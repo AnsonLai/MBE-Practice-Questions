@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bar Exam Quiz App</title>
+    <title>MBE Practice Questions</title>
     <style>
         /* --- Global Styles & Variables --- */
         :root {
@@ -1108,6 +1108,27 @@
             <button id="clear-years-filter" class="clear-filter-button">Clear Years</button>
         </div>
         <div class="sidebar-section">
+            <h3>Attempts</h3>
+            <label><input type="radio" name="filter-attempts" value="all" checked> Show All Questions</label>
+            <label><input type="radio" name="filter-attempts" value="attempted"> Questions with Attempts</label>
+            <label><input type="radio" name="filter-attempts" value="unattempted"> Questions without Attempts</label>
+            <label><input type="radio" name="filter-attempts" value="correct"> Questions with Correct Attempts</label>
+            <label><input type="radio" name="filter-attempts" value="incorrect"> Questions with Incorrect
+                Attempts</label>
+        </div>
+
+        <button id="clear-attempts-filter" class="clear-filter-button">Reset Attempts Filter</button>
+
+        <div class="sidebar-section">
+            <h3>Notes</h3>
+            <label><input type="radio" name="filter-notes" value="all" checked> Show All Questions</label>
+            <label><input type="radio" name="filter-notes" value="with-notes"> Questions with Notes</label>
+            <label><input type="radio" name="filter-notes" value="without-notes"> Questions without Notes</label>
+        </div>
+
+        <button id="clear-notes-filter" class="clear-filter-button">Reset Notes Filter</button>
+
+        <div class="sidebar-section">
             <h3>Order</h3>
             <label><input type="checkbox" id="filter-scramble"> Scramble Question Order</label>
         </div>
@@ -1142,7 +1163,7 @@
 
     <!-- Main Content Container -->
     <div class="container">
-        <h1>Bar Exam Quiz App</h1>
+        <h1>MBE Practice Questions</h1>
 
         <div class="file-controls">
             <label for="jsonFile">Load Quiz Data (JSON):</label>
@@ -1310,6 +1331,15 @@
             clearProvidersButton.addEventListener('click', () => clearCheckboxes(filterProvidersList));
             clearYearsButton.addEventListener('click', () => clearCheckboxes(filterYearsList));
 
+            // Clear attempts filter
+            document.getElementById('clear-attempts-filter').addEventListener('click', () => {
+                document.querySelector('input[name="filter-attempts"][value="all"]').checked = true;
+            });
+
+            document.getElementById('clear-notes-filter').addEventListener('click', () => {
+                document.querySelector('input[name="filter-notes"][value="all"]').checked = true;
+            });
+
             // Add timer-related settings event listeners
             document.getElementById('enable-session-timer')?.addEventListener('change', (e) => {
                 sessionTimerEnabled = e.target.checked;
@@ -1337,7 +1367,6 @@
             document.getElementById('question-limit')?.addEventListener('change', (e) => {
                 questionLimit = Math.max(1, parseInt(e.target.value, 10) || 50);
             });
-
 
             // Annotation Listeners
             toggleAnnotationButton.addEventListener('click', toggleAnnotationMode);
@@ -1423,27 +1452,30 @@
 
             function getFilterSettings() {
                 const statusFilter = document.querySelector('input[name="filter-status"]:checked')?.value || 'all';
+                const attemptsFilter = document.querySelector('input[name="filter-attempts"]:checked')?.value || 'all';
+                const notesFilter = document.querySelector('input[name="filter-notes"]:checked')?.value || 'all';
 
                 const selectedCategories = Array.from(filterCategoriesList.querySelectorAll('input[type="checkbox"]:checked'))
                     .map(cb => cb.value);
                 const selectedProviders = Array.from(filterProvidersList.querySelectorAll('input[type="checkbox"]:checked'))
                     .map(cb => cb.value);
-                // Ensure years are treated as numbers for comparison if necessary
                 const selectedYears = Array.from(filterYearsList.querySelectorAll('input[type="checkbox"]:checked'))
-                    .map(cb => parseInt(cb.value, 10)) // Or keep as string if source.year is string
-                    .filter(y => !isNaN(y)); // Filter out potential NaN if parsing fails
-
+                    .map(cb => parseInt(cb.value, 10))
+                    .filter(y => !isNaN(y));
 
                 const scramble = filterScrambleCheckbox.checked;
 
                 return {
                     status: statusFilter,
+                    attempts: attemptsFilter,
+                    notes: notesFilter,
                     categories: selectedCategories,
                     providers: selectedProviders,
                     years: selectedYears,
                     scramble: scramble
                 };
             }
+
 
             // Timer Functions
             function formatTime(seconds) {
@@ -1735,16 +1767,53 @@
 
                 const filters = getFilterSettings();
 
-                // 1. Filter Questions (unchanged logic)
+                // 1. Filter Questions - Update the existing filter logic
                 let filteredQuestions = quizData.questions.filter(q => {
                     const hasAttempts = q.user_attempts && q.user_attempts.length > 0;
+
+                    // Basic status filter (existing code)
                     if (filters.status === 'unanswered' && hasAttempts) return false;
                     if (filters.status === 'answered' && !hasAttempts) return false;
+
+                    // New attempt-based filters
+                    if (filters.attempts === 'attempted' && !hasAttempts) return false;
+                    if (filters.attempts === 'unattempted' && hasAttempts) return false;
+
+                    // Check for questions with correct/incorrect attempts
+                    if (filters.attempts === 'correct' || filters.attempts === 'incorrect') {
+                        if (!hasAttempts) return false;
+
+                        const hasCorrectAttempt = q.user_attempts.some(attempt =>
+                            attempt.chosen_answer === q.answer?.correct_choice);
+
+                        if (filters.attempts === 'correct' && !hasCorrectAttempt) return false;
+                        if (filters.attempts === 'incorrect' && hasCorrectAttempt &&
+                            q.user_attempts.every(attempt => attempt.chosen_answer === q.answer?.correct_choice)) return false;
+                    }
+
+                    // Notes filters
+                    if (filters.notes === 'with-notes') {
+                        if (!hasAttempts) return false;
+                        const hasNotes = q.user_attempts.some(attempt => attempt.notes && attempt.notes.trim() !== '');
+                        if (!hasNotes) return false;
+                    }
+
+                    if (filters.notes === 'without-notes') {
+                        if (!hasAttempts) return false;
+                        const allAttemptsHaveNotes = q.user_attempts.every(attempt => attempt.notes && attempt.notes.trim() !== '');
+                        if (allAttemptsHaveNotes) return false;
+                    }
+
+                    // Existing category/provider/year filters
                     if (filters.categories.length > 0 && !filters.categories.includes(q.category)) return false;
                     if (filters.providers.length > 0 && !filters.providers.includes(q.source?.provider)) return false;
-                    if (filters.years.length > 0 && !filters.years.includes(parseInt(q.source?.year, 10)) && !filters.years.includes(String(q.source?.year))) return false;
+                    if (filters.years.length > 0 &&
+                        !filters.years.includes(parseInt(q.source?.year, 10)) &&
+                        !filters.years.includes(String(q.source?.year))) return false;
+
                     return true;
                 });
+
 
                 // 2. Prepare Master List (unchanged logic, respecting groups)
                 masterQuestionList = [];
@@ -1794,6 +1863,9 @@
                     resetStopwatch();
                     startSessionTimer();
                     startStopwatch();
+
+                    // Add this line to show filter count in the quiz progress
+                    quizProgressElement.textContent = `Showing ${masterQuestionList.length} questions (${currentQuestionIndex + 1} of ${masterQuestionList.length})`;
 
                     closeSidebar();
                 } else {
@@ -2005,7 +2077,8 @@
                     feedbackAreaElement.className = 'feedback-area incorrect';
                 }
                 const explanationText = currentQuestionObject.answer?.explanation || "No explanation provided.";
-                feedbackHtml += `<div class="explanation"><strong>Explanation:</strong><br>${escapeHtml(explanationText)}</div>`;
+
+                feedbackHtml += `<div class="explanation"><strong>Explanation:</strong>${currentQuestionObject.answer?.ai_generated === true ? ' <span class="ai-generated-flag">(AI Generated)</span>' : ''}<br>${escapeHtml(explanationText)}</div>`;
                 feedbackAreaElement.innerHTML = feedbackHtml;
                 feedbackAreaElement.style.display = 'block';
 
