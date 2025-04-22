@@ -1,0 +1,252 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bar Exam JSON Validator</title>
+    <style>
+        body {
+            font - family: sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        #results {
+            margin - top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+            /* Preserve formatting */
+            word-wrap: break-word;
+            /* Wrap long lines */
+            min-height: 100px;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+
+        label,
+        button {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>JSON Validator</h1>
+    <p>Upload your JSON file to check its integrity against the defined schema rules.</p>
+
+    <label for="jsonFile">Choose JSON file:</label>
+    <input type="file" id="jsonFile" name="jsonFile" accept=".json">
+
+    <button id="validateBtn">Validate File</button>
+
+    <h2>Validation Results:</h2>
+    <pre id="results">Results will appear here...</pre>
+
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const fileInput = document.getElementById('jsonFile');
+        const validateBtn = document.getElementById('validateBtn');
+        const resultsDiv = document.getElementById('results');
+
+        // These categories remain the same
+        const allowedCategories = [
+            "Contracts and Sales",
+            "Constitutional Law",
+            "Criminal Law and Procedure",
+            "Civil Procedure",
+            "Evidence",
+            "Real Property",
+            "Torts"
+        ];
+
+        validateBtn.addEventListener('click', () => {
+            const file = fileInput.files[0];
+            resultsDiv.textContent = 'Processing...'; // Clear previous results
+
+            if (!file) {
+                resultsDiv.innerHTML = '<span class="error">Please select a JSON file first.</span>';
+                return;
+            }
+
+            if (file.type !== "application/json") {
+                resultsDiv.innerHTML = `<span class="error">Error: File must be a .json file. Selected type: ${file.type}</span>`;
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = (event) => {
+                try {
+                    const jsonData = JSON.parse(event.target.result);
+                    validateJsonStructure(jsonData);
+                } catch (e) {
+                    resultsDiv.innerHTML = `<span class="error">Error parsing JSON: ${e.message}</span>`;
+                }
+            };
+
+            reader.onerror = (event) => {
+                resultsDiv.innerHTML = `<span class="error">Error reading file: ${event.target.error}</span>`;
+            };
+
+            reader.readAsText(file);
+        });
+
+        function validateJsonStructure(data) {
+            let errors = [];
+            let warnings = []; // Keep warnings for other potential issues
+
+            // --- Basic Structure Check ---
+            if (!data || typeof data !== 'object') {
+                errors.push("Invalid JSON structure: Root must be an object.");
+                displayResults(errors, warnings);
+                return;
+            }
+            if (!Array.isArray(data.questions)) {
+                errors.push("Invalid JSON structure: Missing or non-array 'questions' property at the root.");
+            }
+            if (data.groups !== undefined && !Array.isArray(data.groups)) {
+                errors.push("Invalid JSON structure: 'groups' property exists but is not an array.");
+            } else if (data.groups === undefined) {
+                // This is acceptable, just skip group checks
+                // warnings.push("Optional 'groups' property at the root is missing. Group validation skipped."); // Optional warning
+            }
+
+
+            if (errors.length > 0) {
+                // Stop further validation if basic structure is wrong
+                displayResults(errors, warnings);
+                return;
+            }
+
+
+            const questionIds = new Set(); // Changed name for clarity
+            const allQuestionIds = new Set(); // Changed name for clarity
+
+            // --- Question Validation ---
+            data.questions.forEach((question, index) => {
+                // *** Now expects 'question_id' ***
+                const questionId = question.question_id || `(missing question_id at index ${index})`;
+
+                // 1. Check for unique Question ID (using question_id)
+                if (!question.question_id) {
+                    errors.push(`Question at index ${index}: Missing 'question_id'.`);
+                } else {
+                    if (questionIds.has(question.question_id)) {
+                        errors.push(`Question ID Error: Duplicate question_id found: '${question.question_id}'.`);
+                    }
+                    questionIds.add(question.question_id);
+                    allQuestionIds.add(question.question_id); // Store for group reference check
+                }
+
+                // 2. Check for required text field
+                if (!question.question_text) {
+                    errors.push(`Question '${questionId}': Missing 'question_text'.`);
+                }
+
+                // 3. Check 'answer' object and 'correct_choice'
+                if (typeof question.answer !== 'object' || question.answer === null || Array.isArray(question.answer)) {
+                    errors.push(`Question '${questionId}': 'answer' is missing or not an object.`);
+                } else if (!question.answer.correct_choice) {
+                    errors.push(`Question '${questionId}': 'answer' object is missing the 'correct_choice' property.`);
+                }
+
+                // 4. Check 'choices' object structure
+                if (typeof question.choices !== 'object' || question.choices === null || Array.isArray(question.choices)) {
+                    errors.push(`Question '${questionId}': 'choices' field is missing or is not an object.`);
+                } else if (Object.keys(question.choices).length === 0) {
+                    errors.push(`Question '${questionId}': 'choices' object has no keys (is empty {}). It needs choice letters like "A", "B", etc.`);
+                } else {
+                    // Optional: Check if correct_choice exists as a key in choices
+                    if (question.answer?.correct_choice && !question.choices.hasOwnProperty(question.answer.correct_choice)) {
+                        errors.push(`Question '${questionId}': The 'correct_choice' ('${question.answer.correct_choice}') does not exist as a key in the 'choices' object.`);
+                    }
+                }
+
+
+                // 5. Check category
+                if (!question.category) {
+                    errors.push(`Question '${questionId}': Missing 'category'.`);
+                } else if (!allowedCategories.includes(question.category)) {
+                    errors.push(`Question '${questionId}': Invalid category '${question.category}'. Allowed categories are: ${allowedCategories.join(', ')}.`);
+                }
+            });
+
+            // --- Group Validation (only if groups exist and is an array) ---
+            if (Array.isArray(data.groups)) {
+                const groupIds = new Set(); // Changed name for clarity
+                data.groups.forEach((group, index) => {
+                    // *** Now expects 'group_id' ***
+                    const groupId = group.group_id || `(missing group_id at group index ${index})`;
+
+                    // 1. Check for unique Group ID (using group_id)
+                    if (!group.group_id) {
+                        errors.push(`Group at index ${index}: Missing 'group_id'.`);
+                    } else {
+                        if (groupIds.has(group.group_id)) {
+                            errors.push(`Group ID Error: Duplicate group_id found: '${group.group_id}'.`);
+                        }
+                        groupIds.add(group.group_id);
+                    }
+
+                    // 2. Check question_order references (references should be question_id values)
+                    if (!group.question_order) {
+                        errors.push(`Group '${groupId}': Missing 'question_order' array.`);
+                    } else if (!Array.isArray(group.question_order)) {
+                        errors.push(`Group '${groupId}': 'question_order' is not an array.`);
+                    } else {
+                        group.question_order.forEach((qId, orderIndex) => { // Changed variable name qUuid -> qId
+                            if (typeof qId !== 'string' || !qId) {
+                                errors.push(`Group '${groupId}': Item at index ${orderIndex} in 'question_order' is not a valid ID string.`);
+                            } else if (!allQuestionIds.has(qId)) { // Check against the set of all known question_ids
+                                errors.push(`Group '${groupId}': 'question_order' contains reference to non-existent question_id: '${qId}'.`);
+                            }
+                        });
+                    }
+                });
+            } // End group validation block
+
+            displayResults(errors, warnings);
+        }
+
+        function displayResults(errors, warnings) {
+            let html = '';
+            if (errors.length === 0 && warnings.length === 0) {
+                html = '<span class="success">Validation Successful! No issues found.</span>';
+            } else {
+                if (warnings.length > 0) {
+                    html += '<strong>Warnings:</strong>\n';
+                    warnings.forEach(w => html += `- ${w}\n`);
+                    html += '\n';
+                }
+                if (errors.length > 0) {
+                    html += '<span class="error">Validation Failed! Issues found:</span>\n';
+                    errors.forEach(err => html += `- ${err}\n`);
+                } else {
+                    html += '<span class="success">Validation Successful (with warnings noted above).</span>';
+                }
+
+            }
+            resultsDiv.innerHTML = html;
+        }
+    });
+</script>
+
+</html>
