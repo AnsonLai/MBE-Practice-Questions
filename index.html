@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bar Exam Quiz App</title>
+    <style>
+        /* --- Global Styles & Variables --- */
+        :root {
+            --primary-color: #007bff;
+            --primary-hover-color: #0056b3;
+            --secondary-color: #6c757d;
+            --secondary-hover-color: #5a6268;
+            --success-color: #28a745;
+            --success-bg-color: #d4edda;
+            --success-border-color: #c3e6cb;
+            --danger-color: #dc3545;
+            --danger-bg-color: #f8d7da;
+            --danger-border-color: #f5c6cb;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --light-gray: #f8f9fa;
+            --medium-gray: #e9ecef;
+            --dark-gray: #6c757d;
+            --text-color: #333;
+            --border-color: #dee2e6;
+            --sidebar-width: 280px;
+            --sidebar-width-mobile: 250px;
+            --font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --base-font-size: 16px;
+            /* Base for rem units */
+            --border-radius: 0.375rem;
+            /* 6px */
+            --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.075);
+            --transition-speed: 0.2s;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: var(--base-font-size);
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            line-height: 1.6;
+            position: relative;
+            padding-left: 0;
+            transition: padding-left var(--transition-speed) ease-in-out;
+        }
+
+        body.sidebar-open {
+            padding-left: var(--sidebar-width);
+        }
+
+        /* --- Container --- */
+        .container {
+            width: 95%;
+            max-width: 900px;
+            margin: 2rem auto;
+            /* More vertical spacing */
+            background-color: #fff;
+            padding: 1.5rem;
+            /* Increased padding */
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            box-sizing: border-box;
+            transition: margin-left var(--transition-speed) ease-in-out;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        /* --- Sidebar Styles --- */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: #fff;
+            /* Changed background */
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            box-sizing: border-box;
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform var(--transition-speed) ease-in-out;
+            z-index: 1000;
+            box-shadow: var(--box-shadow);
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar h2 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            color: var(--primary-color);
+        }
+
+        .sidebar-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-section h3 {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+
+        .sidebar-section label {
+            display: block;
+            margin-bottom: 0.5rem;
+            /* Reduced spacing */
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 0.25rem 0;
+            /* Add padding for easier clicking */
+        }
+
+        .sidebar-section label input[type="checkbox"],
+        .sidebar-section label input[type="radio"] {
+            margin-right: 0.5rem;
+            vertical-align: middle;
+            accent-color: var(--primary-color);
+            /* Style checkbox/radio */
+        }
+
+        .filter-options-list {
+            max-height: 180px;
+            /* Slightly taller */
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            margin-top: 0.5rem;
+        }
+
+        /* Style scrollbar for filter lists */
+        .filter-options-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .filter-options-list::-webkit-scrollbar-track {
+            background: var(--light-gray);
+        }
+
+        .filter-options-list::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+        .filter-options-list::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+
+
+        .sidebar button,
+        button {
+            /* General button styling */
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            /* Adjusted padding */
+            font-size: 0.95rem;
+            /* Slightly larger */
+            font-weight: 500;
+            color: white;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            /* Space below buttons */
+            transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+            text-align: center;
+            vertical-align: middle;
+            line-height: 1.5;
+        }
+
+        .sidebar button {
+            width: 100%;
+            /* Sidebar buttons take full width */
+            margin-top: 1rem;
+            margin-right: 0;
+            /* Reset margin for full width */
+        }
+
+        button:hover:not(:disabled) {
+            background-color: var(--primary-hover-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .clear-filter-button {
+            font-size: 0.8em !important;
+            padding: 0.25rem 0.5rem !important;
+            width: auto !important;
+            margin-top: 0.5rem !important;
+            background-color: var(--secondary-color) !important;
+        }
+
+        .clear-filter-button:hover:not(:disabled) {
+            background-color: var(--secondary-hover-color) !important;
+        }
+
+        #close-sidebar-button {
+            background-color: var(--secondary-color);
+        }
+
+        #close-sidebar-button:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        /* --- Sidebar Toggle Button --- */
+        #sidebar-toggle-button {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1001;
+            padding: 0.5rem 0.75rem;
+            /* Adjusted padding */
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1.25rem;
+            /* Larger icon */
+            line-height: 1;
+            transition: background-color var(--transition-speed), left var(--transition-speed) ease-in-out, transform var(--transition-speed);
+            box-shadow: var(--box-shadow);
+        }
+
+        #sidebar-toggle-button:hover {
+            background-color: var(--primary-hover-color);
+            transform: scale(1.05);
+        }
+
+        body.sidebar-open #sidebar-toggle-button {
+            left: calc(var(--sidebar-width) + 10px);
+            background-color: var(--danger-color);
+        }
+
+        body.sidebar-open #sidebar-toggle-button:hover {
+            background-color: #c82333;
+        }
+
+        /* --- File/Quiz Controls --- */
+        .file-controls,
+        .quiz-controls {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            /* Better alignment */
+            flex-wrap: wrap;
+            /* Allow wrapping */
+            align-items: center;
+            gap: 0.75rem;
+            /* Spacing between items */
+        }
+
+        .file-controls label {
+            margin: 0;
+            /* Remove default margin */
+            font-weight: 500;
+        }
+
+        .file-controls input[type="file"] {
+            margin: 0;
+            /* Consider custom styling for file input later if needed */
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--border-radius);
+            background-color: #fff;
+            cursor: pointer;
+            flex-grow: 1;
+            /* Allow input to take space */
+        }
+
+        .quiz-controls {
+            border-bottom: none;
+            /* No border for bottom controls */
+            padding-bottom: 0;
+            justify-content: flex-end;
+            /* Align Next button right */
+        }
+
+        #quiz-area {
+            display: none;
+            /* Initially hidden */
+        }
+
+        #quiz-progress {
+            text-align: right;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        /* --- Question Group Intro --- */
+        .question-group-intro {
+            background-color: #e9f5ff;
+            /* Softer blue */
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary-color);
+            border-radius: var(--border-radius);
+        }
+
+        .question-group-intro h3 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .question-group-intro p {
+            margin-bottom: 0;
+            font-size: 0.95rem;
+            color: #444;
+        }
+
+        /* --- Question Card --- */
+        .question-card {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: #fff;
+            /* Ensure background */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* --- Tooltip for Question Meta --- */
+        .question-meta-container {
+            position: relative;
+            /* Context for tooltip */
+            margin-top: -1.1rem;
+            margin-bottom: 0.3rem;
+            text-align: right;
+            user-select: none;
+            /* Position trigger icon */
+        }
+
+        .meta-tooltip-trigger {
+            display: inline-block;
+            cursor: help;
+            /* Indicate interactivity */
+            font-size: 0.9rem;
+            /* Make it circular */
+            line-height: 1;
+            user-select: none;
+            /* Prevent text selection */
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        .meta-tooltip-trigger:hover,
+        .meta-tooltip-trigger:focus {
+            background-color: var(--secondary-color);
+            color: white;
+            outline: none;
+            /* Remove default focus ring if needed */
+        }
+
+        .tooltip-text {
+            position: absolute;
+            bottom: 125%;
+            /* Position above the trigger */
+            right: 0;
+            /* Align to the right of trigger */
+            /* left: 50%; */
+            /* Use this for centered */
+            /* transform: translateX(-50%); */
+            /* Use this for centered */
+            transform: translateX(10%);
+            /* Slightly offset */
+            min-width: 250px;
+            /* Minimum width */
+            max-width: 350px;
+            /* Max width */
+            background-color: #333;
+            /* Dark background */
+            color: #fff;
+            text-align: left;
+            /* Align text left */
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            font-size: 0.85rem;
+            line-height: 1.4;
+            z-index: 20;
+            /* Ensure it's above other content */
+            visibility: hidden;
+            /* Hidden by default */
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease-in-out, visibility var(--transition-speed) ease-in-out;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            white-space: normal;
+            /* Allow text wrapping */
+            pointer-events: none;
+            /* Tooltip itself isn't interactive */
+        }
+
+        /* Triangle/Arrow for Tooltip */
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            /* At the bottom of the tooltip */
+            right: 15px;
+            /* Position arrow near the trigger */
+            /* left: 50%; */
+            /* Use this for centered */
+            /* margin-left: -5px; */
+            /* Use this for centered */
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+            /* Arrow pointing down */
+        }
+
+        .meta-tooltip-trigger:hover+.tooltip-text,
+        .meta-tooltip-trigger:focus+.tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Question Text Styling */
+        #question-text {
+            font-size: 1.15rem;
+            /* Reduced font size */
+            font-weight: 400;
+            /* Normal weight */
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            /* Spacing below question */
+            line-height: 1.5;
+            /* Improve readability */
+            color: #212529;
+            /* Slightly darker than default text */
+        }
+
+        /* Choices Form */
+        .choices-form .choice-item {
+            margin-bottom: 0.5rem;
+            /* Tighter spacing between choices */
+        }
+
+        .choices-form label {
+            display: block;
+            margin-bottom: 0;
+            /* Remove margin handled by choice-item */
+            padding: 0.8rem 1rem;
+            /* More padding */
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color var(--transition-speed), border-color var(--transition-speed);
+            line-height: 1.4;
+            background-color: #fff;
+            /* Ensure background */
+        }
+
+        .choices-form label:hover {
+            background-color: var(--light-gray);
+            border-color: #adb5bd;
+        }
+
+        .choices-form label:has(input[type="radio"]:checked) {
+            background-color: #e6f2ff;
+            /* Slightly softer blue */
+            border-color: var(--primary-color);
+        }
+
+        .choices-form label.correct-answer {
+            background-color: var(--success-bg-color);
+            border-color: var(--success-color);
+            color: var(--success-color);
+            /* Darker text for contrast */
+            font-weight: 600;
+        }
+
+        .choices-form label.selected-incorrect {
+            background-color: var(--danger-bg-color);
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+            /* Darker text for contrast */
+        }
+
+        /* Ensure correct/incorrect styles override hover/checked */
+        .choices-form label.correct-answer:hover,
+        .choices-form label.selected-incorrect:hover {
+            background-color: inherit;
+            /* Keep the feedback color */
+        }
+
+
+        .choices-form input[type="radio"] {
+            margin-right: 0.75rem;
+            /* More space */
+            vertical-align: middle;
+            width: 1em;
+            /* Control size */
+            height: 1em;
+            accent-color: var(--primary-color);
+        }
+
+        /* Hide actual radio button, style the label */
+        /* Optional: More advanced custom radio styling can go here */
+
+        .choices-form label span {
+            vertical-align: middle;
+        }
+
+        /* Feedback Area */
+        .feedback-area {
+            margin-top: 1.5rem;
+            padding: 1rem 1.25rem;
+            border-radius: var(--border-radius);
+            border: 1px solid transparent;
+            font-size: 0.95rem;
+        }
+
+        .feedback-area.correct {
+            background-color: var(--success-bg-color);
+            color: #0f5132;
+            /* Darker green text */
+            border-color: var(--success-border-color);
+        }
+
+        .feedback-area.incorrect {
+            background-color: var(--danger-bg-color);
+            color: #842029;
+            /* Darker red text */
+            border-color: var(--danger-border-color);
+        }
+
+        .feedback-area p {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Space between result and explanation */
+        .feedback-area strong {
+            font-weight: 600;
+        }
+
+        .explanation {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed var(--border-color);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 0.9rem;
+            color: #495057;
+            /* Slightly muted color */
+        }
+
+        .explanation strong {
+            font-weight: 600;
+            color: var(--text-color);
+            /* Make 'Explanation:' stand out */
+        }
+
+
+        /* User Notes */
+        .user-notes {
+            margin-top: 1.5rem;
+        }
+
+        .user-notes label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .user-notes textarea {
+            width: 100%;
+            max-width: 100%;
+            margin-top: 0;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+            transition: background-color var(--transition-speed), border-color var(--transition-speed);
+            font-family: inherit;
+            /* Use body font */
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .user-notes textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        .user-notes textarea:disabled {
+            background-color: var(--medium-gray);
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        /* Past Attempts */
+        .past-attempts {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .past-attempts h4 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .past-attempts ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .past-attempts li {
+            background-color: var(--light-gray);
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: var(--border-radius);
+            font-size: 0.85rem;
+            /* Slightly smaller */
+            word-wrap: break-word;
+            border: 1px solid var(--border-color);
+            line-height: 1.5;
+        }
+
+        .past-attempts li strong {
+            font-weight: 600;
+        }
+
+        .past-attempts li em {
+            font-style: normal;
+            color: #555;
+        }
+
+        /* Notes styling */
+
+        .past-attempts .attempt-correct {
+            color: var(--success-color);
+        }
+
+        .past-attempts .attempt-incorrect {
+            color: var(--danger-color);
+        }
+
+
+        /* End of Quiz Message */
+        #end-of-quiz-message {
+            display: none;
+            padding: 1.5rem;
+            text-align: center;
+            background-color: #d1ecf1;
+            /* Info background */
+            color: #0c5460;
+            /* Darker info text */
+            border: 1px solid #bee5eb;
+            border-radius: var(--border-radius);
+            margin-top: 2rem;
+        }
+
+        #end-of-quiz-message h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+
+        /* Annotation Styles */
+        #annotation-area {
+            position: relative;
+            padding-bottom: 1px;
+            margin-bottom: 1rem;
+        }
+
+        /* Space below canvas area */
+        #annotation-spacer {
+            height: 100px;
+        }
+
+        /* Keep spacer */
+        #annotationCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            cursor: crosshair;
+            display: none;
+            touch-action: none;
+            border-radius: var(--border-radius);
+            /* Match card */
+        }
+
+        #annotation-controls {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background-color: var(--medium-gray);
+            border-radius: var(--border-radius);
+            display: none;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            /* Center controls */
+        }
+
+        #annotation-controls span {
+            font-weight: 600;
+            margin-right: 1rem;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        #annotation-controls button {
+            background-color: var(--secondary-color);
+            margin-right: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            margin-bottom: 0;
+            /* Reset margin */
+            color: white;
+            opacity: 0.8;
+        }
+
+        #annotation-controls button:hover:not(:disabled) {
+            background-color: var(--secondary-hover-color);
+            opacity: 1;
+        }
+
+        #annotation-controls button.active-tool {
+            background-color: var(--primary-color);
+            border: 1px solid var(--primary-hover-color);
+            color: white;
+            opacity: 1;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        #annotation-controls button#clearAnnotationButton {
+            background-color: var(--danger-color);
+        }
+
+        #annotation-controls button#clearAnnotationButton:hover {
+            background-color: #c82333;
+        }
+
+        #toggleAnnotationButton {
+            margin-bottom: 1rem;
+            background-color: var(--info-color);
+        }
+
+        #toggleAnnotationButton:hover {
+            background-color: #117a8b;
+        }
+
+        #toggleAnnotationButton.annotation-active {
+            background-color: var(--warning-color);
+            color: #333;
+        }
+
+        #toggleAnnotationButton.annotation-active:hover {
+            background-color: #e0a800;
+        }
+
+
+        /* --- Responsive Design --- */
+
+        /* Tablet and Smaller */
+        @media (max-width: 992px) {
+            .container {
+                width: 95%;
+                padding: 1.25rem;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            #question-text {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Mobile Devices */
+        @media (max-width: 767px) {
+            body.sidebar-open {
+                padding-left: 0;
+                /* Disable body padding shift */
+            }
+
+            .sidebar {
+                width: var(--sidebar-width-mobile);
+                /* Slightly narrower */
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+                /* More prominent shadow when open */
+            }
+
+            body.sidebar-open #sidebar-toggle-button {
+                left: calc(var(--sidebar-width-mobile) + 10px);
+                /* Adjust toggle button position */
+            }
+
+            .container {
+                width: 100%;
+                margin: 1rem 0;
+                /* Edge-to-edge basically */
+                padding: 1rem;
+                border-radius: 0;
+                /* Remove radius for full width */
+                box-shadow: none;
+                /* Remove shadow for full width */
+                border-top: 1px solid var(--border-color);
+                /* Add separation */
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            h1 {
+                font-size: 1.4rem;
+                margin-bottom: 1rem;
+            }
+
+            .file-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+
+            .file-controls input[type="file"] {
+                width: 100%;
+            }
+
+            .file-controls button {
+                width: 100%;
+                margin-right: 0;
+            }
+
+            #quiz-progress {
+                margin-bottom: 0.75rem;
+            }
+
+            .question-card {
+                padding: 1rem;
+            }
+
+            #question-text {
+                font-size: 1.05rem;
+            }
+
+            /* Slightly smaller on mobile */
+            .choices-form label {
+                padding: 0.75rem 0.9rem;
+            }
+
+            /* Adjust padding */
+
+            .feedback-area,
+            .user-notes,
+            .past-attempts {
+                margin-top: 1rem;
+                padding-top: 1rem;
+            }
+
+            .past-attempts li {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            button {
+                padding: 0.7rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            /* Ensure buttons are tappable */
+            .quiz-controls {
+                margin-top: 1rem;
+            }
+
+            .tooltip-text {
+                /* Adjust tooltip positioning/size for mobile if needed */
+                max-width: 80vw;
+                /* Limit width more strictly */
+                bottom: auto;
+                /* Position below trigger */
+                top: 115%;
+                right: auto;
+                /* Let it position left/center */
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .tooltip-text::after {
+                top: -10px;
+                /* Position arrow at the top */
+                bottom: auto;
+                border-color: transparent transparent #333 transparent;
+                /* Arrow pointing up */
+            }
+
+            #annotation-controls {
+                text-align: left;
+            }
+
+            /* Left align on mobile */
+            #annotation-controls button {
+                margin-bottom: 0.5rem;
+            }
+
+            /* Stack buttons slightly */
+        }
+
+        #current-group-intro.drawn-on-canvas,
+        #question-text.drawn-on-canvas {
+            display: none;
+            /* Hide the original HTML elements */
+        }
+
+        /* Ensure annotation area has position context for canvas */
+        #annotation-area {
+            position: relative;
+            /* Maybe add min-height if needed */
+            min-height: 150px;
+            /* Example: ensure some space initially */
+        }
+
+        /* Adjust canvas positioning if needed */
+        #annotationCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            /* width/height set by JS */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar Toggle Button -->
+    <button id="sidebar-toggle-button" aria-label="Toggle Settings Sidebar" aria-expanded="false">☰</button>
+
+    <!-- Settings Sidebar (HTML Structure remains the same) -->
+    <div id="settings-sidebar" class="sidebar">
+        <h2>Quiz Settings</h2>
+        <div class="sidebar-section">
+            <h3>Question Status</h3>
+            <label><input type="radio" name="filter-status" value="all" checked> Show All</label>
+            <label><input type="radio" name="filter-status" value="unanswered"> Show Unanswered Only</label>
+            <label><input type="radio" name="filter-status" value="answered"> Show Answered Only</label>
+        </div>
+        <div class="sidebar-section">
+            <h3>Categories</h3>
+            <div id="filter-categories-list" class="filter-options-list">
+                <p>Load data to see categories.</p>
+            </div>
+            <button id="clear-categories-filter" class="clear-filter-button">Clear Categories</button>
+        </div>
+        <div class="sidebar-section">
+            <h3>Providers</h3>
+            <div id="filter-providers-list" class="filter-options-list">
+                <p>Load data to see providers.</p>
+            </div>
+            <button id="clear-providers-filter" class="clear-filter-button">Clear Providers</button>
+        </div>
+        <div class="sidebar-section">
+            <h3>Years</h3>
+            <div id="filter-years-list" class="filter-options-list">
+                <p>Load data to see years.</p>
+            </div>
+            <button id="clear-years-filter" class="clear-filter-button">Clear Years</button>
+        </div>
+        <div class="sidebar-section">
+            <h3>Order</h3>
+            <label><input type="checkbox" id="filter-scramble"> Scramble Question Order</label>
+        </div>
+        <button id="apply-filters-button" disabled>Apply Filters & Start Quiz</button>
+        <button id="close-sidebar-button">Close Settings</button>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="container">
+        <h1>Bar Exam Quiz App</h1>
+
+        <div class="file-controls">
+            <label for="jsonFile">Load Quiz Data (JSON):</label>
+            <input type="file" id="jsonFile" accept=".json">
+            <button id="loadJsonButton">Load Data</button>
+            <button id="saveJsonButton" disabled>Save Progress</button>
+        </div>
+
+        <div id="quiz-area">
+            <div id="quiz-progress"></div>
+            <div id="current-group-intro" class="question-group-intro" style="display:none;"></div>
+
+            <button id="toggleAnnotationButton" style="display: none;">Annotate Question</button>
+            <div id="annotation-controls">
+                <span>Tools:</span>
+                <button id="penButton" data-tool="pen">Pen</button>
+                <button id="highlighterButton" data-tool="highlighter">Highlight</button>
+                <button id="eraserButton" data-tool="eraser">Eraser</button>
+                <button id="clearAnnotationButton">Clear</button>
+            </div>
+
+            <div id="current-question-card" class="question-card">
+                <!-- Meta moved inside card, wrapped for tooltip -->
+                <div class="question-meta-container">
+                    <span class="meta-tooltip-trigger" tabindex="0" role="button"
+                        aria-describedby="meta-tooltip-content">ℹ️</span>
+                    <span class="tooltip-text" id="meta-tooltip-content">
+                        <!-- Content filled by JS -->
+                    </span>
+                </div>
+
+                <div id="annotation-area">
+                    <!-- Meta display removed from here -->
+                    <h2 id="question-text"></h2>
+                    <form id="choices-form"></form>
+                    <div id="annotation-spacer"></div>
+                    <canvas id="annotationCanvas"></canvas>
+                </div>
+            </div>
+
+            <button id="submit-answer-button">Submit Answer</button>
+
+            <div id="feedback-area" class="feedback-area" style="display:none;"></div>
+
+            <div class="user-notes">
+                <label for="attempt-notes">Notes for future reference:</label>
+                <textarea id="attempt-notes" rows="4" placeholder="Enter notes here to be saved..."
+                    disabled></textarea>
+            </div>
+
+            <div class="quiz-controls">
+                <button id="next-question-button" style="display:none;">Next Question</button>
+            </div>
+
+            <div id="past-attempts" class="past-attempts" style="display:none;"></div>
+        </div>
+
+        <div id="end-of-quiz-message"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Element Refs ---
+            const jsonFileElement = document.getElementById('jsonFile');
+            const loadJsonButton = document.getElementById('loadJsonButton');
+            const saveJsonButton = document.getElementById('saveJsonButton');
+            const quizAreaElement = document.getElementById('quiz-area');
+            const quizProgressElement = document.getElementById('quiz-progress');
+            const groupIntroElement = document.getElementById('current-group-intro');
+            const questionMetaContainer = document.querySelector('.question-meta-container');
+            const metaTooltipContentElement = document.getElementById('meta-tooltip-content');
+            // const questionMetaElement = document.getElementById('question-meta'); // No longer used directly
+            const questionTextElement = document.getElementById('question-text');
+            const choicesFormElement = document.getElementById('choices-form');
+            const attemptNotesElement = document.getElementById('attempt-notes');
+            const submitAnswerButton = document.getElementById('submit-answer-button');
+            const feedbackAreaElement = document.getElementById('feedback-area');
+            const nextQuestionButton = document.getElementById('next-question-button');
+            const pastAttemptsContainer = document.getElementById('past-attempts');
+            const endOfQuizMessageElement = document.getElementById('end-of-quiz-message');
+
+            // Annotation Elements
+            const toggleAnnotationButton = document.getElementById('toggleAnnotationButton');
+            const annotationArea = document.getElementById('annotation-area');
+            const annotationCanvas = document.getElementById('annotationCanvas');
+            const annotationControls = document.getElementById('annotation-controls');
+            const penButton = document.getElementById('penButton');
+            const highlighterButton = document.getElementById('highlighterButton');
+            const eraserButton = document.getElementById('eraserButton');
+            const clearAnnotationButton = document.getElementById('clearAnnotationButton');
+            const annotationCtx = annotationCanvas.getContext('2d', { alpha: true });
+
+            // Sidebar Elements
+            const sidebarElement = document.getElementById('settings-sidebar');
+            const sidebarToggleButton = document.getElementById('sidebar-toggle-button');
+            const closeSidebarButton = document.getElementById('close-sidebar-button');
+            const applyFiltersButton = document.getElementById('apply-filters-button');
+            const filterCategoriesList = document.getElementById('filter-categories-list');
+            const filterProvidersList = document.getElementById('filter-providers-list');
+            const filterYearsList = document.getElementById('filter-years-list');
+            const filterScrambleCheckbox = document.getElementById('filter-scramble');
+            const clearCategoriesButton = document.getElementById('clear-categories-filter');
+            const clearProvidersButton = document.getElementById('clear-providers-filter');
+            const clearYearsButton = document.getElementById('clear-years-filter');
+
+
+            // --- State Vars ---
+            let quizData = null; // Holds the full loaded JSON data
+            let masterQuestionList = []; // The *active* list of questions for the current quiz session (filtered/scrambled)
+            let currentQuestionIndex = -1;
+            let currentQuestionObject = null;
+            let questionStartTime = null;
+            let lastDisplayedGroupId = null;
+
+            // Annotation State
+            let isAnnotationActive = false;
+            let isDrawing = false;
+            let currentTool = 'pen';
+            let lastX = 0;
+            let lastY = 0;
+            let penColor = '#0000FF';
+            let penWidth = 2;
+            let highlighterColor = 'rgba(60, 255, 131, 0.3)';
+            let highlighterWidth = 15;
+            let eraserWidth = 25;
+
+
+            // --- Event Listeners ---
+            loadJsonButton.addEventListener('click', handleLoadJson);
+            saveJsonButton.addEventListener('click', handleSaveJson);
+            submitAnswerButton.addEventListener('click', handleSubmitAnswer);
+            nextQuestionButton.addEventListener('click', handleNextQuestion);
+            sidebarToggleButton.addEventListener('click', toggleSidebar);
+            closeSidebarButton.addEventListener('click', closeSidebar);
+            applyFiltersButton.addEventListener('click', applyFiltersAndStartQuiz);
+            clearCategoriesButton.addEventListener('click', () => clearCheckboxes(filterCategoriesList));
+            clearProvidersButton.addEventListener('click', () => clearCheckboxes(filterProvidersList));
+            clearYearsButton.addEventListener('click', () => clearCheckboxes(filterYearsList));
+
+            // Annotation Listeners
+            toggleAnnotationButton.addEventListener('click', toggleAnnotationMode);
+            annotationCanvas.addEventListener('mousedown', startDrawing);
+            annotationCanvas.addEventListener('mousemove', draw);
+            annotationCanvas.addEventListener('mouseup', stopDrawing);
+            annotationCanvas.addEventListener('mouseout', stopDrawing);
+            annotationCanvas.addEventListener('touchstart', startDrawing, { passive: false });
+            annotationCanvas.addEventListener('touchmove', draw, { passive: false });
+            annotationCanvas.addEventListener('touchend', stopDrawing);
+            annotationCanvas.addEventListener('touchcancel', stopDrawing);
+            penButton.addEventListener('click', () => setTool('pen'));
+            highlighterButton.addEventListener('click', () => setTool('highlighter'));
+            eraserButton.addEventListener('click', () => setTool('eraser'));
+            clearAnnotationButton.addEventListener('click', clearCanvas); // Explicit clear stays
+
+            // --- Sidebar Functions ---
+
+            function toggleSidebar() {
+                const isOpen = sidebarElement.classList.contains('open');
+                if (isOpen) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            }
+
+            function openSidebar() {
+                sidebarElement.classList.add('open');
+                document.body.classList.add('sidebar-open');
+                sidebarToggleButton.setAttribute('aria-expanded', 'true');
+                sidebarToggleButton.innerHTML = '×'; // Change icon to 'X'
+            }
+
+            function closeSidebar() {
+                sidebarElement.classList.remove('open');
+                document.body.classList.remove('sidebar-open');
+                sidebarToggleButton.setAttribute('aria-expanded', 'false');
+                sidebarToggleButton.innerHTML = '☰'; // Change icon back to burger
+            }
+
+            function populateFilterOptions() {
+                if (!quizData || !Array.isArray(quizData.questions)) return;
+
+                const categories = new Set();
+                const providers = new Set();
+                const years = new Set();
+
+                quizData.questions.forEach(q => {
+                    if (q.category) categories.add(q.category);
+                    if (q.source?.provider) providers.add(q.source.provider);
+                    if (q.source?.year) years.add(q.source.year);
+                });
+
+                populateCheckboxList(filterCategoriesList, [...categories].sort());
+                populateCheckboxList(filterProvidersList, [...providers].sort());
+                populateCheckboxList(filterYearsList, [...years].sort((a, b) => b - a)); // Sort years descending
+
+                applyFiltersButton.disabled = false; // Enable button now that data is loaded
+            }
+
+            function populateCheckboxList(container, items) {
+                container.innerHTML = ''; // Clear previous content
+                if (items.length === 0) {
+                    container.innerHTML = '<p>No options available.</p>';
+                    return;
+                }
+                items.forEach(item => {
+                    const label = document.createElement('label');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = item;
+                    checkbox.name = container.id + '-option'; // Unique name per group
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(` ${escapeHtml(item)}`));
+                    container.appendChild(label);
+                });
+            }
+
+            function clearCheckboxes(container) {
+                container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            }
+
+            function getFilterSettings() {
+                const statusFilter = document.querySelector('input[name="filter-status"]:checked')?.value || 'all';
+
+                const selectedCategories = Array.from(filterCategoriesList.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(cb => cb.value);
+                const selectedProviders = Array.from(filterProvidersList.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(cb => cb.value);
+                // Ensure years are treated as numbers for comparison if necessary
+                const selectedYears = Array.from(filterYearsList.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(cb => parseInt(cb.value, 10)) // Or keep as string if source.year is string
+                    .filter(y => !isNaN(y)); // Filter out potential NaN if parsing fails
+
+
+                const scramble = filterScrambleCheckbox.checked;
+
+                return {
+                    status: statusFilter,
+                    categories: selectedCategories,
+                    providers: selectedProviders,
+                    years: selectedYears,
+                    scramble: scramble
+                };
+            }
+
+
+            // --- Core Quiz Logic ---
+
+            function handleLoadJson() {
+                const file = jsonFileElement.files[0];
+                if (!file) { alert('Please select a JSON file first.'); return; }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const loadedData = JSON.parse(e.target.result);
+                        if (loadedData && Array.isArray(loadedData.questions)) {
+                            quizData = loadedData;
+                            // Initialize user_attempts if missing
+                            quizData.questions.forEach(q => {
+                                if (!q.user_attempts) q.user_attempts = [];
+                            });
+                            if (!Array.isArray(quizData.groups)) { quizData.groups = []; } // Ensure groups array exists
+
+                            populateFilterOptions();
+                            applyFiltersAndStartQuiz(); // Start with default filters
+                            saveJsonButton.disabled = false;
+                            closeSidebar();
+                        } else {
+                            alert('Invalid JSON format. Expected an object with a "questions" array.');
+                            resetQuizState();
+                        }
+                    } catch (error) {
+                        alert(`Error parsing JSON: ${error.message}`);
+                        console.error(error);
+                        resetQuizState();
+                    }
+                };
+                reader.onerror = () => {
+                    alert('Error reading file.');
+                    console.error(reader.error);
+                    resetQuizState();
+                };
+                reader.readAsText(file);
+            }
+
+            function handleSaveJson() {
+                if (!quizData) { alert('No quiz data loaded.'); return; }
+                // *** MODIFICATION: Save notes for the current question *before* saving the file ***
+                saveNotesForCurrentAttempt();
+                try {
+                    const jsonDataString = JSON.stringify(quizData, null, 2);
+                    const blob = new Blob([jsonDataString], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const fn = (jsonFileElement.files[0]?.name || 'quiz.json').replace(/(\.json)?$/, '_progress.json');
+                    a.download = fn;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    alert('Progress saved!');
+                } catch (error) {
+                    alert(`Error saving JSON: ${error.message}`);
+                    console.error(error);
+                }
+            }
+
+            /**
+             * Applies selected filters and scrambling, then starts the quiz.
+             */
+            function applyFiltersAndStartQuiz() {
+                if (!quizData) {
+                    alert("Please load quiz data first.");
+                    return;
+                }
+                // *** MODIFICATION: Save notes for the potentially *previous* question before applying filters ***
+                saveNotesForCurrentAttempt();
+                // *** MODIFICATION: Clear canvas for the new quiz session ***
+                clearCanvas();
+
+                const filters = getFilterSettings();
+
+                // 1. Filter Questions (unchanged logic)
+                let filteredQuestions = quizData.questions.filter(q => {
+                    const hasAttempts = q.user_attempts && q.user_attempts.length > 0;
+                    if (filters.status === 'unanswered' && hasAttempts) return false;
+                    if (filters.status === 'answered' && !hasAttempts) return false;
+                    if (filters.categories.length > 0 && !filters.categories.includes(q.category)) return false;
+                    if (filters.providers.length > 0 && !filters.providers.includes(q.source?.provider)) return false;
+                    if (filters.years.length > 0 && !filters.years.includes(parseInt(q.source?.year, 10)) && !filters.years.includes(String(q.source?.year))) return false;
+                    return true;
+                });
+
+                // 2. Prepare Master List (unchanged logic, respecting groups)
+                masterQuestionList = [];
+                const processedGroupIds = new Set();
+                const questionsById = new Map(filteredQuestions.map(q => [q.question_id, q]));
+                const addedQuestionIds = new Set();
+                if (quizData.groups) {
+                    quizData.groups.forEach(group => {
+                        const groupQuestionIds = group.question_order || [];
+                        const allGroupQuestionsFiltered = groupQuestionIds.every(id => questionsById.has(id));
+                        if (allGroupQuestionsFiltered && groupQuestionIds.length > 0) {
+                            groupQuestionIds.forEach(qId => {
+                                const question = questionsById.get(qId);
+                                if (question && !addedQuestionIds.has(qId)) {
+                                    masterQuestionList.push(question);
+                                    addedQuestionIds.add(qId);
+                                }
+                            });
+                            processedGroupIds.add(group.group_id);
+                        }
+                    });
+                }
+                filteredQuestions.forEach(question => {
+                    if (!addedQuestionIds.has(question.question_id)) {
+                        masterQuestionList.push(question);
+                        addedQuestionIds.add(question.question_id);
+                    }
+                });
+
+                // 3. Scramble (if selected)
+                if (filters.scramble) {
+                    masterQuestionList = shuffleArray(masterQuestionList);
+                }
+
+                // 4. Start the Quiz
+                if (masterQuestionList.length > 0) {
+                    currentQuestionIndex = -1;
+                    lastDisplayedGroupId = null;
+                    quizAreaElement.style.display = 'block';
+                    endOfQuizMessageElement.style.display = 'none';
+                    toggleAnnotationButton.style.display = 'inline-block';
+                    displayNextQuestionInternal(); // Display the first question
+                    closeSidebar();
+                } else {
+                    quizAreaElement.style.display = 'none';
+                    endOfQuizMessageElement.innerHTML = `<h2>No Questions Found</h2><p>No questions matched the selected filter criteria.</p>`;
+                    endOfQuizMessageElement.style.display = 'block';
+                    quizProgressElement.textContent = '0 questions';
+                    currentQuestionObject = null;
+                    toggleAnnotationButton.style.display = 'none';
+                    deactivateAnnotationMode(); // Ensure annotation mode is off
+                    alert("No questions match your filter settings.");
+                    closeSidebar();
+                }
+            }
+
+            function shuffleArray(array) {
+                let currentIndex = array.length, randomIndex;
+                while (currentIndex > 0) {
+                    randomIndex = Math.floor(Math.random() * currentIndex);
+                    currentIndex--;
+                    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+                }
+                return array;
+            }
+
+            function renderQuestion(question) {
+                // Reset UI elements, BUT NOT the canvas content
+                deactivateAnnotationMode(); // Hide controls/canvas, but drawing persists
+                // *** MODIFICATION: Do NOT clear canvas here ***
+                // clearCanvas(); // REMOVED
+
+                groupIntroElement.innerHTML = '';
+                choicesFormElement.innerHTML = '';
+                feedbackAreaElement.style.display = 'none';
+                feedbackAreaElement.innerHTML = '';
+                pastAttemptsContainer.style.display = 'none';
+                pastAttemptsContainer.innerHTML = '';
+                metaTooltipContentElement.innerHTML = '';
+
+                // Display Group Intro
+                let displayGroupIntro = false;
+                if (question.group_id) {
+                    if (question.group_id !== lastDisplayedGroupId) {
+                        const group = quizData.groups.find(g => g.group_id === question.group_id);
+                        if (group) {
+                            groupIntroElement.innerHTML = `<h3>Fact Pattern: ${escapeHtml(group.text || `Group ${group.group_id}`)}</h3><p>${escapeHtml(group.intro_text || "Refer to the fact pattern...")}</p>`;
+                            displayGroupIntro = true;
+                            lastDisplayedGroupId = question.group_id;
+                        } else {
+                            groupIntroElement.innerHTML = `<h3>Fact Pattern for Group ${question.group_id}</h3><p>Group details not found.</p>`;
+                            displayGroupIntro = true;
+                            lastDisplayedGroupId = question.group_id;
+                        }
+                    } else {
+                        displayGroupIntro = true; // Keep container visible
+                    }
+                } else {
+                    lastDisplayedGroupId = null;
+                }
+                groupIntroElement.style.display = displayGroupIntro && groupIntroElement.innerHTML.trim() !== '' ? 'block' : 'none';
+
+                // Display Question Meta in Tooltip
+                const sourceInfo = question.source || {};
+                // Removed <strong>ID:</strong> ${question.question_id}<br>
+                const metaHtml = `<strong>Category:</strong> ${question.category || 'N/A'}<br>
+                                  <strong>Source:</strong> ${escapeHtml(sourceInfo.name || 'Unknown')}<br>
+                                  <strong>Provider:</strong> ${escapeHtml(sourceInfo.provider || 'N/A')}<br>
+                                  <strong>Year:</strong> ${sourceInfo.year || 'N/A'} | <strong>Q#:</strong> ${sourceInfo.question || 'N/A'}`;
+                metaTooltipContentElement.innerHTML = metaHtml;
+
+                // Display Question Text and Choices
+                questionTextElement.innerText = question.question_text || "[No Question Text Found]";
+                const choices = question.choices || {};
+                ['A', 'B', 'C', 'D'].forEach(choiceKey => {
+                    if (choices[choiceKey] !== undefined) {
+                        const choiceContainer = document.createElement('div');
+                        choiceContainer.classList.add('choice-item');
+                        const choiceLabel = document.createElement('label');
+                        const choiceInput = document.createElement('input');
+                        const choiceTextSpan = document.createElement('span');
+                        const inputId = `choice-${question.question_id}-${choiceKey}`;
+                        choiceInput.type = 'radio';
+                        choiceInput.name = `choice-${question.question_id}`;
+                        choiceInput.value = choiceKey;
+                        choiceInput.id = inputId;
+                        choiceInput.required = true;
+                        choiceLabel.htmlFor = inputId;
+                        choiceTextSpan.innerText = ` ${choiceKey}. ${choices[choiceKey]}`;
+                        choiceLabel.appendChild(choiceInput);
+                        choiceLabel.appendChild(choiceTextSpan);
+                        choiceContainer.appendChild(choiceLabel);
+                        choicesFormElement.appendChild(choiceContainer);
+                    }
+                });
+
+                // Reset Buttons and Notes Area
+                submitAnswerButton.style.display = 'inline-block';
+                submitAnswerButton.disabled = false;
+                nextQuestionButton.style.display = 'none';
+                attemptNotesElement.value = ''; // Clear notes from previous question
+                // *** MODIFICATION: Enable notes from the start ***
+                attemptNotesElement.disabled = false;
+
+                renderPastAttempts(question);
+
+                // Show annotation button if quiz is active
+                if (quizData && masterQuestionList.length > 0) {
+                    toggleAnnotationButton.style.display = 'inline-block';
+                } else {
+                    toggleAnnotationButton.style.display = 'none';
+                }
+            }
+
+            function renderPastAttempts(question) {
+                // Ensure user_attempts exists
+                if (!question.user_attempts) question.user_attempts = [];
+
+                const attempts = question.user_attempts;
+                if (attempts.length > 0) {
+                    let listHtml = '<h4>Your Past Attempts for this Question:</h4><ul>';
+                    attempts.slice().reverse().forEach((attempt, index) => {
+                        const attemptNumber = attempt.attempt_id || (attempts.length - index);
+                        const timeSpent = typeof attempt.time_spent_seconds === 'number' ? attempt.time_spent_seconds.toFixed(1) : 'N/A';
+                        const submittedDate = attempt.time_submitted ? new Date(attempt.time_submitted).toLocaleString() : 'N/A';
+                        let resultClass = '';
+                        let resultText = '';
+                        const correctAnswer = question.answer?.correct_choice;
+
+                        if (correctAnswer && attempt.chosen_answer === correctAnswer) {
+                            resultClass = 'attempt-correct';
+                            resultText = 'Correct';
+                        } else if (correctAnswer) {
+                            resultClass = 'attempt-incorrect';
+                            resultText = `Incorrect (Correct: ${correctAnswer})`;
+                        } else {
+                            resultText = 'N/A';
+                        }
+
+                        listHtml += `<li>Attempt #${attemptNumber}: Chose <strong class="${resultClass}">${escapeHtml(attempt.chosen_answer) || 'N/A'}</strong> (${resultText}) <br>
+                                     Time Spent: ${timeSpent}s | Submitted: ${submittedDate}
+                                     ${attempt.notes ? `<br>Notes: <em>${escapeHtml(attempt.notes)}</em>` : ''}
+                                     </li>`;
+                    });
+                    listHtml += '</ul>';
+                    pastAttemptsContainer.innerHTML = listHtml;
+                    // Visibility controlled in handleSubmitAnswer
+                } else {
+                    pastAttemptsContainer.innerHTML = '';
+                    pastAttemptsContainer.style.display = 'none'; // Hide if no attempts
+                }
+            }
+
+            function handleSubmitAnswer() {
+                const selectedChoiceInput = choicesFormElement.querySelector('input[type="radio"]:checked');
+                if (!selectedChoiceInput) {
+                    alert('Please select an answer.');
+                    return;
+                }
+
+                const chosenAnswer = selectedChoiceInput.value;
+                const timeSpentSeconds = questionStartTime ? (Date.now() - questionStartTime) / 1000 : 0;
+                const correctAnswer = currentQuestionObject.answer?.correct_choice;
+                // *** MODIFICATION: Capture notes *before* creating the attempt ***
+                const currentNotes = attemptNotesElement.value.trim();
+
+                const originalQuestion = quizData.questions.find(q => q.question_id === currentQuestionObject.question_id);
+                if (!originalQuestion) {
+                    console.error("Could not find original question object to record attempt!");
+                    alert("Error: Could not save attempt. Original question data not found.");
+                    return;
+                }
+                if (!Array.isArray(originalQuestion.user_attempts)) {
+                    originalQuestion.user_attempts = [];
+                }
+
+                // Create and add the new attempt record
+                const newAttempt = {
+                    attempt_id: originalQuestion.user_attempts.length + 1,
+                    chosen_answer: chosenAnswer,
+                    time_submitted: new Date().toISOString(),
+                    time_spent_seconds: parseFloat(timeSpentSeconds.toFixed(1)),
+                    // *** MODIFICATION: Add captured notes here ***
+                    notes: currentNotes
+                };
+                originalQuestion.user_attempts.push(newAttempt);
+                // Update local copy if different
+                if (currentQuestionObject !== originalQuestion) {
+                    if (!Array.isArray(currentQuestionObject.user_attempts)) {
+                        currentQuestionObject.user_attempts = [];
+                    }
+                    currentQuestionObject.user_attempts.push({ ...newAttempt }); // Add a copy to local object
+                }
+
+                // --- UI Updates ---
+                // *** MODIFICATION: Do NOT clear canvas here ***
+                // clearCanvas(); // REMOVED
+                deactivateAnnotationMode(); // Hide controls, keep drawing
+
+                // Show feedback
+                const isCorrect = correctAnswer && chosenAnswer === correctAnswer;
+                let feedbackHtml = '';
+                if (isCorrect) {
+                    feedbackHtml = '<p><strong>Correct!</strong></p>';
+                    feedbackAreaElement.className = 'feedback-area correct';
+                } else {
+                    feedbackHtml = `<p><strong>Incorrect.</strong> You chose ${chosenAnswer}. The correct answer was ${correctAnswer || 'N/A'}.</p>`;
+                    feedbackAreaElement.className = 'feedback-area incorrect';
+                }
+                const explanationText = currentQuestionObject.answer?.explanation || "No explanation provided.";
+                feedbackHtml += `<div class="explanation"><strong>Explanation:</strong><br>${escapeHtml(explanationText)}</div>`;
+                feedbackAreaElement.innerHTML = feedbackHtml;
+                feedbackAreaElement.style.display = 'block';
+
+                // Disable choices and highlight
+                choicesFormElement.querySelectorAll('label').forEach(label => {
+                    const input = label.querySelector('input[type="radio"]');
+                    if (input) {
+                        input.disabled = true;
+                        if (input.value === correctAnswer) label.classList.add('correct-answer');
+                        if (input.value === chosenAnswer && !isCorrect) label.classList.add('selected-incorrect');
+                    }
+                });
+
+                // Update button states
+                submitAnswerButton.style.display = 'none';
+                submitAnswerButton.disabled = true;
+                nextQuestionButton.style.display = 'inline-block';
+                // *** MODIFICATION: Notes area remains enabled ***
+                // attemptNotesElement.disabled = false; // Already enabled
+
+                // Update and show past attempts
+                renderPastAttempts(currentQuestionObject);
+                pastAttemptsContainer.style.display = 'block';
+
+                // Focus notes and scroll feedback into view
+                attemptNotesElement.focus();
+                feedbackAreaElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            /**
+             * Saves the current notes from the textarea to the *last* attempt of the *current* question
+             * in the original quizData. Called before moving to the next question or saving the file.
+             */
+            function saveNotesForCurrentAttempt() {
+                if (currentQuestionObject && quizData?.questions) {
+                    const originalQuestion = quizData.questions.find(q => q.question_id === currentQuestionObject.question_id);
+                    // Ensure attempts array exists and has items
+                    if (originalQuestion && Array.isArray(originalQuestion.user_attempts) && originalQuestion.user_attempts.length > 0) {
+                        const lastAttemptIndex = originalQuestion.user_attempts.length - 1;
+                        const lastAttempt = originalQuestion.user_attempts[lastAttemptIndex];
+
+                        // *** MODIFICATION: Always save the current notes, no need to check disabled status ***
+                        if (lastAttempt) {
+                            const notesValue = attemptNotesElement.value.trim();
+                            if (lastAttempt.notes !== notesValue) { // Only update if changed
+                                lastAttempt.notes = notesValue;
+
+                                // Update local copy too if different
+                                if (currentQuestionObject !== originalQuestion && currentQuestionObject.user_attempts?.length > 0) {
+                                    const localLastAttempt = currentQuestionObject.user_attempts[lastAttemptIndex];
+                                    // Check attempt_id for safety, though index should match if logic is sound
+                                    if (localLastAttempt && localLastAttempt.attempt_id === lastAttempt.attempt_id) {
+                                        localLastAttempt.notes = notesValue;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            function handleNextQuestion() {
+                saveNotesForCurrentAttempt(); // Save potentially updated notes before moving on
+                displayNextQuestionInternal();
+            }
+
+            /**
+             * Displays the next question in the masterQuestionList or ends the quiz.
+             */
+            function displayNextQuestionInternal() {
+                // *** MODIFICATION: Clear canvas *before* loading the new question ***
+                clearCanvas();
+
+                currentQuestionIndex++;
+                if (currentQuestionIndex < masterQuestionList.length) {
+                    currentQuestionObject = masterQuestionList[currentQuestionIndex];
+                    if (!currentQuestionObject) {
+                        console.error(`Error: Undefined question at index ${currentQuestionIndex}. Skipping.`);
+                        displayNextQuestionInternal(); // Attempt to skip
+                        return;
+                    }
+                    renderQuestion(currentQuestionObject);
+                    quizProgressElement.textContent = `Question ${currentQuestionIndex + 1} of ${masterQuestionList.length}`;
+                    questionStartTime = Date.now();
+                    const questionCardElement = document.getElementById('current-question-card');
+                    if (questionCardElement) {
+                        questionCardElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                } else {
+                    quizAreaElement.style.display = 'none';
+                    endOfQuizMessageElement.innerHTML = `<h2>Quiz Complete!</h2><p>You answered ${masterQuestionList.length} questions in this session.</p>`;
+                    endOfQuizMessageElement.style.display = 'block';
+                    currentQuestionObject = null;
+                    toggleAnnotationButton.style.display = 'none';
+                    deactivateAnnotationMode();
+                }
+            }
+
+            function resetQuizState() {
+                masterQuestionList = [];
+                currentQuestionIndex = -1;
+                currentQuestionObject = null;
+                lastDisplayedGroupId = null;
+
+                // Reset UI
+                quizAreaElement.style.display = 'none';
+                endOfQuizMessageElement.style.display = 'none';
+                endOfQuizMessageElement.innerHTML = '';
+                quizProgressElement.textContent = '';
+                groupIntroElement.innerHTML = '';
+                groupIntroElement.style.display = 'none';
+                feedbackAreaElement.innerHTML = '';
+                feedbackAreaElement.style.display = 'none';
+                pastAttemptsContainer.innerHTML = '';
+                pastAttemptsContainer.style.display = 'none';
+                attemptNotesElement.value = '';
+                // *** MODIFICATION: Ensure notes are disabled initially if no quiz loaded ***
+                attemptNotesElement.disabled = true;
+                choicesFormElement.innerHTML = '';
+                questionTextElement.textContent = '';
+                metaTooltipContentElement.innerHTML = '';
+
+                // Reset Buttons
+                saveJsonButton.disabled = true;
+                jsonFileElement.value = '';
+
+                // Reset Sidebar Filters
+                if (quizData) { // Only reset filters if data is loaded
+                    document.querySelectorAll('input[name="filter-status"]').forEach(rb => rb.checked = (rb.value === 'all'));
+                    clearCheckboxes(filterCategoriesList);
+                    clearCheckboxes(filterProvidersList);
+                    clearCheckboxes(filterYearsList);
+                    filterScrambleCheckbox.checked = false;
+                    applyFiltersButton.disabled = false;
+                } else {
+                    filterCategoriesList.innerHTML = '<p>Load data to see categories.</p>';
+                    filterProvidersList.innerHTML = '<p>Load data to see providers.</p>';
+                    filterYearsList.innerHTML = '<p>Load data to see years.</p>';
+                    applyFiltersButton.disabled = true;
+                }
+
+                // Reset Annotation
+                deactivateAnnotationMode();
+                clearCanvas(); // Clear canvas on full reset
+                setTool('pen');
+                toggleAnnotationButton.style.display = 'none';
+            }
+
+
+            // --- Annotation Functions ---
+            // (resizeCanvas, activateAnnotationMode, deactivateAnnotationMode, toggleAnnotationMode,
+            //  getCoords, startDrawing, draw, stopDrawing, setTool, clearCanvas - remain mostly unchanged
+            //  except for the modified highlighter color maybe)
+
+            function resizeCanvas() {
+                // Debounce or throttle this if resize events fire too rapidly
+                const rect = annotationArea.getBoundingClientRect();
+                // Use integer values for canvas width/height to avoid sub-pixel issues
+                const newWidth = Math.floor(annotationArea.offsetWidth);
+                const newHeight = Math.floor(annotationArea.offsetHeight);
+
+                // Check if resize is actually needed to avoid unnecessary redraws/context resets
+                if (annotationCanvas.width !== newWidth || annotationCanvas.height !== newHeight) {
+                    // Capture existing drawing temporarily
+                    let tempImageData = null;
+                    if (annotationCanvas.width > 0 && annotationCanvas.height > 0) {
+                        try {
+                            tempImageData = annotationCtx.getImageData(0, 0, annotationCanvas.width, annotationCanvas.height);
+                        } catch (e) {
+                            console.warn("Could not get ImageData (tainted canvas?):", e);
+                            tempImageData = null; // Ensure it's null if error occurs
+                        }
+                    }
+
+                    annotationCanvas.width = newWidth;
+                    annotationCanvas.height = newHeight;
+
+                    // Reset context properties
+                    annotationCtx.lineCap = 'round';
+                    annotationCtx.lineJoin = 'round';
+
+                    // Restore the drawing if we captured it
+                    if (tempImageData) {
+                        annotationCtx.putImageData(tempImageData, 0, 0);
+                        console.log("Canvas resized, drawing restored.");
+                    } else {
+                        console.log("Canvas resized, drawing NOT restored (no prior image data or error).");
+                    }
+                }
+            }
+
+            function activateAnnotationMode() {
+                if (isAnnotationActive) return;
+                isAnnotationActive = true;
+                // Ensure canvas dimensions match container *before* displaying
+                resizeCanvas(); // Call resize to check/set dimensions and potentially restore drawing
+                annotationCanvas.style.display = 'block';
+                annotationCanvas.style.pointerEvents = 'auto';
+                annotationControls.style.display = 'block';
+                toggleAnnotationButton.textContent = 'Hide Annotations';
+                toggleAnnotationButton.classList.add('annotation-active');
+                setTool(currentTool); // Re-apply tool settings
+                console.log("Annotation Mode Activated");
+                // Re-check size after layout changes might affect offsetWidth/Height
+                requestAnimationFrame(resizeCanvas);
+            }
+
+            function deactivateAnnotationMode() {
+                if (!isAnnotationActive) return;
+                isAnnotationActive = false;
+                // Just hide, don't clear
+                annotationCanvas.style.display = 'none';
+                annotationCanvas.style.pointerEvents = 'none';
+                annotationControls.style.display = 'none';
+                toggleAnnotationButton.textContent = 'Annotate Question';
+                toggleAnnotationButton.classList.remove('annotation-active');
+                isDrawing = false;
+                console.log("Annotation Mode Deactivated (Drawing Persists)");
+            }
+
+            function toggleAnnotationMode() {
+                if (isAnnotationActive) {
+                    deactivateAnnotationMode();
+                } else {
+                    activateAnnotationMode();
+                }
+            }
+
+            function getCoords(e) {
+                let x, y;
+                const rect = annotationCanvas.getBoundingClientRect();
+                if (e.touches && e.touches.length > 0) {
+                    x = e.touches[0].clientX - rect.left;
+                    y = e.touches[0].clientY - rect.top;
+                    e.preventDefault(); // Prevent scrolling
+                } else {
+                    x = e.offsetX;
+                    y = e.offsetY;
+                }
+                return { x, y };
+            }
+
+            function startDrawing(e) {
+                if (!isAnnotationActive) return;
+                // Check size again right before drawing, in case of late layout shifts
+                if (annotationCanvas.width !== annotationArea.offsetWidth || annotationCanvas.height !== annotationArea.offsetHeight) {
+                    resizeCanvas(); // This might restore old drawing, ensure it happens before new path starts
+                }
+
+                const { x, y } = getCoords(e);
+                isDrawing = true;
+                [lastX, lastY] = [x, y];
+
+                annotationCtx.beginPath();
+                annotationCtx.moveTo(lastX, lastY);
+
+                // Set Tool Properties
+                annotationCtx.globalAlpha = 1.0; // Reset alpha
+                annotationCtx.globalCompositeOperation = 'source-over'; // Reset blend mode
+
+                if (currentTool === 'pen') {
+                    annotationCtx.strokeStyle = penColor;
+                    annotationCtx.lineWidth = penWidth;
+                } else if (currentTool === 'highlighter') {
+                    annotationCtx.globalCompositeOperation = 'multiply'; // Blend mode for highlighter
+                    annotationCtx.strokeStyle = highlighterColor;
+                    annotationCtx.lineWidth = highlighterWidth;
+                    annotationCtx.globalAlpha = 0.01;
+                    // Note: globalAlpha adjustment might be needed depending on color alpha,
+                    // but 'multiply' often handles the transparency effect well.
+                } else if (currentTool === 'eraser') {
+                    annotationCtx.globalCompositeOperation = 'destination-out'; // Blend mode for eraser
+                    annotationCtx.lineWidth = eraserWidth;
+                }
+            }
+
+            function draw(e) {
+                if (!isDrawing || !isAnnotationActive) return;
+                const { x, y } = getCoords(e);
+
+                annotationCtx.lineTo(x, y);
+                annotationCtx.stroke();
+
+                [lastX, lastY] = [x, y];
+            }
+
+            function stopDrawing() {
+                if (!isDrawing) return;
+                // Don't closePath for continuous line drawing unless you specifically want the start/end joined
+                // annotationCtx.closePath();
+                isDrawing = false;
+            }
+
+            function setTool(toolName) {
+                currentTool = toolName;
+                console.log("Tool set to:", currentTool);
+                penButton.classList.toggle('active-tool', currentTool === 'pen');
+                highlighterButton.classList.toggle('active-tool', currentTool === 'highlighter');
+                eraserButton.classList.toggle('active-tool', currentTool === 'eraser');
+                annotationCanvas.style.cursor = (currentTool === 'eraser') ? 'cell' : 'crosshair';
+            }
+
+            // Clear canvas function remains essential for explicit clear / next question
+            function clearCanvas() {
+                if (annotationCanvas.width > 0 && annotationCanvas.height > 0) {
+                    annotationCtx.clearRect(0, 0, annotationCanvas.width, annotationCanvas.height);
+                    console.log("Canvas cleared");
+                } else {
+                    console.log("Canvas not cleared (zero dimensions or context issue)");
+                }
+            }
+
+
+            // --- Utility Functions ---
+            function escapeHtml(unsafe) {
+                if (unsafe === null || unsafe === undefined) return '';
+                return unsafe.toString()
+                    .replace(/&/g, "&")
+                    .replace(/</g, "<")
+                    .replace(/>/g, ">")
+                    .replace(/"/g, '"')
+                    .replace(/'/g, "'");
+            }
+
+            // --- Initial Page State ---
+            resetQuizState(); // Initialize everything
+            setTool('pen');
+            closeSidebar();
+
+        });
+    </script>
+
+</body>
+
+</html>
