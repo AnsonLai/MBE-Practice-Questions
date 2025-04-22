@@ -967,6 +967,108 @@
             left: 0;
             /* width/height set by JS */
         }
+
+        /* Timer Container Styles */
+        #timer-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        .timer {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            background-color: var(--light-gray);
+            padding: 0.4rem 0.6rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .timer-label {
+            font-weight: 600;
+        }
+
+        .timer-value {
+            font-family: monospace;
+            font-size: 1.1em;
+        }
+
+        .timer.warning .timer-value {
+            color: var(--warning-color);
+            font-weight: bold;
+        }
+
+        .timer.danger .timer-value {
+            color: var(--danger-color);
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Timer Settings Styles */
+        .setting-item {
+            margin-bottom: 0.8rem;
+        }
+
+        .setting-item label {
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .setting-item input[type="number"] {
+            width: 100%;
+            padding: 0.4rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+        }
+
+        /* Keep checkboxes on same line with label */
+        .setting-item label input[type="checkbox"] {
+            margin-right: 0.4rem;
+            vertical-align: middle;
+        }
+
+        @keyframes flash {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .timer.flashing {
+            animation: flash 0.8s infinite;
+            color: var(--danger-color) !important;
+            font-weight: bold !important;
+        }
+
+        .timer.flashing .timer-value {
+            color: var(--danger-color) !important;
+        }
     </style>
 </head>
 
@@ -1009,6 +1111,31 @@
             <h3>Order</h3>
             <label><input type="checkbox" id="filter-scramble"> Scramble Question Order</label>
         </div>
+        <div class="sidebar-section">
+            <h3>Timer Settings</h3>
+            <div class="setting-item">
+                <label for="session-time-limit">Session Time Limit (minutes):</label>
+                <input type="number" id="session-time-limit" min="1" max="240" value="60" step="1">
+            </div>
+            <div class="setting-item">
+                <label for="question-limit">Number of Questions (Sprint):</label>
+                <input type="number" id="question-limit" min="1" max="200" value="50" step="1">
+            </div>
+            <div class="setting-item">
+                <label><input type="checkbox" id="enable-session-timer"> Enable Session Timer</label>
+            </div>
+            <div class="setting-item">
+                <label><input type="checkbox" id="enable-question-timer"> Enable Question Timer</label>
+            </div>
+            <div class="setting-item">
+                <label><input type="checkbox" id="enable-stopwatch" checked> Enable Stopwatch</label>
+            </div>
+            <div class="setting-item">
+                <label for="question-time-limit">Question Time Limit (seconds):</label>
+                <input type="number" id="question-time-limit" min="10" max="600" value="90" step="5">
+            </div>
+        </div>
+
         <button id="apply-filters-button" disabled>Apply Filters & Start Quiz</button>
         <button id="close-sidebar-button">Close Settings</button>
     </div>
@@ -1026,6 +1153,20 @@
 
         <div id="quiz-area">
             <div id="quiz-progress"></div>
+            <div id="timer-container">
+                <div id="session-timer" class="timer">
+                    <span class="timer-label">Session:</span>
+                    <span class="timer-value">00:00</span>
+                </div>
+                <div id="question-timer" class="timer">
+                    <span class="timer-label">Question:</span>
+                    <span class="timer-value">00:00</span>
+                </div>
+                <div id="stopwatch" class="timer">
+                    <span class="timer-label">Elapsed:</span>
+                    <span class="timer-value">00:00</span>
+                </div>
+            </div>
             <div id="current-group-intro" class="question-group-intro" style="display:none;"></div>
 
             <button id="toggleAnnotationButton" style="display: none;">Annotate Question</button>
@@ -1062,8 +1203,7 @@
 
             <div class="user-notes">
                 <label for="attempt-notes">Notes for future reference:</label>
-                <textarea id="attempt-notes" rows="4" placeholder="Enter notes here to be saved..."
-                    disabled></textarea>
+                <textarea id="attempt-notes" rows="4" placeholder="Enter notes here to be saved..." disabled></textarea>
             </div>
 
             <div class="quiz-controls">
@@ -1142,6 +1282,21 @@
             let highlighterWidth = 15;
             let eraserWidth = 25;
 
+            // --- Timer State Variables ---
+            let sessionTimerEnabled = false;
+            let questionTimerEnabled = false;
+            let stopwatchEnabled = true;
+            let sessionTimeLimit = 60 * 60; // 60 minutes in seconds
+            let questionTimeLimit = 90; // 90 seconds
+            let questionLimit = 50; // Default 50 questions
+
+            let sessionTimeRemaining = 0;
+            let questionTimeRemaining = 0;
+            let stopwatchTime = 0;
+            let sessionTimerInterval = null;
+            let questionTimerInterval = null;
+            let stopwatchInterval = null;
+
 
             // --- Event Listeners ---
             loadJsonButton.addEventListener('click', handleLoadJson);
@@ -1154,6 +1309,35 @@
             clearCategoriesButton.addEventListener('click', () => clearCheckboxes(filterCategoriesList));
             clearProvidersButton.addEventListener('click', () => clearCheckboxes(filterProvidersList));
             clearYearsButton.addEventListener('click', () => clearCheckboxes(filterYearsList));
+
+            // Add timer-related settings event listeners
+            document.getElementById('enable-session-timer')?.addEventListener('change', (e) => {
+                sessionTimerEnabled = e.target.checked;
+                updateTimerVisibility();
+            });
+
+            document.getElementById('enable-question-timer')?.addEventListener('change', (e) => {
+                questionTimerEnabled = e.target.checked;
+                updateTimerVisibility();
+            });
+
+            document.getElementById('enable-stopwatch')?.addEventListener('change', (e) => {
+                stopwatchEnabled = e.target.checked;
+                updateTimerVisibility();
+            });
+
+            document.getElementById('session-time-limit')?.addEventListener('change', (e) => {
+                sessionTimeLimit = Math.max(1, parseInt(e.target.value, 10) || 60) * 60; // Convert to seconds
+            });
+
+            document.getElementById('question-time-limit')?.addEventListener('change', (e) => {
+                questionTimeLimit = Math.max(10, parseInt(e.target.value, 10) || 90);
+            });
+
+            document.getElementById('question-limit')?.addEventListener('change', (e) => {
+                questionLimit = Math.max(1, parseInt(e.target.value, 10) || 50);
+            });
+
 
             // Annotation Listeners
             toggleAnnotationButton.addEventListener('click', toggleAnnotationMode);
@@ -1261,6 +1445,214 @@
                 };
             }
 
+            // Timer Functions
+            function formatTime(seconds) {
+                const isNegative = seconds < 0;
+                const absoluteSeconds = Math.abs(seconds);
+                const minutes = Math.floor(absoluteSeconds / 60);
+                const remainderSeconds = Math.floor(absoluteSeconds % 60);
+
+                return `${isNegative ? '-' : ''}${minutes.toString().padStart(2, '0')}:${remainderSeconds.toString().padStart(2, '0')}`;
+            }
+
+            function updateTimerVisibility() {
+                const timerContainer = document.getElementById('timer-container');
+                const sessionTimerElement = document.getElementById('session-timer');
+                const questionTimerElement = document.getElementById('question-timer');
+                const stopwatchElement = document.getElementById('stopwatch');
+
+                if (!timerContainer) return;
+
+                sessionTimerElement.style.display = sessionTimerEnabled ? 'flex' : 'none';
+                questionTimerElement.style.display = questionTimerEnabled ? 'flex' : 'none';
+                stopwatchElement.style.display = stopwatchEnabled ? 'flex' : 'none';
+
+                // Hide the entire container if all timers are disabled
+                timerContainer.style.display =
+                    (sessionTimerEnabled || questionTimerEnabled || stopwatchEnabled) ? 'flex' : 'none';
+            }
+
+            function startSessionTimer() {
+                if (!sessionTimerEnabled) return;
+
+                clearInterval(sessionTimerInterval);
+                sessionTimeRemaining = sessionTimeLimit;
+                updateSessionTimerDisplay();
+
+                sessionTimerInterval = setInterval(() => {
+                    sessionTimeRemaining--;
+                    updateSessionTimerDisplay();
+
+                    if (sessionTimeRemaining <= 0) {
+                        clearInterval(sessionTimerInterval);
+                        handleSessionTimeout();
+                    }
+                }, 1000);
+            }
+
+            function updateSessionTimerDisplay() {
+                const sessionTimerElement = document.getElementById('session-timer');
+                const sessionTimerValue = sessionTimerElement?.querySelector('.timer-value');
+                if (!sessionTimerValue) return;
+
+                sessionTimerValue.textContent = formatTime(sessionTimeRemaining);
+
+                // Update visual indicators
+                sessionTimerElement.classList.remove('warning', 'danger');
+                if (sessionTimeRemaining <= 60) { // Last minute
+                    sessionTimerElement.classList.add('danger');
+                } else if (sessionTimeRemaining <= 300) { // Last 5 minutes
+                    sessionTimerElement.classList.add('warning');
+                }
+            }
+
+            function startQuestionTimer() {
+                if (!questionTimerEnabled) return;
+
+                clearInterval(questionTimerInterval);
+                questionTimeRemaining = questionTimeLimit;
+                updateQuestionTimerDisplay();
+
+                questionTimerInterval = setInterval(() => {
+                    questionTimeRemaining--;
+                    updateQuestionTimerDisplay();
+
+                    if (questionTimeRemaining === 0) {
+                        // When hitting exactly zero, trigger the visual changes
+                        handleQuestionTimeout();
+                        // But don't clear the interval - let it keep going negative
+                    }
+                }, 1000);
+            }
+
+
+            function updateQuestionTimerDisplay() {
+                const questionTimerElement = document.getElementById('question-timer');
+                const questionTimerValue = questionTimerElement?.querySelector('.timer-value');
+                if (!questionTimerValue) return;
+
+                questionTimerValue.textContent = formatTime(questionTimeRemaining);
+
+                // Update visual indicators
+                questionTimerElement.classList.remove('warning', 'danger', 'flashing');
+
+                if (questionTimeRemaining < 0) {
+                    // Negative time - add flashing red effect
+                    questionTimerElement.classList.add('danger', 'flashing');
+                } else if (questionTimeRemaining <= 10) { // Last 10 seconds
+                    questionTimerElement.classList.add('danger');
+                } else if (questionTimeRemaining <= 30) { // Last 30 seconds
+                    questionTimerElement.classList.add('warning');
+                }
+            }
+
+
+            function startStopwatch() {
+                if (!stopwatchEnabled) return;
+
+                clearInterval(stopwatchInterval);
+                stopwatchTime = 0;
+                updateStopwatchDisplay();
+
+                stopwatchInterval = setInterval(() => {
+                    stopwatchTime++;
+                    updateStopwatchDisplay();
+                }, 1000);
+            }
+
+            function updateStopwatchDisplay() {
+                const stopwatchElement = document.getElementById('stopwatch');
+                const stopwatchValue = stopwatchElement?.querySelector('.timer-value');
+                if (!stopwatchValue) return;
+                stopwatchValue.textContent = formatTime(stopwatchTime);
+            }
+
+            function pauseQuestionTimer() {
+                clearInterval(questionTimerInterval);
+            }
+
+            function pauseSessionTimer() {
+                clearInterval(sessionTimerInterval);
+            }
+
+            function pauseStopwatch() {
+                clearInterval(stopwatchInterval);
+            }
+
+            function resetQuestionTimer() {
+                clearInterval(questionTimerInterval);
+                questionTimeRemaining = questionTimeLimit;
+                updateQuestionTimerDisplay();
+            }
+
+            function resetSessionTimer() {
+                clearInterval(sessionTimerInterval);
+                sessionTimeRemaining = sessionTimeLimit;
+                updateSessionTimerDisplay();
+            }
+
+            function resetStopwatch() {
+                clearInterval(stopwatchInterval);
+                stopwatchTime = 0;
+                updateStopwatchDisplay();
+            }
+
+            function handleSessionTimeout() {
+                // Handle the session ending
+                alert("Session time has expired!");
+
+                // Display end of quiz
+                quizAreaElement.style.display = 'none';
+                endOfQuizMessageElement.innerHTML = `<h2>Time's Up!</h2><p>You completed ${currentQuestionIndex + 1} of ${masterQuestionList.length} questions in this session.</p>`;
+                endOfQuizMessageElement.style.display = 'block';
+                currentQuestionObject = null;
+                toggleAnnotationButton.style.display = 'none';
+                deactivateAnnotationMode();
+
+                // Pause all timers
+                pauseQuestionTimer();
+                pauseSessionTimer();
+                pauseStopwatch();
+            }
+
+            function handleQuestionTimeout() {
+                // Instead of automatically submitting or moving to next question,
+                // simply update the display to show negative time
+                const questionTimerElement = document.getElementById('question-timer');
+                if (questionTimerElement) {
+                    questionTimerElement.classList.add('danger', 'flashing');
+                }
+
+                // Continue the timer (don't clear the interval)
+                // We just keep counting down into negative values
+            }
+
+
+            function initializeTimerSettings() {
+                // Get DOM elements
+                const sessionTimeLimitInput = document.getElementById('session-time-limit');
+                const questionTimeLimitInput = document.getElementById('question-time-limit');
+                const questionLimitInput = document.getElementById('question-limit');
+                const enableSessionTimerCheckbox = document.getElementById('enable-session-timer');
+                const enableQuestionTimerCheckbox = document.getElementById('enable-question-timer');
+                const enableStopwatchCheckbox = document.getElementById('enable-stopwatch');
+
+                // Set initial values from the DOM elements
+                sessionTimerEnabled = enableSessionTimerCheckbox?.checked || false;
+                questionTimerEnabled = enableQuestionTimerCheckbox?.checked || false;
+                stopwatchEnabled = enableStopwatchCheckbox?.checked || true;
+
+                // Get values from inputs, with fallbacks
+                sessionTimeLimit = (parseInt(sessionTimeLimitInput?.value, 10) || 60) * 60; // Convert minutes to seconds
+                questionTimeLimit = parseInt(questionTimeLimitInput?.value, 10) || 90;
+                questionLimit = parseInt(questionLimitInput?.value, 10) || 50;
+
+                // Update timer visibility
+                updateTimerVisibility();
+                // Additional line to ensure the correct behavior for negative times
+                document.documentElement.style.setProperty('--negative-time-color', 'var(--danger-color)');
+            }
+
 
             // --- Core Quiz Logic ---
 
@@ -1275,6 +1667,7 @@
                             quizData = loadedData;
                             // Initialize user_attempts if missing
                             quizData.questions.forEach(q => {
+                                console.log(q);
                                 if (!q.user_attempts) q.user_attempts = [];
                             });
                             if (!Array.isArray(quizData.groups)) { quizData.groups = []; } // Ensure groups array exists
@@ -1328,6 +1721,9 @@
              * Applies selected filters and scrambling, then starts the quiz.
              */
             function applyFiltersAndStartQuiz() {
+                // Initialize timer settings
+                initializeTimerSettings();
+
                 if (!quizData) {
                     alert("Please load quiz data first.");
                     return;
@@ -1391,6 +1787,14 @@
                     endOfQuizMessageElement.style.display = 'none';
                     toggleAnnotationButton.style.display = 'inline-block';
                     displayNextQuestionInternal(); // Display the first question
+
+                    // Start timers
+                    resetSessionTimer();
+                    resetQuestionTimer();
+                    resetStopwatch();
+                    startSessionTimer();
+                    startStopwatch();
+
                     closeSidebar();
                 } else {
                     quizAreaElement.style.display = 'none';
@@ -1543,6 +1947,8 @@
             }
 
             function handleSubmitAnswer() {
+                pauseQuestionTimer();
+
                 const selectedChoiceInput = choicesFormElement.querySelector('input[type="radio"]:checked');
                 if (!selectedChoiceInput) {
                     alert('Please select an answer.');
@@ -1663,6 +2069,7 @@
 
             function handleNextQuestion() {
                 saveNotesForCurrentAttempt(); // Save potentially updated notes before moving on
+                pauseQuestionTimer();
                 displayNextQuestionInternal();
             }
 
@@ -1672,6 +2079,26 @@
             function displayNextQuestionInternal() {
                 // *** MODIFICATION: Clear canvas *before* loading the new question ***
                 clearCanvas();
+
+                // Reset question timer for the new question
+                resetQuestionTimer();
+                startQuestionTimer();
+
+                // Check question limit
+                if (questionLimit > 0 && currentQuestionIndex >= questionLimit) {
+                    // End the quiz when the question limit is reached
+                    quizAreaElement.style.display = 'none';
+                    endOfQuizMessageElement.innerHTML = `<h2>Quiz Complete!</h2><p>You completed the ${questionLimit}-question sprint session.</p>`;
+                    endOfQuizMessageElement.style.display = 'block';
+                    currentQuestionObject = null;
+                    toggleAnnotationButton.style.display = 'none';
+                    deactivateAnnotationMode();
+                    pauseQuestionTimer();
+                    pauseSessionTimer();
+                    pauseStopwatch();
+                    return;
+                }
+
 
                 currentQuestionIndex++;
                 if (currentQuestionIndex < masterQuestionList.length) {
@@ -1722,6 +2149,12 @@
                 choicesFormElement.innerHTML = '';
                 questionTextElement.textContent = '';
                 metaTooltipContentElement.innerHTML = '';
+
+                // Stop all timers
+                pauseQuestionTimer();
+                pauseSessionTimer();
+                pauseStopwatch();
+
 
                 // Reset Buttons
                 saveJsonButton.disabled = true;
@@ -1929,6 +2362,9 @@
             resetQuizState(); // Initialize everything
             setTool('pen');
             closeSidebar();
+
+            // Initialize timer visibility on page load
+            updateTimerVisibility();
 
         });
     </script>
