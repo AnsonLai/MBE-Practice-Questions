@@ -1,398 +1,509 @@
 {
     "questions": [
-      {
-        "question_id": "7a1b9c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
-        "group_id": null,
-        "question_text": "A father lived with his son, who was an alcoholic. When drunk, the son often became violent and physically abused his father. As a result, the father always lived in fear. One night, the father heard his son on the front stoop making loud obscene remarks. The father was certain that his son was drunk and was terrified that he would be physically beaten again. In his fear, he bolted the front door and took out a revolver. When the son discovered that the door was bolted, he kicked it down. As the son burst through the front door, his father shot him four times in the chest, killing him. In fact, the son was not under the influence of alcohol or any drug and did not intend to harm his father.\nAt trial, the father presented the above facts and asked the judge to instruct the jury on self-defense.\nHow should the judge instruct the jury with respect to self-defense?",
-        "category": "Criminal Law and Procedure",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 1 },
-        "answer": {
-          "correct_choice": "B",
-          "explanation": "A defendant is entitled to a jury instruction on a defense if there is any evidence presented, however slight, that supports the defense. The facts here, particularly the father's history of abuse by the son, his fear, and the son's actions (obscene remarks, kicking down the door), provide sufficient evidence for a reasonable jury to *consider* whether the father subjectively believed he was in imminent danger, even if that belief was ultimately found to be unreasonable or the force excessive. The judge must give the instruction if the evidence is sufficient to raise the defense, leaving it to the jury to decide if the elements of self-defense (imminent threat, reasonable belief, non-excessive force) are met. Option A is true but B is the legal reason *why* the instruction must be given. Option C and D present reasons why the jury might ultimately *reject* the self-defense claim, but they do not prevent the judge from *giving* the instruction if the defense is raised by the evidence.",
-          "ai_generated": true
+        {
+            "question_id": "91757f83-f760-425e-bc40-37afb4d5c993",
+            "group_id": null,
+            "question_text": "A father lived with his son, who was an alcoholic. When drunk, the son often became violent and physically abused his father. As a result, the father always lived in fear. One night, the father heard his son on the front stoop making loud obscene remarks. The father was certain that his son was drunk and was terrified that he would be physically beaten again. In his fear, he bolted the front door and took out a revolver. When the son discovered that the door was bolted, he kicked it down. As the son burst through the front door, his father shot him four times in the chest, killing him. In fact, the son was not under the influence of alcohol or any drug and did not intend to harm his father.\nAt trial, the father presented the above facts and asked the judge to instruct the jury on self-defense.\nHow should the judge instruct the jury with respect to self-defense?",
+            "category": "Criminal Law and Procedure",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 1
+            },
+            "answer": {
+                "correct_choice": "B",
+                "explanation": "A defendant is entitled to a jury instruction on a defense if there is any evidence presented, however slight, that supports the defense. The facts here, particularly the father's history of abuse by the son, his fear, and the son's actions (obscene remarks, kicking down the door), provide sufficient evidence for a reasonable jury to *consider* whether the father subjectively believed he was in imminent danger, even if that belief was ultimately found to be unreasonable or the force excessive. The judge must give the instruction if the evidence is sufficient to raise the defense, leaving it to the jury to decide if the elements of self-defense (imminent threat, reasonable belief, non-excessive force) are met. Option A is true but B is the legal reason *why* the instruction must be given. Option C and D present reasons why the jury might ultimately *reject* the self-defense claim, but they do not prevent the judge from *giving* the instruction if the defense is raised by the evidence.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "Give the self-defense instruction, because it expresses the defense's theory of the case.",
+                "B": "Give the self-defense instruction, because the evidence is sufficient to raise the defense.",
+                "C": "Deny the self-defense instruction, because the father was not in imminent danger from his son.",
+                "D": "Deny the self-defense instruction, because the father used excessive force."
+            },
+            "user_attempts": []
         },
-        "choices": {
-          "A": "Give the self-defense instruction, because it expresses the defense's theory of the case.",
-          "B": "Give the self-defense instruction, because the evidence is sufficient to raise the defense.",
-          "C": "Deny the self-defense instruction, because the father was not in imminent danger from his son.",
-          "D": "Deny the self-defense instruction, because the father used excessive force."
+        {
+            "question_id": "1a216b1d-442b-47fa-a39d-a9cf88faac3b",
+            "group_id": null,
+            "question_text": "A man sued a railroad for personal injuries suffered when his car was struck by a train at an unguarded crossing. A major issue is whether the train sounded its whistle before arriving at the crossing. The railroad has offered the testimony of a resident who has lived near the crossing for 15 years. Although she was not present on the occasion in question, she will testify that, whenever she is home, the train always sounds its whistle before arriving at the crossing.\nIs the resident's testimony admissible?",
+            "category": "Evidence",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 2
+            },
+            "answer": {
+                "correct_choice": "C",
+                "explanation": "Federal Rule of Evidence 406 allows evidence of a person's habit or an organization's routine practice to prove that on a particular occasion the person or organization acted in accordance with the habit or routine practice. The testimony that the train \"always sounds its whistle before arriving at the crossing\" describes a regular, repeated response to a specific situation (approaching the crossing) by the railroad, which constitutes a routine practice. This evidence is admissible to prove that the train likely acted in accordance with this practice on the occasion in question. Option A is incorrect because habit or routine practice evidence is specifically admissible to prove conduct on a specific occasion, even if the witness did not observe that specific occasion. Option B is incorrect; Rule 406 applies to both persons (habit) and organizations (routine practice). Option D is incorrect; a present sense impression is a statement describing an event *while* or *immediately after* perceiving it, not testimony about a long-standing pattern of behavior.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "No, due to the resident's lack of personal knowledge regarding the incident in question.",
+                "B": "No, because habit evidence is limited to the conduct of persons, not businesses.",
+                "C": "Yes, as evidence of a routine practice.",
+                "D": "Yes, as a summary of her present sense impressions."
+            },
+            "user_attempts": []
         },
-        "user_attempts": []
-      },
-      {
-        "question_id": "1e2f3a4b-5c6d-7e8f-9a0b-1c2d3e4f5a6b",
-        "group_id": null,
-        "question_text": "A man sued a railroad for personal injuries suffered when his car was struck by a train at an unguarded crossing. A major issue is whether the train sounded its whistle before arriving at the crossing. The railroad has offered the testimony of a resident who has lived near the crossing for 15 years. Although she was not present on the occasion in question, she will testify that, whenever she is home, the train always sounds its whistle before arriving at the crossing.\nIs the resident's testimony admissible?",
-        "category": "Evidence",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 2 },
-        "answer": {
-          "correct_choice": "C",
-          "explanation": "Federal Rule of Evidence 406 allows evidence of a person's habit or an organization's routine practice to prove that on a particular occasion the person or organization acted in accordance with the habit or routine practice. The testimony that the train \"always sounds its whistle before arriving at the crossing\" describes a regular, repeated response to a specific situation (approaching the crossing) by the railroad, which constitutes a routine practice. This evidence is admissible to prove that the train likely acted in accordance with this practice on the occasion in question. Option A is incorrect because habit or routine practice evidence is specifically admissible to prove conduct on a specific occasion, even if the witness did not observe that specific occasion. Option B is incorrect; Rule 406 applies to both persons (habit) and organizations (routine practice). Option D is incorrect; a present sense impression is a statement describing an event *while* or *immediately after* perceiving it, not testimony about a long-standing pattern of behavior.",
-          "ai_generated": true
+        {
+            "question_id": "9bac22a7-64ff-4bc0-b41e-107b876673dd",
+            "group_id": null,
+            "question_text": "To keep its public school expenditures under control in a time of increasing costs, a state passed a law providing that children who have not lived in the state for at least one year cannot attend public schools in the state.\nWhich of the following statements about this law is most accurate as a matter of constitutional law?",
+            "category": "Constitutional Law",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 3
+            },
+            "answer": {
+                "correct_choice": "D",
+                "explanation": "State laws that impose durational residency requirements on the receipt of essential government benefits, such as public education or welfare benefits, are generally reviewed under the Privileges or Immunities Clause of the Fourteenth Amendment. The Supreme Court has held that such requirements penalize the right to interstate travel, which is protected under this clause. While education is not considered a fundamental right requiring strict scrutiny, a state cannot deny it to newly arrived residents for an arbitrary period that unduly burdens their right to travel. Durational requirements like one year for essential services often violate the Privileges or Immunities Clause because they treat newer residents differently from established residents without sufficient justification. Option A is incorrect; while education is not a fundamental right, durational requirements affecting essential services are reviewed under the Privileges or Immunities Clause. Option B is incorrect; the Tenth Amendment reserves powers to the states but does not allow states to enact laws that violate other provisions of the Constitution, such as the Fourteenth Amendment. Option C is incorrect; the Supreme Court has not classified public education as a fundamental constitutional right that a state must provide to all persons residing in the state without restriction; the issue here is the *durational* requirement penalizing recent travel, not a complete denial of education to all residents.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "The one-year residence requirement is valid because it does not affect any fundamental right or suspect class.",
+                "B": "State durational residence requirements that are established for publicly funded services are constitutional because they relate to government operations reserved exclusively to the states by the Tenth Amendment.",
+                "C": "Because publicly funded education is a fundamental constitutional right, a state may not deny it to any class of persons who reside in that state.",
+                "D": "State durational residence requirements established for this kind of publicly funded service solely for the purpose of reducing state expenditures violate the privileges or immunities clause of the Fourteenth Amendment."
+            },
+            "user_attempts": []
         },
-        "choices": {
-          "A": "No, due to the resident's lack of personal knowledge regarding the incident in question.",
-          "B": "No, because habit evidence is limited to the conduct of persons, not businesses.",
-          "C": "Yes, as evidence of a routine practice.",
-          "D": "Yes, as a summary of her present sense impressions."
+        {
+            "question_id": "15dc7ab9-1716-4154-9b08-d884a327afcc",
+            "group_id": null,
+            "question_text": "A man has four German shepherd dogs that he has trained for guard duty and that he holds for breeding purposes. The man has \"Beware of Dogs\" signs clearly posted around a fenced-in yard where he keeps the dogs. The man's next-door neighbor frequently walks past the man's house and knows about the dogs' ferocity. One summer day, the neighbor entered the man's fenced-in yard to retrieve a snow shovel that the man had borrowed during the past winter. The neighbor was attacked by one of the dogs and was severely injured.\nIn a suit against the man, is the neighbor likely to prevail?",
+            "category": "Torts",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 4
+            },
+            "answer": {
+                "correct_choice": "A",
+                "explanation": "Many jurisdictions impose strict liability on the owner of an animal for injuries caused by the animal if the owner knows of the animal's dangerous propensities (the \"one bite rule\" or similar). German shepherds trained for guard duty are often presumed to have dangerous propensities known to the owner, potentially triggering strict liability. However, strict liability is often subject to defenses, including assumption of risk. If the injured party knew of the animal's danger and voluntarily encountered it, they may be barred from recovery. Here, the neighbor knew the dogs were ferocious (dangerous), saw the \"Beware of Dogs\" signs, and voluntarily entered the fenced yard. The neighbor's knowledge and voluntary decision to enter the known danger are likely to act as a complete defense, whether the claim is based on strict liability or negligence. Option B states the neighbor was trespassing, which is true, but the neighbor's *knowledge* of the specific danger posed by the dogs is a stronger and more direct defense to liability for the dog bite itself than merely being a trespasser (though trespasser status also limits the duty owed). Option C is incorrect; the neighbor was not an invitee; entering for a personal reason (retrieving a borrowed item) without the owner's specific invitation for that purpose makes the neighbor, at best, a licensee or more likely a trespasser. Option D is incorrect; owning and training dogs is not typically considered an abnormally dangerous activity giving rise to strict liability for *all* resulting harm, but rather strict liability specifically for harm caused by known dangerous propensities, which is subject to defenses.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "No, because the neighbor knew that the man had dangerous dogs in the yard.",
+                "B": "No, because the neighbor was trespassing when he entered the man's property.",
+                "C": "Yes, because the neighbor was an invitee for the purpose of retrieving the shovel.",
+                "D": "Yes, because the man was engaged in an abnormally dangerous activity."
+            },
+            "user_attempts": []
         },
-        "user_attempts": []
-      },
-      {
-        "question_id": "3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f",
-        "group_id": null,
-        "question_text": "To keep its public school expenditures under control in a time of increasing costs, a state passed a law providing that children who have not lived in the state for at least one year cannot attend public schools in the state.\nWhich of the following statements about this law is most accurate as a matter of constitutional law?",
-        "category": "Constitutional Law",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 3 },
-        "answer": {
-          "correct_choice": "D",
-          "explanation": "State laws that impose durational residency requirements on the receipt of essential government benefits, such as public education or welfare benefits, are generally reviewed under the Privileges or Immunities Clause of the Fourteenth Amendment. The Supreme Court has held that such requirements penalize the right to interstate travel, which is protected under this clause. While education is not considered a fundamental right requiring strict scrutiny, a state cannot deny it to newly arrived residents for an arbitrary period that unduly burdens their right to travel. Durational requirements like one year for essential services often violate the Privileges or Immunities Clause because they treat newer residents differently from established residents without sufficient justification. Option A is incorrect; while education is not a fundamental right, durational requirements affecting essential services are reviewed under the Privileges or Immunities Clause. Option B is incorrect; the Tenth Amendment reserves powers to the states but does not allow states to enact laws that violate other provisions of the Constitution, such as the Fourteenth Amendment. Option C is incorrect; the Supreme Court has not classified public education as a fundamental constitutional right that a state must provide to all persons residing in the state without restriction; the issue here is the *durational* requirement penalizing recent travel, not a complete denial of education to all residents.",
-          "ai_generated": true
+        {
+            "question_id": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+            "group_id": null,
+            "question_text": "A woman from State A filed an action against a retailer in a state court in State B. The complaint alleged that the retailer had not delivered $100,000 worth of goods for which the woman had paid.\nTwenty days after being served, the retailer, which is incorporated in State C and has its principal place of business in State B, filed a notice of removal in a federal district court in State B.\nWas the action properly removed?",
+            "category": "Civil Procedure",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 5
+            },
+            "answer": {
+                "correct_choice": "B",
+                "explanation": "Under 28 U.S.C. § 1441(b)(2), a civil action otherwise removable solely on the basis of diversity jurisdiction may not be removed if any of the defendants is a citizen of the state in which the action is brought. This is known as the \"forum defendant rule\" or \"in-state defendant rule.\" For diversity jurisdiction purposes, a corporation is deemed to be a citizen of every state where it is incorporated and of the state where it has its principal place of business (POB). Here, the retailer is incorporated in State C and has its POB in State B, making it a citizen of both State C and State B for diversity purposes. The action was brought in a state court in State B. Since the retailer is a citizen of State B (the forum state), the forum defendant rule prohibits removal based on diversity jurisdiction, even though diversity otherwise exists between the parties (State A vs. State B/C) and the amount in controversy ($100,000) is met. Option A is incorrect; the notice of removal was filed 20 days after service, which is within the usual 30-day limit under 28 U.S.C. § 1446(b). Option C is incorrect; while diversity exists, the forum defendant rule prevents removal. Option D is correct that the retailer is a citizen of both State B and State C, but this fact, combined with being sued in State B, is *why* removal is improper under the forum defendant rule.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "No, because the notice of removal was not timely filed.",
+                "B": "No, because the retailer is a citizen of State B.",
+                "C": "Yes, because the parties are citizens of different states and more than $75,000 is in controversy.",
+                "D": "Yes, because the retailer is a citizen of both State B and State C."
+            },
+            "user_attempts": []
         },
-        "choices": {
-          "A": "The one-year residence requirement is valid because it does not affect any fundamental right or suspect class.",
-          "B": "State durational residence requirements that are established for publicly funded services are constitutional because they relate to government operations reserved exclusively to the states by the Tenth Amendment.",
-          "C": "Because publicly funded education is a fundamental constitutional right, a state may not deny it to any class of persons who reside in that state.",
-          "D": "State durational residence requirements established for this kind of publicly funded service solely for the purpose of reducing state expenditures violate the privileges or immunities clause of the Fourteenth Amendment."
+        {
+            "question_id": "9e0f1a2b-3c4d-5e6f-7a8b-9c0d1e2f3a4b",
+            "group_id": null,
+            "question_text": "A man owned a house where he lived with his family. The man was convicted of selling large quantities of an illegal drug from his house. Acting under a state law authorizing the destruction of buildings that are used for illegal activity, the city destroyed the man's house.\nThe man's family then rented an apartment and demanded that the city pay the rent for that temporary residence. The family relied on a state law providing that any person who was dispossessed of his or her place of residence because of the actions of city officials was entitled to replacement housing at the city's expense until permanent substitute housing could be found. When the city refused to pay the rent for the apartment, the man's family sued the city in a state trial court claiming a right to such payment under both the state law and the due process clause of the Fourteenth Amendment to the United States Constitution.\nThe highest state court ruled for the family. Although the court decided that the family had no right to payment under the state law, it held that the Fourteenth Amendment entitled the family to payment of the rent for the temporary apartment. In its opinion, the highest state court indicated that in several of its decisions it had found cities liable for compensation in similar situations on the basis of the due process clause of the state constitution. But the highest state court declined to base its holding on the state constitution because that issue had not been properly raised in the case.\nThe city then filed a petition for a writ of certiorari in the United States Supreme Court.\nDoes the Court have jurisdiction to review the merits of this case?",
+            "category": "Constitutional Law",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 6
+            },
+            "answer": {
+                "correct_choice": "A",
+                "explanation": "The Supreme Court can review a state court decision only if it relies on federal law. If the state court decision is based on adequate and independent state law grounds, the Supreme Court lacks jurisdiction, even if federal issues were also considered, because the state law ground is sufficient to support the judgment and reviewing the federal issue would be an advisory opinion. Here, the state court explicitly stated that it based its decision *solely* on the Due Process Clause of the Fourteenth Amendment to the U.S. Constitution. While it noted that the state constitution *could* have provided a basis, it expressly declined to rule on that ground because it hadn't been properly raised. Since the state court's judgment rests *wholly* on federal law, there is no adequate and independent state ground precluding Supreme Court review. Option B is incorrect because the state court clearly separated the state and federal grounds and relied exclusively on federal law. Option C is incorrect; the case is not moot, as the family's right to receive payment is still a live controversy. Option D is incorrect; while independent state law grounds *could* have been used, the state court *did not* use them as the basis for its decision; it expressly relied on the federal Due Process Clause.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "Yes, because the highest state court based its decision wholly on federal law grounds.",
+                "B": "Yes, because the federal and state law issues in this case are so intertwined that a resolution of the federal law issues is necessary to facilitate a proper determination of the state law issues.",
+                "C": "No, because the decision of the highest state court renders the case moot.",
+                "D": "No, because independent state law grounds could have been used to justify the result in this case."
+            },
+            "user_attempts": []
         },
-        "user_attempts": []
-      },
-      {
-        "question_id": "5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b",
-        "group_id": null,
-        "question_text": "A man has four German shepherd dogs that he has trained for guard duty and that he holds for breeding purposes. The man has \"Beware of Dogs\" signs clearly posted around a fenced-in yard where he keeps the dogs. The man's next-door neighbor frequently walks past the man's house and knows about the dogs' ferocity. One summer day, the neighbor entered the man's fenced-in yard to retrieve a snow shovel that the man had borrowed during the past winter. The neighbor was attacked by one of the dogs and was severely injured.\nIn a suit against the man, is the neighbor likely to prevail?",
-        "category": "Torts",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 4 },
-        "answer": {
-          "correct_choice": "A",
-          "explanation": "Many jurisdictions impose strict liability on the owner of an animal for injuries caused by the animal if the owner knows of the animal's dangerous propensities (the \"one bite rule\" or similar). German shepherds trained for guard duty are often presumed to have dangerous propensities known to the owner, potentially triggering strict liability. However, strict liability is often subject to defenses, including assumption of risk. If the injured party knew of the animal's danger and voluntarily encountered it, they may be barred from recovery. Here, the neighbor knew the dogs were ferocious (dangerous), saw the \"Beware of Dogs\" signs, and voluntarily entered the fenced yard. The neighbor's knowledge and voluntary decision to enter the known danger are likely to act as a complete defense, whether the claim is based on strict liability or negligence. Option B states the neighbor was trespassing, which is true, but the neighbor's *knowledge* of the specific danger posed by the dogs is a stronger and more direct defense to liability for the dog bite itself than merely being a trespasser (though trespasser status also limits the duty owed). Option C is incorrect; the neighbor was not an invitee; entering for a personal reason (retrieving a borrowed item) without the owner's specific invitation for that purpose makes the neighbor, at best, a licensee or more likely a trespasser. Option D is incorrect; owning and training dogs is not typically considered an abnormally dangerous activity giving rise to strict liability for *all* resulting harm, but rather strict liability specifically for harm caused by known dangerous propensities, which is subject to defenses.",
-          "ai_generated": true
+        {
+            "question_id": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+            "group_id": null,
+            "question_text": "A sporting goods shop contracted with a publisher to buy, for sale in its store, 1,200 posters featuring a professional golfer. During production, the image of the golfer was inadvertently reversed and the right-handed golfer appeared to be left-handed. When the posters were delivered on the date provided in the contract, the sporting goods shop noticed the discrepancy, which had no provable significant impact on the effectiveness of the poster. In the opinion of the shop management, however, the posters did not look as good as they had in the catalog from which the shop had ordered them.\nIs the sporting goods shop legally entitled to reject the posters?",
+            "category": "Contracts and Sales",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 7
+            },
+            "answer": {
+                "correct_choice": "C",
+                "explanation": "Under the Uniform Commercial Code (UCC), which governs the sale of goods, a buyer has a \"perfect tender\" right to reject goods if they fail in any respect to conform to the contract, unless the contract is an installment contract or other circumstances limit this right (neither applies here). The posters contracted for featured a professional golfer. The delivered posters featured a golfer with a reversed image, making a right-handed golfer appear left-handed. This means the goods did not conform to the contract description. The buyer's motivation for rejection or the lack of a \"significant impact\" on effectiveness is generally irrelevant under the perfect tender rule (UCC § 2-601). The buyer is entitled to reject nonconforming goods. Option A is incorrect because the perfect tender rule generally does not require the nonconformity to be material. Option B is incorrect; while a seller might have a right to cure the nonconformity, the buyer is still initially entitled to reject the nonconforming goods, especially if the time for performance has expired. Option D is incorrect; the facts suggest the posters were for resale, fitting the implied warranty of merchantability (fit for ordinary purpose), but there is no indication they were for a particular purpose relied upon by the buyer (fitness for a particular purpose), and regardless, the nonconformity itself provides grounds for rejection under the perfect tender rule, independent of warranty issues.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "No, because the nonconformity does not materially alter the value of the posters to the sporting goods shop.",
+                "B": "No, because the publisher must be given an opportunity to cure the nonconformity before the sporting goods shop can reject the posters.",
+                "C": "Yes, because the posters do not conform to the contract.",
+                "D": "Yes, because the publisher has breached an implied warranty of fitness for a particular purpose."
+            },
+            "user_attempts": []
         },
-        "choices": {
-          "A": "No, because the neighbor knew that the man had dangerous dogs in the yard.",
-          "B": "No, because the neighbor was trespassing when he entered the man's property.",
-          "C": "Yes, because the neighbor was an invitee for the purpose of retrieving the shovel.",
-          "D": "Yes, because the man was engaged in an abnormally dangerous activity."
+        {
+            "question_id": "3a4b5c6d-7e8f-9a0b-1c2d-3e4f5a6b7c8d",
+            "group_id": null,
+            "question_text": "A woman borrowed $800,000 from a bank and gave the bank a note for that amount secured by a mortgage on her farm. Several years later, at a time when the woman still owed the bank $750,000 on the mortgage loan, she sold the farm to a man for $900,000. The man paid the woman $150,000 in cash and specifically assumed the mortgage note. The bank received notice of this transaction and elected not to exercise the optional due-on-sale clause in the mortgage.\nWithout informing the man, the bank later released the woman from any further personal liability on the note.\nAfter he had owned the farm for a number of years, the man defaulted on the loan. The bank properly accelerated the loan, and the farm was eventually sold at a foreclosure sale for $500,000. Because there was still $600,000 owing on the note, the bank sued the man for the $100,000 deficiency.\nIs the man liable to the bank for the deficiency?",
+            "category": "Real Property",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 8
+            },
+            "answer": {
+                "correct_choice": "D",
+                "explanation": "When a grantee (Man) assumes a mortgage, they become primarily liable to the lender (Bank) for the mortgage debt. The original mortgagor (Woman) remains secondarily liable as a surety for the debt. The bank, as a third-party beneficiary of the assumption agreement between the Woman and the Man, can sue the Man directly for the debt. The bank's release of the Woman from her secondary liability does not discharge the Man, who is the principal debtor after assuming the mortgage. The Man's obligation to the bank arises from his direct assumption of the debt. Therefore, the Man remains personally liable for the deficiency after the foreclosure sale. Option A is incorrect; after assuming the mortgage, the Man became primarily liable for the debt, and the Woman became a surety. Option B is incorrect; releasing a surety (the Woman) does not release the principal debtor (the Man) from their primary obligation, although releasing the principal debtor *would* release the surety. Option C is incorrect; \"clogging the equity of redemption\" is a mortgage law doctrine that prohibits agreements made at the time the mortgage is created that prevent the mortgagor from redeeming the property upon paying the debt; it is irrelevant to this scenario involving assumption and release.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "No, because the woman would have still been primarily liable for payment, but the bank had released her from personal liability.",
+                "B": "No, because the bank’s release of the woman from personal liability also released the man.",
+                "C": "Yes, because the bank’s release of the woman constituted a clogging of the equity of redemption.",
+                "D": "Yes, because the man’s personal liability on the note was not affected by the bank’s release of the woman."
+            },
+            "user_attempts": []
         },
-        "user_attempts": []
-      },
-      {
-        "question_id": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
-        "group_id": null,
-        "question_text": "A woman from State A filed an action against a retailer in a state court in State B. The complaint alleged that the retailer had not delivered $100,000 worth of goods for which the woman had paid.\nTwenty days after being served, the retailer, which is incorporated in State C and has its principal place of business in State B, filed a notice of removal in a federal district court in State B.\nWas the action properly removed?",
-        "category": "Civil Procedure",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 5 },
-        "answer": {
-          "correct_choice": "B",
-          "explanation": "Under 28 U.S.C. § 1441(b)(2), a civil action otherwise removable solely on the basis of diversity jurisdiction may not be removed if any of the defendants is a citizen of the state in which the action is brought. This is known as the \"forum defendant rule\" or \"in-state defendant rule.\" For diversity jurisdiction purposes, a corporation is deemed to be a citizen of every state where it is incorporated and of the state where it has its principal place of business (POB). Here, the retailer is incorporated in State C and has its POB in State B, making it a citizen of both State C and State B for diversity purposes. The action was brought in a state court in State B. Since the retailer is a citizen of State B (the forum state), the forum defendant rule prohibits removal based on diversity jurisdiction, even though diversity otherwise exists between the parties (State A vs. State B/C) and the amount in controversy ($100,000) is met. Option A is incorrect; the notice of removal was filed 20 days after service, which is within the usual 30-day limit under 28 U.S.C. § 1446(b). Option C is incorrect; while diversity exists, the forum defendant rule prevents removal. Option D is correct that the retailer is a citizen of both State B and State C, but this fact, combined with being sued in State B, is *why* removal is improper under the forum defendant rule.",
-          "ai_generated": true
+        {
+            "question_id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
+            "group_id": null,
+            "question_text": "A young man suggested to his friend that they steal a large-screen TV from a neighbor's house. The friend was angry with the young man and decided to use the opportunity to get even with him by having him arrested. The friend said he would help, and that night, he drove the young man to the neighbor's house. The young man broke in while the friend remained outside. The friend called the police on his cell phone and then drove away. Police officers arrived at the scene just as the young man was carrying the TV out the back door.\nThe jurisdiction defines crimes as at common law.\nOf what crime, if any, can the friend properly be convicted?",
+            "category": "Criminal Law and Procedure",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 9
+            },
+            "answer": {
+                "correct_choice": "A",
+                "explanation": "Under common law, a conspiracy requires an agreement between two or more persons to commit an unlawful act with the specific intent to commit the unlawful act. While the friend initially agreed, his immediate actions (calling the police) demonstrate that he did not have the specific intent to commit the burglary or larceny or to further the conspiracy. His intent was to thwart the crime and cause the young man's arrest. Although he performed an act (driving) that facilitated the young man's arrival, this act was not done with the requisite criminal intent to assist or agree to the crime. Furthermore, by calling the police and leaving, the friend arguably withdrew from any potential conspiracy by communicating his withdrawal and taking affirmative steps to prevent the crime's completion. Accomplice liability requires assisting the principal with the intent that the crime be committed. The friend actively worked against the commission of the crime. Therefore, the friend is likely not guilty of conspiracy, burglary (as an accomplice), or larceny (as an accomplice).",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "No crime.",
+                "B": "Conspiracy.",
+                "C": "Burglary.",
+                "D": "Conspiracy and larceny."
+            },
+            "user_attempts": []
         },
-        "choices": {
-          "A": "No, because the notice of removal was not timely filed.",
-          "B": "No, because the retailer is a citizen of State B.",
-          "C": "Yes, because the parties are citizens of different states and more than $75,000 is in controversy.",
-          "D": "Yes, because the retailer is a citizen of both State B and State C."
+        {
+            "question_id": "7e8f9a0b-1c2d-3e4f-5a6b-7c8d9e0f1a2b",
+            "group_id": null,
+            "question_text": "A 50-year-old nurse who had been fired from his job at a hospital told his attorney, \"I was fired because of my age, and I want to sue the hospital.\"\nBased on this information, the attorney filed an age discrimination complaint against the hospital in federal court. As it turned out, the hospital had hired a 52-year-old man as the nurse's replacement, a fact that rendered an age discrimination claim unavailable. The hospital responded to the complaint by filing a motion for sanctions against the nurse's attorney.\nIs the court likely to grant the hospital's motion?",
+            "category": "Civil Procedure",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 10
+            },
+            "answer": {
+                "correct_choice": "B",
+                "explanation": "Federal Rule of Civil Procedure 11 requires attorneys to certify that their pleadings are based on a reasonable inquiry into the facts and law. Filing a complaint for age discrimination when the replacement employee was older would typically violate this rule as the claim would not be warranted by existing law or a nonfrivolous argument for changing it. However, Rule 11 provides a \"safe harbor\" provision: a motion for sanctions must be served on the opposing party at least 21 days before it is filed with the court. This allows the offending party to withdraw or correct the challenged document and avoid sanctions. The facts state that the hospital *responded to the complaint by filing a motion for sanctions*. This phrasing strongly implies the motion was filed immediately with the court, without providing the required 21-day safe harbor period. Therefore, the motion for sanctions was likely procedurally defective, and the court is likely to deny it on that basis. Option A is incorrect; sanctions under Rule 11 can be imposed on the attorney. Options C and D describe substantive reasons why sanctions *could* potentially be warranted (lack of reasonable inquiry into facts, legal contentions unwarranted by law), but they don't address the procedural requirement of the safe harbor provision, which is the most likely basis for denying the motion as described.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "No, because sanctions are not proper against the attorney of a represented party.",
+                "B": "No, because the hospital failed to give the attorney the chance to withdraw the complaint in advance of filing the motion with the court.",
+                "C": "Yes, because the nurse's attorney failed to conduct a reasonable pre-filing inquiry.",
+                "D": "Yes, because the nurse's complaint contained legal contentions that were not warranted by existing law based on the facts in this case."
+            },
+            "user_attempts": []
         },
-        "user_attempts": []
-      },
-      {
-        "question_id": "9e0f1a2b-3c4d-5e6f-7a8b-9c0d1e2f3a4b",
-        "group_id": null,
-        "question_text": "A man owned a house where he lived with his family. The man was convicted of selling large quantities of an illegal drug from his house. Acting under a state law authorizing the destruction of buildings that are used for illegal activity, the city destroyed the man's house.\nThe man's family then rented an apartment and demanded that the city pay the rent for that temporary residence. The family relied on a state law providing that any person who was dispossessed of his or her place of residence because of the actions of city officials was entitled to replacement housing at the city's expense until permanent substitute housing could be found. When the city refused to pay the rent for the apartment, the man's family sued the city in a state trial court claiming a right to such payment under both the state law and the due process clause of the Fourteenth Amendment to the United States Constitution.\nThe highest state court ruled for the family. Although the court decided that the family had no right to payment under the state law, it held that the Fourteenth Amendment entitled the family to payment of the rent for the temporary apartment. In its opinion, the highest state court indicated that in several of its decisions it had found cities liable for compensation in similar situations on the basis of the due process clause of the state constitution. But the highest state court declined to base its holding on the state constitution because that issue had not been properly raised in the case.\nThe city then filed a petition for a writ of certiorari in the United States Supreme Court.\nDoes the Court have jurisdiction to review the merits of this case?",
-        "category": "Constitutional Law",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 6 },
-        "answer": {
-          "correct_choice": "A",
-          "explanation": "The Supreme Court can review a state court decision only if it relies on federal law. If the state court decision is based on adequate and independent state law grounds, the Supreme Court lacks jurisdiction, even if federal issues were also considered, because the state law ground is sufficient to support the judgment and reviewing the federal issue would be an advisory opinion. Here, the state court explicitly stated that it based its decision *solely* on the Due Process Clause of the Fourteenth Amendment to the U.S. Constitution. While it noted that the state constitution *could* have provided a basis, it expressly declined to rule on that ground because it hadn't been properly raised. Since the state court's judgment rests *wholly* on federal law, there is no adequate and independent state ground precluding Supreme Court review. Option B is incorrect because the state court clearly separated the state and federal grounds and relied exclusively on federal law. Option C is incorrect; the case is not moot, as the family's right to receive payment is still a live controversy. Option D is incorrect; while independent state law grounds *could* have been used, the state court *did not* use them as the basis for its decision; it expressly relied on the federal Due Process Clause.",
-          "ai_generated": true
+        {
+            "question_id": "f8f933f9-a0f1-4422-b678-f02b937a8fab",
+            "group_id": null,
+            "question_text": "A daughter was appointed guardian of her elderly father following an adjudication of his mental incompetence. The father had experienced periods of dementia during which he did not fully understand what he was doing. The father later contracted to purchase an automobile at a fair price from a seller who was unaware of the guardianship. At the time of the purchase, the father was lucid and fully understood the nature and purpose of the transaction.\nWhat is the legal status of the transaction?",
+            "category": "Contracts and Sales",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 11
+            },
+            "answer": {
+                "correct_choice": "C",
+                "explanation": "Once a court has formally adjudicated a person as mentally incompetent and appointed a guardian or conservator, that person loses the legal capacity to contract. Any contracts entered into by the adjudicated person *after* the appointment of the guardian are generally considered *void*, not merely voidable. This is true regardless of whether the person was having a lucid interval at the time of contracting or whether the other party was aware of the adjudication or guardianship. The legal disability is imposed by the court's order. Option A is incorrect because the other party's reasonable belief about the father's capacity is not determinative once a formal adjudication of incompetence has occurred. Option B is incorrect for the same reason; the fairness of the terms and the seller's lack of knowledge are irrelevant after a formal adjudication and appointment of a guardian. Option D is incorrect; a contract entered into after a formal adjudication of incompetence is void, not merely voidable at the option of the incompetent person (or their guardian).",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "The contract is enforceable, because a reasonable person in the situation of the seller would have thought that the father had the capacity to make the contract.",
+                "B": "The contract is enforceable, because it was made on fair terms and the seller had no knowledge of the father's guardianship.",
+                "C": "The contract is void, because the father was under guardianship at the time it was made.",
+                "D": "The contract is voidable at the option of the father."
+            },
+            "user_attempts": []
         },
-        "choices": {
-          "A": "Yes, because the highest state court based its decision wholly on federal law grounds.",
-          "B": "Yes, because the federal and state law issues in this case are so intertwined that a resolution of the federal law issues is necessary to facilitate a proper determination of the state law issues.",
-          "C": "No, because the decision of the highest state court renders the case moot.",
-          "D": "No, because independent state law grounds could have been used to justify the result in this case."
+        {
+            "question_id": "4014e1df-dc5b-49d2-9cfb-98e7a0863887",
+            "group_id": null,
+            "question_text": "Two sisters own a single tract of land as tenants in common, each holding a one-half interest. The younger sister entered into a three-year written lease with a tenant; the lease described by metes and bounds a specified portion of the land, which consisted of about 40% of the total tract. The tenant went into sole possession of the leased portion of the land.\nThe older sister has sued both the younger sister and the tenant to establish the older sister's right to possession of the leased portion of the land.\nWho is likely to prevail?",
+            "category": "Real Property",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 12
+            },
+            "answer": {
+                "correct_choice": "A",
+                "explanation": "In a tenancy in common, each co-tenant has an undivided right to possess and enjoy the *entire* property, not just a specific portion. One co-tenant cannot unilaterally partition the property or exclude another co-tenant from any part of it. When one co-tenant leases a specific portion of the jointly held property to a third party, that lease is valid between the leasing co-tenant and the tenant as to the leasing co-tenant's interest, but it does not bind the other co-tenants or affect their right to possess the whole. The non-leasing co-tenant (the older sister) retains her right to possess the entire tract, including the portion leased to the tenant. She cannot be excluded from that portion by either the younger sister or the tenant. Option B is incorrect; a co-tenant *can* lease their undivided interest, but the lease is subject to the rights of the other co-tenants to possess the whole. Option C is incorrect; the older sister cannot be excluded from the leased portion; she has a right to possess it concurrently with the tenant. Option D is incorrect; the duration or type of interest leased does not override the older sister's right to possess the entire property.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "The older sister, because the younger sister cannot unilaterally partition the land without the older sister's consent.",
+                "B": "The older sister, because the younger sister may not lease her undivided interest in the land without the older sister's consent.",
+                "C": "The younger sister and the tenant, because the older sister has been excluded only from the specified portion of the land subject to the lease, which makes up less than one-half of the land's total area.",
+                "D": "The younger sister and the tenant, because the younger sister's lease to the tenant was necessarily for less than a fee simple interest."
+            },
+            "user_attempts": []
         },
-        "user_attempts": []
-      },
-      {
-        "question_id": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
-        "group_id": null,
-        "question_text": "A sporting goods shop contracted with a publisher to buy, for sale in its store, 1,200 posters featuring a professional golfer. During production, the image of the golfer was inadvertently reversed and the right-handed golfer appeared to be left-handed. When the posters were delivered on the date provided in the contract, the sporting goods shop noticed the discrepancy, which had no provable significant impact on the effectiveness of the poster. In the opinion of the shop management, however, the posters did not look as good as they had in the catalog from which the shop had ordered them.\nIs the sporting goods shop legally entitled to reject the posters?",
-        "category": "Contracts and Sales",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 7 },
-        "answer": {
-          "correct_choice": "C",
-          "explanation": "Under the Uniform Commercial Code (UCC), which governs the sale of goods, a buyer has a \"perfect tender\" right to reject goods if they fail in any respect to conform to the contract, unless the contract is an installment contract or other circumstances limit this right (neither applies here). The posters contracted for featured a professional golfer. The delivered posters featured a golfer with a reversed image, making a right-handed golfer appear left-handed. This means the goods did not conform to the contract description. The buyer's motivation for rejection or the lack of a \"significant impact\" on effectiveness is generally irrelevant under the perfect tender rule (UCC § 2-601). The buyer is entitled to reject nonconforming goods. Option A is incorrect because the perfect tender rule generally does not require the nonconformity to be material. Option B is incorrect; while a seller might have a right to cure the nonconformity, the buyer is still initially entitled to reject the nonconforming goods, especially if the time for performance has expired. Option D is incorrect; the facts suggest the posters were for resale, fitting the implied warranty of merchantability (fit for ordinary purpose), but there is no indication they were for a particular purpose relied upon by the buyer (fitness for a particular purpose), and regardless, the nonconformity itself provides grounds for rejection under the perfect tender rule, independent of warranty issues.",
-          "ai_generated": true
+        {
+            "question_id": "9a0b1c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+            "group_id": null,
+            "question_text": "A state law prohibits any barbershop licensed by the state from displaying posters in support of any current candidate for public office or displaying or distributing any campaign literature in support of such a candidate. No other kinds of posters or literature are subject to this prohibition, nor are any other types of commercial establishments in the state subject to similar prohibitions.\nIs this law constitutional?",
+            "category": "Constitutional Law",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 13
+            },
+            "answer": {
+                "correct_choice": "B",
+                "explanation": "This law is a restriction on speech in a commercial establishment, specifically targeting political speech related to candidates. Restrictions on speech based on its content (content-based restrictions) are subject to strict scrutiny under the First Amendment: they must be narrowly tailored to serve a compelling government interest. A law that bans only political candidate posters is content-based. The facts provide *no evidence* that such a restriction is necessary to serve a compelling state interest. Preventing political advocacy in a specific type of business based on its content is highly unlikely to survive strict scrutiny. Option A is true that it treats barbershops differently, which could raise Equal Protection concerns, but the primary constitutional issue is the content-based restriction on political speech itself, which is addressed under the First Amendment. Option C is incorrect; the availability of alternative means of communication does not save a content-based restriction that fails strict scrutiny. Option D is incorrect; the state's ability to regulate licensed businesses does not grant it unlimited power to restrict constitutional rights, especially First Amendment speech rights, without meeting the appropriate level of scrutiny.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "No, because it treats barbershops differently from other commercial establishments.",
+                "B": "No, because it imposes a restriction on the content or subject matter of speech in the absence of any evidence that such a restriction is necessary to serve a compelling state interest.",
+                "C": "Yes, because it leaves political candidates free to communicate their campaign messages to voters by other means.",
+                "D": "Yes, because the operation of a licensed barbershop is a privilege and therefore is subject to any reasonable restriction imposed by the state."
+            },
+            "user_attempts": []
         },
-        "choices": {
-          "A": "No, because the nonconformity does not materially alter the value of the posters to the sporting goods shop.",
-          "B": "No, because the publisher must be given an opportunity to cure the nonconformity before the sporting goods shop can reject the posters.",
-          "C": "Yes, because the posters do not conform to the contract.",
-          "D": "Yes, because the publisher has breached an implied warranty of fitness for a particular purpose."
+        {
+            "question_id": "123ada1d-53ea-46e3-b205-6652366ac444",
+            "group_id": null,
+            "question_text": "A defendant was prosecuted for mail fraud. At trial, the defendant moved to have all witnesses excluded from the courtroom, and the court granted the motion. The government named the investigating FBI agent as its designated representative. Upon learning that the agent would be giving testimony during the trial, the defendant moved that the agent also be excluded from the courtroom.\nShould the defendant's motion be granted?",
+            "category": "Evidence",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 14
+            },
+            "answer": {
+                "correct_choice": "B",
+                "explanation": "Federal Rule of Evidence 615 mandates the exclusion of witnesses from the courtroom (sequestration) at a party's request so they cannot hear other testimony. However, Rule 615 provides exceptions. Rule 615(b) exempts \"an officer or employee of a party who is designated as the party's representative by its attorney.\" In a criminal case, the government is a party, and the investigating agent is typically designated as the government's representative. This designated representative is allowed to remain in the courtroom throughout the trial, even if they are also going to testify. Their presence helps the government's attorney manage the case, respond to testimony, and is often essential to the prosecution. Option A is incorrect; under Rule 615(b), the designated representative is exempt by right; a showing of essential presence is required under Rule 615(c) for witnesses *not* falling under the automatic exemptions. Option C is a common concern addressed by sequestration, but the rule makes an explicit exception for designated representatives. Option D is too broad; the defendant has the right to sequester witnesses under Rule 615, but the rule provides specific exemptions.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "No, provided that the government can show that the agent's presence is essential to the presentation of its case.",
+                "B": "No, because the government has a right to have its designated representative remain in the courtroom throughout the trial.",
+                "C": "Yes, because the agent's testimony might be influenced by the testimony of other witnesses.",
+                "D": "Yes, because the defendant has a right to exclude all persons who may be called as government witnesses."
+            },
+            "user_attempts": []
         },
-        "user_attempts": []
-      },
-      {
-        "question_id": "3a4b5c6d-7e8f-9a0b-1c2d-3e4f5a6b7c8d",
-        "group_id": null,
-        "question_text": "A woman borrowed $800,000 from a bank and gave the bank a note for that amount secured by a mortgage on her farm. Several years later, at a time when the woman still owed the bank $750,000 on the mortgage loan, she sold the farm to a man for $900,000. The man paid the woman $150,000 in cash and specifically assumed the mortgage note. The bank received notice of this transaction and elected not to exercise the optional due-on-sale clause in the mortgage.\nWithout informing the man, the bank later released the woman from any further personal liability on the note.\nAfter he had owned the farm for a number of years, the man defaulted on the loan. The bank properly accelerated the loan, and the farm was eventually sold at a foreclosure sale for $500,000. Because there was still $600,000 owing on the note, the bank sued the man for the $100,000 deficiency.\nIs the man liable to the bank for the deficiency?",
-        "category": "Real Property",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 8 },
-        "answer": {
-          "correct_choice": "D",
-          "explanation": "When a grantee (Man) assumes a mortgage, they become primarily liable to the lender (Bank) for the mortgage debt. The original mortgagor (Woman) remains secondarily liable as a surety for the debt. The bank, as a third-party beneficiary of the assumption agreement between the Woman and the Man, can sue the Man directly for the debt. The bank's release of the Woman from her secondary liability does not discharge the Man, who is the principal debtor after assuming the mortgage. The Man's obligation to the bank arises from his direct assumption of the debt. Therefore, the Man remains personally liable for the deficiency after the foreclosure sale. Option A is incorrect; after assuming the mortgage, the Man became primarily liable for the debt, and the Woman became a surety. Option B is incorrect; releasing a surety (the Woman) does not release the principal debtor (the Man) from their primary obligation, although releasing the principal debtor *would* release the surety. Option C is incorrect; \"clogging the equity of redemption\" is a mortgage law doctrine that prohibits agreements made at the time the mortgage is created that prevent the mortgagor from redeeming the property upon paying the debt; it is irrelevant to this scenario involving assumption and release.",
-          "ai_generated": true
+        {
+            "question_id": "4ddd2646-bf0e-4524-b6ad-48f56e813ef0",
+            "group_id": null,
+            "question_text": "A man entered a tavern in an obviously intoxicated condition, was refused service, and was ordered to leave and escorted out. Just after leaving the tavern, the man staggered across the road toward a liquor store. As he was crossing the road, the man was struck by a car and severely injured.\nThe man sued the tavern for his personal injuries. At trial, the evidence established the facts as set out above.\nAt the close of the evidence, both parties moved for judgment as a matter of law.\nHow should the court rule on these motions?",
+            "category": "Torts",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 15
+            },
+            "answer": {
+                "correct_choice": "C",
+                "explanation": "To establish negligence, the plaintiff must prove duty, breach, causation (actual and proximate), and damages. While a tavern may owe a duty to an intoxicated patron, the scope of that duty can be limited. Refusing service and escorting an intoxicated patron off the premises does not necessarily constitute a breach of duty, especially if the patron is directed to a safe location (like the stoop) and the subsequent injury occurs as a result of the patron's own actions (staggering across a road) sometime later and distance away. For the tavern to be liable, its actions must have been a proximate cause of the injury. It is questionable whether ejecting the man onto the stoop was a foreseeable and direct cause of him being hit by a car while attempting to cross the road to go to another liquor store. Granting judgment as a matter of law for the tavern means the court found that, even taking the evidence in the light most favorable to the plaintiff, no reasonable jury could find that the tavern breached a duty owed to the man or that the tavern's actions were the proximate cause of his injury. Given the facts, the causal chain between the ejection and the injury is tenuous. Granting the plaintiff's motion (D) would mean the tavern's liability is established as a matter of law, which is highly unlikely in this situation. Denying both (A, B) would send the case to the jury, which might be appropriate if there's a stronger argument for duty/causation, but here, the court is likely to find the evidence insufficient as a matter of law.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "Deny both motions and submit the case to the jury, because reasonable jurors could conclude that the accident was foreseeable.",
+                "B": "Deny both motions and submit the case to the jury, because a tavern is a place of public accommodation.",
+                "C": "Grant the tavern's motion, because there is no evidence that the tavern breached a duty to the man.",
+                "D": "Grant the man's motion, because it is undisputed that by being ejected from the tavern, the man was put at risk."
+            },
+            "user_attempts": []
         },
-        "user_attempts": []
-      },
-      {
-        "question_id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
-        "group_id": null,
-        "question_text": "A young man suggested to his friend that they steal a large-screen TV from a neighbor's house. The friend was angry with the young man and decided to use the opportunity to get even with him by having him arrested. The friend said he would help, and that night, he drove the young man to the neighbor's house. The young man broke in while the friend remained outside. The friend called the police on his cell phone and then drove away. Police officers arrived at the scene just as the young man was carrying the TV out the back door.\nThe jurisdiction defines crimes as at common law.\nOf what crime, if any, can the friend properly be convicted?",
-        "category": "Criminal Law and Procedure",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 9 },
-        "answer": {
-          "correct_choice": "A",
-          "explanation": "Under common law, a conspiracy requires an agreement between two or more persons to commit an unlawful act with the specific intent to commit the unlawful act. While the friend initially agreed, his immediate actions (calling the police) demonstrate that he did not have the specific intent to commit the burglary or larceny or to further the conspiracy. His intent was to thwart the crime and cause the young man's arrest. Although he performed an act (driving) that facilitated the young man's arrival, this act was not done with the requisite criminal intent to assist or agree to the crime. Furthermore, by calling the police and leaving, the friend arguably withdrew from any potential conspiracy by communicating his withdrawal and taking affirmative steps to prevent the crime's completion. Accomplice liability requires assisting the principal with the intent that the crime be committed. The friend actively worked against the commission of the crime. Therefore, the friend is likely not guilty of conspiracy, burglary (as an accomplice), or larceny (as an accomplice).",
-          "ai_generated": true
+        {
+            "question_id": "7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d",
+            "group_id": null,
+            "question_text": "A protester brought an action in federal court against a police officer, alleging that the officer's use of force in arresting the protester violated the protester's federal civil rights.\nDuring the jury trial, eyewitnesses gave conflicting testimony on the arrest. At the close of evidence, the protester moved for judgment as a matter of law, which the court denied.\nThe court instructed the jury that the protester's burden of proof was clear and convincing evidence, rather than the correct burden of preponderance of the evidence. The jury returned a verdict for the officer, and the court entered judgment accordingly.\nWhat is the protester's best option for challenging the judgment?",
+            "category": "Civil Procedure",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 16
+            },
+            "answer": {
+                "correct_choice": "A",
+                "explanation": "The correct standard of proof in a federal civil rights action alleging excessive force (a tort claim based on a constitutional violation) is typically the preponderance of the evidence. The court's instruction that the protester's burden was \"clear and convincing evidence\" imposed a significantly higher standard than required by law. This erroneous instruction prejudiced the protester by making it much harder for the jury to find in their favor. A new trial is the appropriate remedy for prejudicial error in jury instructions that affects a party's substantial rights (Federal Rule of Civil Procedure 59). Option B is incorrect; while a verdict against the clear weight of the evidence is a ground for a new trial, the erroneous instruction is a more direct and certain basis for challenging the judgment here. Options C and D suggest seeking judgment as a matter of law (JMOL), but JMOL challenges the sufficiency of the evidence to support the jury's verdict, not errors in the instructions given to the jury. The issue is not that there was insufficient evidence for the jury to find for the officer under the correct standard, but that the jury was misinformed about the plaintiff's burden.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "Seek a new trial, because the jury instruction affected the protester's substantial rights.",
+                "B": "Seek a new trial, because the verdict was against the clear weight of the evidence.",
+                "C": "Seek judgment as a matter of law, because the jury did not have legally sufficient evidence to find for the officer.",
+                "D": "Seek judgment as a matter of law, because the jury's findings were clearly erroneous."
+            },
+            "user_attempts": []
         },
-        "choices": {
-          "A": "No crime.",
-          "B": "Conspiracy.",
-          "C": "Burglary.",
-          "D": "Conspiracy and larceny."
+        {
+            "question_id": "1e2f3a4b-5c6d-7e8f-9a0b-1c2d3e4f5a6b",
+            "group_id": null,
+            "question_text": "An attempt was made to hijack a commercial airliner while it was in flight from San Francisco to New Orleans. Within minutes, however, the hijacker was seized, and the plane proceeded to its destination. Upon the plane's arrival, television stations broadcast pictures of the passengers as they disembarked. Among the passengers pictured on television was a businessman who was supposed to be in Chicago on company business. The disclosure that the businessman was in New Orleans and not in Chicago at the time resulted in the loss of his position with his company and great humiliation and embarrassment for him.\nIf the businessman asserts a claim against the television stations for broadcasting his picture as he disembarked, is he likely to prevail?",
+            "category": "Torts",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 17
+            },
+            "answer": {
+                "correct_choice": "D",
+                "explanation": "The tort of publicity given to private facts requires the publication of private information that is highly offensive to a reasonable person and is not of legitimate public concern (i.e., not newsworthy). The facts concern a hijacking incident, which is a matter of high public interest and clearly newsworthy. The arrival of the plane and the disembarking of passengers are integral parts of this newsworthy event. While the businessman's presence on the flight and its location may have been personally embarrassing or detrimental, his appearance as a passenger on a hijacked plane arriving at its destination is considered newsworthy. Therefore, the television stations are likely protected by the newsworthiness privilege, even though the publication caused harm. Option A is incorrect; the tort requires more than just revealing location; it must be private information whose publication is highly offensive and not newsworthy. Option B is incorrect; while the businessman suffered pecuniary loss, this does not make the publication tortious if it was privileged (e.g., newsworthy). Option C is incorrect; the tort of publicity given to private facts does not require physical harm, only emotional distress and potential reputational harm.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "Yes, because the businessman's location was revealed against his wishes.",
+                "B": "Yes, because publication of the television pictures caused the businessman pecuniary loss.",
+                "C": "No, because the humiliation and embarrassment did not result in physical harm to the businessman.",
+                "D": "No, because the scene shown on television was newsworthy."
+            },
+            "user_attempts": []
         },
-        "user_attempts": []
-      },
-      {
-        "question_id": "7e8f9a0b-1c2d-3e4f-5a6b-7c8d9e0f1a2b",
-        "group_id": null,
-        "question_text": "A 50-year-old nurse who had been fired from his job at a hospital told his attorney, \"I was fired because of my age, and I want to sue the hospital.\"\nBased on this information, the attorney filed an age discrimination complaint against the hospital in federal court. As it turned out, the hospital had hired a 52-year-old man as the nurse's replacement, a fact that rendered an age discrimination claim unavailable. The hospital responded to the complaint by filing a motion for sanctions against the nurse's attorney.\nIs the court likely to grant the hospital's motion?",
-        "category": "Civil Procedure",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 10 },
-        "answer": {
-          "correct_choice": "B",
-          "explanation": "Federal Rule of Civil Procedure 11 requires attorneys to certify that their pleadings are based on a reasonable inquiry into the facts and law. Filing a complaint for age discrimination when the replacement employee was older would typically violate this rule as the claim would not be warranted by existing law or a nonfrivolous argument for changing it. However, Rule 11 provides a \"safe harbor\" provision: a motion for sanctions must be served on the opposing party at least 21 days before it is filed with the court. This allows the offending party to withdraw or correct the challenged document and avoid sanctions. The facts state that the hospital *responded to the complaint by filing a motion for sanctions*. This phrasing strongly implies the motion was filed immediately with the court, without providing the required 21-day safe harbor period. Therefore, the motion for sanctions was likely procedurally defective, and the court is likely to deny it on that basis. Option A is incorrect; sanctions under Rule 11 can be imposed on the attorney. Options C and D describe substantive reasons why sanctions *could* potentially be warranted (lack of reasonable inquiry into facts, legal contentions unwarranted by law), but they don't address the procedural requirement of the safe harbor provision, which is the most likely basis for denying the motion as described.",
-          "ai_generated": true
+        {
+            "question_id": "3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f",
+            "group_id": null,
+            "question_text": "A company contracted with a builder to construct a new corporate headquarters for a fixed price of $100 million. At the time of the contract, structural steel was widely available and was included in the contract as a $6 million item. Before work began on the project, tornado damage shut down the production facility of the biggest structural steel supplier in the country, and the price of structural steel increased by 20% as a result. The builder informed the company of the steel price increase, and the parties then orally agreed to increase the project price to $101 million.\nThe builder proceeded with construction and delivered the project on time. The company paid the builder $100 million but refused to pay the additional $1 million.\nIf the builder sues the company for $1 million, is the builder likely to prevail?",
+            "category": "Contracts and Sales",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 18
+            },
+            "answer": {
+                "correct_choice": "D",
+                "explanation": "This is a construction contract, primarily governed by common law. Under common law, a contract modification requires new consideration. However, many jurisdictions follow the rule that a promise modifying a duty under a contract is binding if the modification is fair and equitable in view of circumstances not anticipated by the parties when the contract was made (Restatement (Second) of Contracts § 89). The sudden, significant increase in the price of structural steel due to an unexpected event like a tornado fits the description of unanticipated circumstances. Therefore, the oral agreement to increase the contract price by $1 million to account for this increase is likely enforceable under this modern rule, even without new consideration. Option A is incorrect; while the Statute of Frauds might apply to a contract for construction over a year, modifications might not require a writing, or performance might take it out of the statute. However, the primary issue here is consideration for the modification. Option B is incorrect; while there's arguably no *new* consideration under the pre-existing duty rule, the modification is likely enforceable under the unanticipated circumstances exception. Option C is incorrect; the builder was already obligated to complete the project for $100 million, so completing it doesn't constitute new consideration for the *additional* $1 million under the pre-existing duty rule. The builder's argument relies on the exception to the rule, not meeting the rule.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "No, because the modification was never reduced to a writing signed by the party to be charged.",
+                "B": "No, because there was no consideration for the modification of the contract.",
+                "C": "Yes, because the company's promise was supported by consideration.",
+                "D": "Yes, because the modification was fair and equitable in view of the unanticipated increase in the price of structural steel."
+            },
+            "user_attempts": []
         },
-        "choices": {
-          "A": "No, because sanctions are not proper against the attorney of a represented party.",
-          "B": "No, because the hospital failed to give the attorney the chance to withdraw the complaint in advance of filing the motion with the court.",
-          "C": "Yes, because the nurse's attorney failed to conduct a reasonable pre-filing inquiry.",
-          "D": "Yes, because the nurse's complaint contained legal contentions that were not warranted by existing law based on the facts in this case."
+        {
+            "question_id": "5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b",
+            "group_id": null,
+            "question_text": "At a defendant's trial for extortion, the prosecutor called a witness expecting her to testify that she had heard the defendant threaten a man with physical harm unless the man made payoffs to the defendant. The witness denied ever having heard the defendant make such threats, even though she had testified to that effect before the grand jury. The prosecutor now seeks to admit the witness's grand jury testimony.\nHow should the court rule with regard to the grand jury testimony?",
+            "category": "Evidence",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 19
+            },
+            "answer": {
+                "correct_choice": "B",
+                "explanation": "Under Federal Rule of Evidence 801(d)(1)(A), a declarant-witness's prior inconsistent statement is not hearsay if it was given under penalty of perjury at a trial, hearing, or other proceeding or in a deposition. Grand jury testimony is considered testimony given under penalty of perjury at an \"other proceeding.\" Since the witness's grand jury testimony that she heard threats is inconsistent with her trial testimony denying hearing threats, and the grand jury testimony meets the requirements of Rule 801(d)(1)(A), it is admissible for both impeachment purposes (to show the witness is not credible) and as substantive evidence (to prove that the defendant actually made the threats). Option A is incorrect; the statement was made by a non-party witness, not a party-opponent. Option C is incorrect; the former testimony exception (Rule 804(b)(1)) applies when the declarant is *unavailable* as a witness; here, the witness is testifying at trial. Option D is incorrect; because the statement meets the criteria of Rule 801(d)(1)(A), it is admissible for substantive use. The term \"testimonial statement\" is relevant to the Confrontation Clause, but since the witness is available for cross-examination at trial, admitting her prior testimonial grand jury statement for substantive purposes does not violate the Confrontation Clause.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "Admit the testimony, because it contains a statement by a party-opponent.",
+                "B": "Admit the testimony, both for impeachment and for substantive use, because the witness made the inconsistent statement under oath at a formal proceeding.",
+                "C": "Admit the testimony under the former testimony exception to the hearsay rule.",
+                "D": "Exclude the testimony for substantive use, because it is a testimonial statement."
+            },
+            "user_attempts": []
         },
-        "user_attempts": []
-      },
-      {
-        "question_id": "3e4f5a6b-7c8d-9e0f-1a2b-3c4d5e6f7a8b",
-        "group_id": null,
-        "question_text": "A daughter was appointed guardian of her elderly father following an adjudication of his mental incompetence. The father had experienced periods of dementia during which he did not fully understand what he was doing. The father later contracted to purchase an automobile at a fair price from a seller who was unaware of the guardianship. At the time of the purchase, the father was lucid and fully understood the nature and purpose of the transaction.\nWhat is the legal status of the transaction?",
-        "category": "Contracts and Sales",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 11 },
-        "answer": {
-          "correct_choice": "C",
-          "explanation": "Once a court has formally adjudicated a person as mentally incompetent and appointed a guardian or conservator, that person loses the legal capacity to contract. Any contracts entered into by the adjudicated person *after* the appointment of the guardian are generally considered *void*, not merely voidable. This is true regardless of whether the person was having a lucid interval at the time of contracting or whether the other party was aware of the adjudication or guardianship. The legal disability is imposed by the court's order. Option A is incorrect because the other party's reasonable belief about the father's capacity is not determinative once a formal adjudication of incompetence has occurred. Option B is incorrect for the same reason; the fairness of the terms and the seller's lack of knowledge are irrelevant after a formal adjudication and appointment of a guardian. Option D is incorrect; a contract entered into after a formal adjudication of incompetence is void, not merely voidable at the option of the incompetent person (or their guardian).",
-          "ai_generated": true
+        {
+            "question_id": "7a1b9c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+            "group_id": null,
+            "question_text": "A man arranged to have custom-made wooden shutters installed on the windows of his home. The contractor who installed the shutters did so by drilling screws and brackets into the exterior window frames and the shutters.\nThe man later agreed to sell the home to a buyer. The sales agreement did not mention the shutters, the buyer did not inquire about them, and the buyer did not conduct a walkthrough inspection of the home before the closing.\nThe man conveyed the home to the buyer by warranty deed. After the sale closed, the buyer noticed that the shutters and brackets had been removed from the home and that the window frames had been repaired and repainted.\nThe buyer demanded that the man return the shutters and pay the cost of reinstallation, claiming that the shutters had been conveyed to him with the sale of the home. When the man refused, the buyer sued.\nIs the buyer likely to prevail?",
+            "category": "Real Property",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 20
+            },
+            "answer": {
+                "correct_choice": "C",
+                "explanation": "An item of personal property becomes a fixture, and thus part of the real property conveyed with the land, if it is physically annexed to the real property, adapted to the use of the real property, and the annexor intended for it to become a permanent part of the real property. Courts consider factors such as the degree of annexation, the nature of the item, its adaptation to the realty, and the intent of the person who installed it. Custom-made wooden shutters attached to window frames with screws and brackets are highly likely to be considered fixtures because they are physically attached, specifically adapted to the house (custom-made for the windows), and installation with screws and brackets suggests an intent for permanent attachment, particularly since their removal caused damage requiring repair. As fixtures, they are considered part of the real property and pass to the buyer with the conveyance by deed, unless specifically excluded in the contract. Option A is incorrect; fixtures are considered part of the land and pass with the deed unless the contract specifies otherwise. Silence in the contract means they are included if they are fixtures. Option B is incorrect; the fact that removal required repairs supports, rather than refutes, the argument that they were fixtures. Option D is incorrect; while the removal of fixtures *could* potentially violate a covenant of title (like seisin), the primary issue is whether the shutters are classified as fixtures in the first place, in which case they were included in the conveyance, and their removal constituted taking something that now belonged to the buyer.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "No, because the sales agreement did not mention the shutters.",
+                "B": "No, because the window frames had been repaired and repainted after removal of the shutters.",
+                "C": "Yes, because the shutters had become fixtures.",
+                "D": "Yes, because the man gave the buyer a warranty deed and the absence of the shutters violated a covenant of the deed."
+            },
+            "user_attempts": []
         },
-        "choices": {
-          "A": "The contract is enforceable, because a reasonable person in the situation of the seller would have thought that the father had the capacity to make the contract.",
-          "B": "The contract is enforceable, because it was made on fair terms and the seller had no knowledge of the father's guardianship.",
-          "C": "The contract is void, because the father was under guardianship at the time it was made.",
-          "D": "The contract is voidable at the option of the father."
-        },
-        "user_attempts": []
-      },
-      {
-        "question_id": "5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b",
-        "group_id": null,
-        "question_text": "Two sisters own a single tract of land as tenants in common, each holding a one-half interest. The younger sister entered into a three-year written lease with a tenant; the lease described by metes and bounds a specified portion of the land, which consisted of about 40% of the total tract. The tenant went into sole possession of the leased portion of the land.\nThe older sister has sued both the younger sister and the tenant to establish the older sister's right to possession of the leased portion of the land.\nWho is likely to prevail?",
-        "category": "Real Property",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 12 },
-        "answer": {
-          "correct_choice": "A",
-          "explanation": "In a tenancy in common, each co-tenant has an undivided right to possess and enjoy the *entire* property, not just a specific portion. One co-tenant cannot unilaterally partition the property or exclude another co-tenant from any part of it. When one co-tenant leases a specific portion of the jointly held property to a third party, that lease is valid between the leasing co-tenant and the tenant as to the leasing co-tenant's interest, but it does not bind the other co-tenants or affect their right to possess the whole. The non-leasing co-tenant (the older sister) retains her right to possess the entire tract, including the portion leased to the tenant. She cannot be excluded from that portion by either the younger sister or the tenant. Option B is incorrect; a co-tenant *can* lease their undivided interest, but the lease is subject to the rights of the other co-tenants to possess the whole. Option C is incorrect; the older sister cannot be excluded from the leased portion; she has a right to possess it concurrently with the tenant. Option D is incorrect; the duration or type of interest leased does not override the older sister's right to possess the entire property.",
-          "ai_generated": true
-        },
-        "choices": {
-          "A": "The older sister, because the younger sister cannot unilaterally partition the land without the older sister's consent.",
-          "B": "The older sister, because the younger sister may not lease her undivided interest in the land without the older sister's consent.",
-          "C": "The younger sister and the tenant, because the older sister has been excluded only from the specified portion of the land subject to the lease, which makes up less than one-half of the land's total area.",
-          "D": "The younger sister and the tenant, because the younger sister's lease to the tenant was necessarily for less than a fee simple interest."
-        },
-        "user_attempts": []
-      },
-      {
-        "question_id": "9a0b1c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
-        "group_id": null,
-        "question_text": "A state law prohibits any barbershop licensed by the state from displaying posters in support of any current candidate for public office or displaying or distributing any campaign literature in support of such a candidate. No other kinds of posters or literature are subject to this prohibition, nor are any other types of commercial establishments in the state subject to similar prohibitions.\nIs this law constitutional?",
-        "category": "Constitutional Law",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 13 },
-        "answer": {
-          "correct_choice": "B",
-          "explanation": "This law is a restriction on speech in a commercial establishment, specifically targeting political speech related to candidates. Restrictions on speech based on its content (content-based restrictions) are subject to strict scrutiny under the First Amendment: they must be narrowly tailored to serve a compelling government interest. A law that bans only political candidate posters is content-based. The facts provide *no evidence* that such a restriction is necessary to serve a compelling state interest. Preventing political advocacy in a specific type of business based on its content is highly unlikely to survive strict scrutiny. Option A is true that it treats barbershops differently, which could raise Equal Protection concerns, but the primary constitutional issue is the content-based restriction on political speech itself, which is addressed under the First Amendment. Option C is incorrect; the availability of alternative means of communication does not save a content-based restriction that fails strict scrutiny. Option D is incorrect; the state's ability to regulate licensed businesses does not grant it unlimited power to restrict constitutional rights, especially First Amendment speech rights, without meeting the appropriate level of scrutiny.",
-          "ai_generated": true
-        },
-        "choices": {
-          "A": "No, because it treats barbershops differently from other commercial establishments.",
-          "B": "No, because it imposes a restriction on the content or subject matter of speech in the absence of any evidence that such a restriction is necessary to serve a compelling state interest.",
-          "C": "Yes, because it leaves political candidates free to communicate their campaign messages to voters by other means.",
-          "D": "Yes, because the operation of a licensed barbershop is a privilege and therefore is subject to any reasonable restriction imposed by the state."
-        },
-        "user_attempts": []
-      },
-      {
-        "question_id": "3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f",
-        "group_id": null,
-        "question_text": "A defendant was prosecuted for mail fraud. At trial, the defendant moved to have all witnesses excluded from the courtroom, and the court granted the motion. The government named the investigating FBI agent as its designated representative. Upon learning that the agent would be giving testimony during the trial, the defendant moved that the agent also be excluded from the courtroom.\nShould the defendant's motion be granted?",
-        "category": "Evidence",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 14 },
-        "answer": {
-          "correct_choice": "B",
-          "explanation": "Federal Rule of Evidence 615 mandates the exclusion of witnesses from the courtroom (sequestration) at a party's request so they cannot hear other testimony. However, Rule 615 provides exceptions. Rule 615(b) exempts \"an officer or employee of a party who is designated as the party's representative by its attorney.\" In a criminal case, the government is a party, and the investigating agent is typically designated as the government's representative. This designated representative is allowed to remain in the courtroom throughout the trial, even if they are also going to testify. Their presence helps the government's attorney manage the case, respond to testimony, and is often essential to the prosecution. Option A is incorrect; under Rule 615(b), the designated representative is exempt by right; a showing of essential presence is required under Rule 615(c) for witnesses *not* falling under the automatic exemptions. Option C is a common concern addressed by sequestration, but the rule makes an explicit exception for designated representatives. Option D is too broad; the defendant has the right to sequester witnesses under Rule 615, but the rule provides specific exemptions.",
-          "ai_generated": true
-        },
-        "choices": {
-          "A": "No, provided that the government can show that the agent's presence is essential to the presentation of its case.",
-          "B": "No, because the government has a right to have its designated representative remain in the courtroom throughout the trial.",
-          "C": "Yes, because the agent's testimony might be influenced by the testimony of other witnesses.",
-          "D": "Yes, because the defendant has a right to exclude all persons who may be called as government witnesses."
-        },
-        "user_attempts": []
-      },
-      {
-        "question_id": "5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b",
-        "group_id": null,
-        "question_text": "A man entered a tavern in an obviously intoxicated condition, was refused service, and was ordered to leave and escorted out. Just after leaving the tavern, the man staggered across the road toward a liquor store. As he was crossing the road, the man was struck by a car and severely injured.\nThe man sued the tavern for his personal injuries. At trial, the evidence established the facts as set out above.\nAt the close of the evidence, both parties moved for judgment as a matter of law.\nHow should the court rule on these motions?",
-        "category": "Torts",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 15 },
-        "answer": {
-          "correct_choice": "C",
-          "explanation": "To establish negligence, the plaintiff must prove duty, breach, causation (actual and proximate), and damages. While a tavern may owe a duty to an intoxicated patron, the scope of that duty can be limited. Refusing service and escorting an intoxicated patron off the premises does not necessarily constitute a breach of duty, especially if the patron is directed to a safe location (like the stoop) and the subsequent injury occurs as a result of the patron's own actions (staggering across a road) sometime later and distance away. For the tavern to be liable, its actions must have been a proximate cause of the injury. It is questionable whether ejecting the man onto the stoop was a foreseeable and direct cause of him being hit by a car while attempting to cross the road to go to another liquor store. Granting judgment as a matter of law for the tavern means the court found that, even taking the evidence in the light most favorable to the plaintiff, no reasonable jury could find that the tavern breached a duty owed to the man or that the tavern's actions were the proximate cause of his injury. Given the facts, the causal chain between the ejection and the injury is tenuous. Granting the plaintiff's motion (D) would mean the tavern's liability is established as a matter of law, which is highly unlikely in this situation. Denying both (A, B) would send the case to the jury, which might be appropriate if there's a stronger argument for duty/causation, but here, the court is likely to find the evidence insufficient as a matter of law.",
-          "ai_generated": true
-        },
-        "choices": {
-          "A": "Deny both motions and submit the case to the jury, because reasonable jurors could conclude that the accident was foreseeable.",
-          "B": "Deny both motions and submit the case to the jury, because a tavern is a place of public accommodation.",
-          "C": "Grant the tavern's motion, because there is no evidence that the tavern breached a duty to the man.",
-          "D": "Grant the man's motion, because it is undisputed that by being ejected from the tavern, the man was put at risk."
-        },
-        "user_attempts": []
-      },
-      {
-        "question_id": "7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d",
-        "group_id": null,
-        "question_text": "A protester brought an action in federal court against a police officer, alleging that the officer's use of force in arresting the protester violated the protester's federal civil rights.\nDuring the jury trial, eyewitnesses gave conflicting testimony on the arrest. At the close of evidence, the protester moved for judgment as a matter of law, which the court denied.\nThe court instructed the jury that the protester's burden of proof was clear and convincing evidence, rather than the correct burden of preponderance of the evidence. The jury returned a verdict for the officer, and the court entered judgment accordingly.\nWhat is the protester's best option for challenging the judgment?",
-        "category": "Civil Procedure",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 16 },
-        "answer": {
-          "correct_choice": "A",
-          "explanation": "The correct standard of proof in a federal civil rights action alleging excessive force (a tort claim based on a constitutional violation) is typically the preponderance of the evidence. The court's instruction that the protester's burden was \"clear and convincing evidence\" imposed a significantly higher standard than required by law. This erroneous instruction prejudiced the protester by making it much harder for the jury to find in their favor. A new trial is the appropriate remedy for prejudicial error in jury instructions that affects a party's substantial rights (Federal Rule of Civil Procedure 59). Option B is incorrect; while a verdict against the clear weight of the evidence is a ground for a new trial, the erroneous instruction is a more direct and certain basis for challenging the judgment here. Options C and D suggest seeking judgment as a matter of law (JMOL), but JMOL challenges the sufficiency of the evidence to support the jury's verdict, not errors in the instructions given to the jury. The issue is not that there was insufficient evidence for the jury to find for the officer under the correct standard, but that the jury was misinformed about the plaintiff's burden.",
-          "ai_generated": true
-        },
-        "choices": {
-          "A": "Seek a new trial, because the jury instruction affected the protester's substantial rights.",
-          "B": "Seek a new trial, because the verdict was against the clear weight of the evidence.",
-          "C": "Seek judgment as a matter of law, because the jury did not have legally sufficient evidence to find for the officer.",
-          "D": "Seek judgment as a matter of law, because the jury's findings were clearly erroneous."
-        },
-        "user_attempts": []
-      },
-      {
-        "question_id": "1e2f3a4b-5c6d-7e8f-9a0b-1c2d3e4f5a6b",
-        "group_id": null,
-        "question_text": "An attempt was made to hijack a commercial airliner while it was in flight from San Francisco to New Orleans. Within minutes, however, the hijacker was seized, and the plane proceeded to its destination. Upon the plane's arrival, television stations broadcast pictures of the passengers as they disembarked. Among the passengers pictured on television was a businessman who was supposed to be in Chicago on company business. The disclosure that the businessman was in New Orleans and not in Chicago at the time resulted in the loss of his position with his company and great humiliation and embarrassment for him.\nIf the businessman asserts a claim against the television stations for broadcasting his picture as he disembarked, is he likely to prevail?",
-        "category": "Torts",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 17 },
-        "answer": {
-          "correct_choice": "D",
-          "explanation": "The tort of publicity given to private facts requires the publication of private information that is highly offensive to a reasonable person and is not of legitimate public concern (i.e., not newsworthy). The facts concern a hijacking incident, which is a matter of high public interest and clearly newsworthy. The arrival of the plane and the disembarking of passengers are integral parts of this newsworthy event. While the businessman's presence on the flight and its location may have been personally embarrassing or detrimental, his appearance as a passenger on a hijacked plane arriving at its destination is considered newsworthy. Therefore, the television stations are likely protected by the newsworthiness privilege, even though the publication caused harm. Option A is incorrect; the tort requires more than just revealing location; it must be private information whose publication is highly offensive and not newsworthy. Option B is incorrect; while the businessman suffered pecuniary loss, this does not make the publication tortious if it was privileged (e.g., newsworthy). Option C is incorrect; the tort of publicity given to private facts does not require physical harm, only emotional distress and potential reputational harm.",
-          "ai_generated": true
-        },
-        "choices": {
-          "A": "Yes, because the businessman's location was revealed against his wishes.",
-          "B": "Yes, because publication of the television pictures caused the businessman pecuniary loss.",
-          "C": "No, because the humiliation and embarrassment did not result in physical harm to the businessman.",
-          "D": "No, because the scene shown on television was newsworthy."
-        },
-        "user_attempts": []
-      },
-      {
-        "question_id": "3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f",
-        "group_id": null,
-        "question_text": "A company contracted with a builder to construct a new corporate headquarters for a fixed price of $100 million. At the time of the contract, structural steel was widely available and was included in the contract as a $6 million item. Before work began on the project, tornado damage shut down the production facility of the biggest structural steel supplier in the country, and the price of structural steel increased by 20% as a result. The builder informed the company of the steel price increase, and the parties then orally agreed to increase the project price to $101 million.\nThe builder proceeded with construction and delivered the project on time. The company paid the builder $100 million but refused to pay the additional $1 million.\nIf the builder sues the company for $1 million, is the builder likely to prevail?",
-        "category": "Contracts and Sales",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 18 },
-        "answer": {
-          "correct_choice": "D",
-          "explanation": "This is a construction contract, primarily governed by common law. Under common law, a contract modification requires new consideration. However, many jurisdictions follow the rule that a promise modifying a duty under a contract is binding if the modification is fair and equitable in view of circumstances not anticipated by the parties when the contract was made (Restatement (Second) of Contracts § 89). The sudden, significant increase in the price of structural steel due to an unexpected event like a tornado fits the description of unanticipated circumstances. Therefore, the oral agreement to increase the contract price by $1 million to account for this increase is likely enforceable under this modern rule, even without new consideration. Option A is incorrect; while the Statute of Frauds might apply to a contract for construction over a year, modifications might not require a writing, or performance might take it out of the statute. However, the primary issue here is consideration for the modification. Option B is incorrect; while there's arguably no *new* consideration under the pre-existing duty rule, the modification is likely enforceable under the unanticipated circumstances exception. Option C is incorrect; the builder was already obligated to complete the project for $100 million, so completing it doesn't constitute new consideration for the *additional* $1 million under the pre-existing duty rule. The builder's argument relies on the exception to the rule, not meeting the rule.",
-          "ai_generated": true
-        },
-        "choices": {
-          "A": "No, because the modification was never reduced to a writing signed by the party to be charged.",
-          "B": "No, because there was no consideration for the modification of the contract.",
-          "C": "Yes, because the company's promise was supported by consideration.",
-          "D": "Yes, because the modification was fair and equitable in view of the unanticipated increase in the price of structural steel."
-        },
-        "user_attempts": []
-      },
-      {
-        "question_id": "5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b",
-        "group_id": null,
-        "question_text": "At a defendant's trial for extortion, the prosecutor called a witness expecting her to testify that she had heard the defendant threaten a man with physical harm unless the man made payoffs to the defendant. The witness denied ever having heard the defendant make such threats, even though she had testified to that effect before the grand jury. The prosecutor now seeks to admit the witness's grand jury testimony.\nHow should the court rule with regard to the grand jury testimony?",
-        "category": "Evidence",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 19 },
-        "answer": {
-          "correct_choice": "B",
-          "explanation": "Under Federal Rule of Evidence 801(d)(1)(A), a declarant-witness's prior inconsistent statement is not hearsay if it was given under penalty of perjury at a trial, hearing, or other proceeding or in a deposition. Grand jury testimony is considered testimony given under penalty of perjury at an \"other proceeding.\" Since the witness's grand jury testimony that she heard threats is inconsistent with her trial testimony denying hearing threats, and the grand jury testimony meets the requirements of Rule 801(d)(1)(A), it is admissible for both impeachment purposes (to show the witness is not credible) and as substantive evidence (to prove that the defendant actually made the threats). Option A is incorrect; the statement was made by a non-party witness, not a party-opponent. Option C is incorrect; the former testimony exception (Rule 804(b)(1)) applies when the declarant is *unavailable* as a witness; here, the witness is testifying at trial. Option D is incorrect; because the statement meets the criteria of Rule 801(d)(1)(A), it is admissible for substantive use. The term \"testimonial statement\" is relevant to the Confrontation Clause, but since the witness is available for cross-examination at trial, admitting her prior testimonial grand jury statement for substantive purposes does not violate the Confrontation Clause.",
-          "ai_generated": true
-        },
-        "choices": {
-          "A": "Admit the testimony, because it contains a statement by a party-opponent.",
-          "B": "Admit the testimony, both for impeachment and for substantive use, because the witness made the inconsistent statement under oath at a formal proceeding.",
-          "C": "Admit the testimony under the former testimony exception to the hearsay rule.",
-          "D": "Exclude the testimony for substantive use, because it is a testimonial statement."
-        },
-        "user_attempts": []
-      },
-      {
-        "question_id": "7a1b9c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
-        "group_id": null,
-        "question_text": "A man arranged to have custom-made wooden shutters installed on the windows of his home. The contractor who installed the shutters did so by drilling screws and brackets into the exterior window frames and the shutters.\nThe man later agreed to sell the home to a buyer. The sales agreement did not mention the shutters, the buyer did not inquire about them, and the buyer did not conduct a walkthrough inspection of the home before the closing.\nThe man conveyed the home to the buyer by warranty deed. After the sale closed, the buyer noticed that the shutters and brackets had been removed from the home and that the window frames had been repaired and repainted.\nThe buyer demanded that the man return the shutters and pay the cost of reinstallation, claiming that the shutters had been conveyed to him with the sale of the home. When the man refused, the buyer sued.\nIs the buyer likely to prevail?",
-        "category": "Real Property",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 20 },
-        "answer": {
-          "correct_choice": "C",
-          "explanation": "An item of personal property becomes a fixture, and thus part of the real property conveyed with the land, if it is physically annexed to the real property, adapted to the use of the real property, and the annexor intended for it to become a permanent part of the real property. Courts consider factors such as the degree of annexation, the nature of the item, its adaptation to the realty, and the intent of the person who installed it. Custom-made wooden shutters attached to window frames with screws and brackets are highly likely to be considered fixtures because they are physically attached, specifically adapted to the house (custom-made for the windows), and installation with screws and brackets suggests an intent for permanent attachment, particularly since their removal caused damage requiring repair. As fixtures, they are considered part of the real property and pass to the buyer with the conveyance by deed, unless specifically excluded in the contract. Option A is incorrect; fixtures are considered part of the land and pass with the deed unless the contract specifies otherwise. Silence in the contract means they are included if they are fixtures. Option B is incorrect; the fact that removal required repairs supports, rather than refutes, the argument that they were fixtures. Option D is incorrect; while the removal of fixtures *could* potentially violate a covenant of title (like seisin), the primary issue is whether the shutters are classified as fixtures in the first place, in which case they were included in the conveyance, and their removal constituted taking something that now belonged to the buyer.",
-          "ai_generated": true
-        },
-        "choices": {
-          "A": "No, because the sales agreement did not mention the shutters.",
-          "B": "No, because the window frames had been repaired and repainted after removal of the shutters.",
-          "C": "Yes, because the shutters had become fixtures.",
-          "D": "Yes, because the man gave the buyer a warranty deed and the absence of the shutters violated a covenant of the deed."
-        },
-        "user_attempts": []
-      },
-      {
-        "question_id": "3e4f5a6b-7c8d-9e0f-1a2b-3c4d5e6f7a8b",
-        "group_id": null,
-        "question_text": "The president of a pharmaceutical firm received a report from his testing bureau that a manufactured lot of the firm's anti-cancer prescription medication was well below strength. Concerned about being able to fulfill contractual commitments, the president instructed his staff to deliver the defective lot. A cancer patient who had been maintained on the drug died shortly after beginning to take the defective pills.\nMedical evidence established that the patient would have lived longer had the drug been at full strength, but would have died before long in any event.\nThe president was convicted of murder. On appeal, he argues that his conviction should be reversed.\nShould the conviction be reversed?",
-        "category": "Criminal Law and Procedure",
-        "source": { "name": "MBE Sample Test Questions", "provider": "NCBE", "year": 2021, "question": 21 },
-        "answer": {
-          "correct_choice": "B",
-          "explanation": "Murder can be proven with various mental states, including depraved-heart recklessness, which requires the defendant to act with extreme disregard for a known high risk to human life, resulting in death. The president, knowing the medication was below strength and necessary for a cancer patient, chose to deliver it anyway to fulfill contracts, creating a substantial and unjustifiable risk of harm, including hastening death. A jury could find this conduct demonstrates extreme recklessness sufficient for depraved-heart murder. While the patient had a terminal illness and would die anyway, criminal causation (proximate cause) requires the defendant's conduct to be a factual cause and a sufficiently direct cause of death. If the defective drug accelerated the patient's death, as the medical evidence suggests, the president's conduct can be considered a legal cause of death, even if not the sole cause. Therefore, a jury could reasonably find both the required mental state (recklessness) and causation for murder. Option A is incorrect; murder requires more than strict liability; it requires a culpable mental state and causation. Option C is incorrect; while providing substandard drugs may violate regulations, the conduct can also constitute a criminal offense like murder or manslaughter depending on the circumstances, mental state, and resulting harm. Option D is incorrect; while the cancer was a contributing factor, the president's act of providing ineffective treatment that medical evidence shows shortened the patient's life can be considered a concurrent or accelerating cause sufficient for criminal liability; the cancer doesn't automatically negate the defendant's causal role.",
-          "ai_generated": true
-        },
-        "choices": {
-          "A": "No, because the intentional delivery of adulterated or mislabeled drugs gives rise to strict criminal liability.",
-          "B": "No, because the jury could have found that the president's conduct was sufficiently reckless to constitute murder.",
-          "C": "Yes, because distribution of the defective lot was only a regulatory offense.",
-          "D": "Yes, because the cancer, not the president's conduct, was the proximate cause of death of the patient."
-        },
-        "user_attempts": []
-      }
+        {
+            "question_id": "3e4f5a6b-7c8d-9e0f-1a2b-3c4d5e6f7a8b",
+            "group_id": null,
+            "question_text": "The president of a pharmaceutical firm received a report from his testing bureau that a manufactured lot of the firm's anti-cancer prescription medication was well below strength. Concerned about being able to fulfill contractual commitments, the president instructed his staff to deliver the defective lot. A cancer patient who had been maintained on the drug died shortly after beginning to take the defective pills.\nMedical evidence established that the patient would have lived longer had the drug been at full strength, but would have died before long in any event.\nThe president was convicted of murder. On appeal, he argues that his conviction should be reversed.\nShould the conviction be reversed?",
+            "category": "Criminal Law and Procedure",
+            "source": {
+                "name": "MBE Sample Test Questions",
+                "provider": "NCBE",
+                "year": 2021,
+                "question": 21
+            },
+            "answer": {
+                "correct_choice": "B",
+                "explanation": "Murder can be proven with various mental states, including depraved-heart recklessness, which requires the defendant to act with extreme disregard for a known high risk to human life, resulting in death. The president, knowing the medication was below strength and necessary for a cancer patient, chose to deliver it anyway to fulfill contracts, creating a substantial and unjustifiable risk of harm, including hastening death. A jury could find this conduct demonstrates extreme recklessness sufficient for depraved-heart murder. While the patient had a terminal illness and would die anyway, criminal causation (proximate cause) requires the defendant's conduct to be a factual cause and a sufficiently direct cause of death. If the defective drug accelerated the patient's death, as the medical evidence suggests, the president's conduct can be considered a legal cause of death, even if not the sole cause. Therefore, a jury could reasonably find both the required mental state (recklessness) and causation for murder. Option A is incorrect; murder requires more than strict liability; it requires a culpable mental state and causation. Option C is incorrect; while providing substandard drugs may violate regulations, the conduct can also constitute a criminal offense like murder or manslaughter depending on the circumstances, mental state, and resulting harm. Option D is incorrect; while the cancer was a contributing factor, the president's act of providing ineffective treatment that medical evidence shows shortened the patient's life can be considered a concurrent or accelerating cause sufficient for criminal liability; the cancer doesn't automatically negate the defendant's causal role.",
+                "ai_generated": true
+            },
+            "choices": {
+                "A": "No, because the intentional delivery of adulterated or mislabeled drugs gives rise to strict criminal liability.",
+                "B": "No, because the jury could have found that the president's conduct was sufficiently reckless to constitute murder.",
+                "C": "Yes, because distribution of the defective lot was only a regulatory offense.",
+                "D": "Yes, because the cancer, not the president's conduct, was the proximate cause of death of the patient."
+            },
+            "user_attempts": []
+        }
     ],
     "groups": []
-  }
+}

@@ -6,7 +6,7 @@ Make sure to properly escape quotations and other symbols like \ and " with back
 
 Here's a summary of the project I want help with. My main goal is to create a robust single page web app (HTML and JS only) that I can use to build a quiz application for studying for the US bar exam. I need to compile practice questions from various sources I have, like official past exams and materials from providers such as Barbri, into this single JSON format.
 
-The JSON schema needs to capture all the essential details for each multiple-choice question. This includes the question_id, the question_text, the legal category (like Torts), the choices (A, B, C, D), the answer object specifying the correct_choice and providing a detailed explanation, and information about the question's source (provider, year, etc.).
+The JSON schema needs to capture all the essential details for each multiple-choice question. This includes the question_id, the question_text, the legal category (like Torts), the choices (A, B, C, D), the answer object specifying the correct_choice and providing a detailed explanation, and information about the question's source (provider, year, etc.).  If an explanation is not provided, an AI generated explanation is added and the optional ai_generated flag is set to true.
 
 An important feature I need is the ability to handle groups of questions that are based on a common fact pattern, which is common in bar exams. So, the schema includes a groups list where each group has an ID, potentially some introductory text, and a defined question_order. Back in the main questions list, each question object has a group_id field that links it to the relevant group, or is null if it's a standalone question. This setup ensures these related questions stay together in the right sequence, preserving the necessary context.
 
@@ -17,11 +17,16 @@ This is the sample schema for you:
 {
   "questions": [
     {
-      "question_id": "80f58eac-205a-4e74-8365-febdd89bf655",
-      "group_id": "bfdb0485-8e3f-4d2f-bdcd-0ba2fbf6b8dd",
+      "question_id": "91757f83-f760-425e-bc40-37afb4d5c993",
+      "group_id": "15dc7ab9-1716-4154-9b08-d884a327afcc",
       "question_text": "What is the holding in Palsgraf v. Long Island Railroad Co.?",
       "category": "Torts",
-      "source": { "name": "Barbri Mock Exam 1", "provider": "Barbri", "year": 2023, "question": 1 },
+      "source": {
+        "name": "Barbri Mock Exam 1",
+        "provider": "Barbri",
+        "year": 2023,
+        "question": 1
+      },
       "answer": {
         "correct_choice": "A",
         "explanation": "Explanation of why A is correct, focusing on the concept of duty owed only to foreseeable plaintiffs within the zone of danger."
@@ -35,14 +40,19 @@ This is the sample schema for you:
       "user_attempts": []
     },
     {
-      "question_id": "4c1bfb0a-6d4d-45fd-b39e-3c786c5e232d",
-      "group_id": "bfdb0485-8e3f-4d2f-bdcd-0ba2fbf6b8dd",
+      "question_id": "1a216b1d-442b-47fa-a39d-a9cf88faac3b",
+      "group_id": "15dc7ab9-1716-4154-9b08-d884a327afcc",
       "question_text": "Applying Palsgraf, which of the following is true?",
       "category": "Torts",
-      "source": { "name": "Barbri Mock Exam 1", "provider": "Barbri", "year": 2023, "question": 2 },
+      "source": {
+        "name": "Barbri Mock Exam 1",
+        "provider": "Barbri",
+        "year": 2023,
+        "question": 2
+      },
       "answer": {
         "correct_choice": "C",
-        "explanation": "Explanation of why C is correct, highlighting that Palsgraf was outside the zone of foreseeable danger created by the employees' actions."
+        "explanation": "Explanation of why C is correct, highlighting that Palsgraf was outside the zone of foreseeable danger created by the employees' actions.",
         "ai_generated": true
       },
       "choices": {
@@ -51,14 +61,27 @@ This is the sample schema for you:
         "C": "The railroad is not liable to Palsgraf because her injury was not a foreseeable consequence of their negligence.",
         "D": "Palsgraf can recover because she was physically injured."
       },
-      "user_attempts": []
+      "user_attempts": [
+        {
+          "attempt_id": 1,
+          "chosen_answer": "B",
+          "time_submitted": "2025-04-22T22:35:09.370Z",
+          "time_spent_seconds": 298.7,
+          "notes": ""
+        }
+      ]
     },
     {
-      "question_id": "a48ad4e5-ff1b-4339-8aec-1066627ca86b",
+      "question_id": "9bac22a7-64ff-4bc0-b41e-107b876673dd",
       "group_id": null,
       "question_text": "Under the Federal Rules of Evidence, which of the following constitutes hearsay?",
       "category": "Evidence",
-      "source": { "name": "NCBE MBE Study Aid", "provider": "NCBE", "year": 2022, "question": 1 },
+      "source": {
+        "name": "NCBE MBE Study Aid",
+        "provider": "NCBE",
+        "year": 2022,
+        "question": 1
+      },
       "answer": {
         "correct_choice": "B",
         "explanation": "Explanation of why B is correct: It's an out-of-court statement offered to prove the truth of the matter asserted. A describes present sense impression (exception), C is non-assertive conduct (not a statement), D is an operative legal fact (not offered for truth)."
@@ -74,10 +97,13 @@ This is the sample schema for you:
   ],
   "groups": [
     {
-      "group_id": "bfdb0485-8e3f-4d2f-bdcd-0ba2fbf6b8dd",
+      "group_id": "15dc7ab9-1716-4154-9b08-d884a327afcc",
       "text": "Palsgraf v. Long Island Railroad Co. Questions",
       "intro_text": "The following two questions pertain to the landmark case of Palsgraf v. Long Island Railroad Co. and its implications for the element of duty in negligence law.",
-      "question_order": ["80f58eac-205a-4e74-8365-febdd89bf655", "4c1bfb0a-6d4d-45fd-b39e-3c786c5e232d"]
+      "question_order": [
+        "91757f83-f760-425e-bc40-37afb4d5c993",
+        "1a216b1d-442b-47fa-a39d-a9cf88faac3b"
+      ]
     }
   ]
 }

@@ -1,11 +1,16 @@
 {
   "questions": [
     {
-      "question_id": 1,
-      "group_id": 1,
+      "question_id": "91757f83-f760-425e-bc40-37afb4d5c993",
+      "group_id": "15dc7ab9-1716-4154-9b08-d884a327afcc",
       "question_text": "What is the holding in Palsgraf v. Long Island Railroad Co.?",
       "category": "Torts",
-      "source": { "name": "Barbri Mock Exam 1", "provider": "Barbri", "year": 2023, "question": 1 },
+      "source": {
+        "name": "Barbri Mock Exam 1",
+        "provider": "Barbri",
+        "year": 2023,
+        "question": 1
+      },
       "answer": {
         "correct_choice": "A",
         "explanation": "Explanation of why A is correct, focusing on the concept of duty owed only to foreseeable plaintiffs within the zone of danger."
@@ -19,14 +24,20 @@
       "user_attempts": []
     },
     {
-      "question_id": 2,
-      "group_id": 1,
+      "question_id": "1a216b1d-442b-47fa-a39d-a9cf88faac3b",
+      "group_id": "15dc7ab9-1716-4154-9b08-d884a327afcc",
       "question_text": "Applying Palsgraf, which of the following is true?",
       "category": "Torts",
-      "source": { "name": "Barbri Mock Exam 1", "provider": "Barbri", "year": 2023, "question": 2 },
+      "source": {
+        "name": "Barbri Mock Exam 1",
+        "provider": "Barbri",
+        "year": 2023,
+        "question": 2
+      },
       "answer": {
         "correct_choice": "C",
-        "explanation": "Explanation of why C is correct, highlighting that Palsgraf was outside the zone of foreseeable danger created by the employees' actions."
+        "explanation": "Explanation of why C is correct, highlighting that Palsgraf was outside the zone of foreseeable danger created by the employees' actions.",
+        "ai_generated": true
       },
       "choices": {
         "A": "The railroad is liable for all injuries caused by the explosion.",
@@ -34,14 +45,27 @@
         "C": "The railroad is not liable to Palsgraf because her injury was not a foreseeable consequence of their negligence.",
         "D": "Palsgraf can recover because she was physically injured."
       },
-      "user_attempts": []
+      "user_attempts": [
+        {
+          "attempt_id": 1,
+          "chosen_answer": "B",
+          "time_submitted": "2025-04-22T22:35:09.370Z",
+          "time_spent_seconds": 298.7,
+          "notes": ""
+        }
+      ]
     },
     {
-      "question_id": 3,
+      "question_id": "9bac22a7-64ff-4bc0-b41e-107b876673dd",
       "group_id": null,
       "question_text": "Under the Federal Rules of Evidence, which of the following constitutes hearsay?",
       "category": "Evidence",
-      "source": { "name": "NCBE MBE Study Aid", "provider": "NCBE", "year": 2022, "question": 1 },
+      "source": {
+        "name": "NCBE MBE Study Aid",
+        "provider": "NCBE",
+        "year": 2022,
+        "question": 1
+      },
       "answer": {
         "correct_choice": "B",
         "explanation": "Explanation of why B is correct: It's an out-of-court statement offered to prove the truth of the matter asserted. A describes present sense impression (exception), C is non-assertive conduct (not a statement), D is an operative legal fact (not offered for truth)."
@@ -57,10 +81,13 @@
   ],
   "groups": [
     {
-      "group_id": 1,
+      "group_id": "15dc7ab9-1716-4154-9b08-d884a327afcc",
       "text": "Palsgraf v. Long Island Railroad Co. Questions",
       "intro_text": "The following two questions pertain to the landmark case of Palsgraf v. Long Island Railroad Co. and its implications for the element of duty in negligence law.",
-      "question_order": [1, 2]
+      "question_order": [
+        "91757f83-f760-425e-bc40-37afb4d5c993",
+        "1a216b1d-442b-47fa-a39d-a9cf88faac3b"
+      ]
     }
   ]
 }
