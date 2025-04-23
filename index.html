@@ -2059,8 +2059,8 @@
 
                 const filters = getFilterSettings();
 
-                // 1. Filter Questions
-                let filteredQuestions = quizData.questions.filter(q => {
+                // 1. Filter Questions (As before)
+                const filteredQuestions = quizData.questions.filter(q => {
                     const hasAttempts = q.user_attempts && q.user_attempts.length > 0;
 
                     // Status filter
@@ -2087,54 +2087,81 @@
                         if (hasAttempts && q.user_attempts.every(attempt => attempt.notes && attempt.notes.trim() !== '')) return false;
                     }
 
-                    // Category/Provider/Year filters
-                    if (filters.categories.length > 0 && !filters.categories.includes(q.category)) return false;
-                    if (filters.providers.length > 0 && !filters.providers.includes(q.source?.provider)) return false;
-                    if (filters.years.length > 0 && !filters.years.includes(q.source?.year?.toString())) return false; // Compare as strings for safety
+                    // Category/Provider/Year filters (Using includes and checking for existence)
+                    if (filters.categories.length > 0 && (!q.category || !filters.categories.includes(q.category))) return false;
+                    if (filters.providers.length > 0 && (!q.source?.provider || !filters.providers.includes(q.source.provider))) return false;
+                    if (filters.years.length > 0 && (!q.source?.year || !filters.years.includes(q.source.year))) return false; // Years are numbers
 
                     return true;
                 });
 
-                // 2. Prepare Master List (respecting groups)
-                masterQuestionList = [];
-                const processedGroupIds = new Set();
-                const questionsById = new Map(filteredQuestions.map(q => [q.question_id, q]));
-                const addedQuestionIds = new Set();
+                // Create a map for quick lookup of filtered questions by ID
+                const filteredQuestionsMap = new Map(filteredQuestions.map(q => [q.question_id, q]));
 
+                // 2. Identify Units (Standalone questions or ordered groups)
+                let quizUnits = [];
+                const processedQuestionIds = new Set(); // Track questions already added to a unit
+
+                // Prioritize processing groups first to ensure they are handled correctly
                 if (quizData.groups) {
                     quizData.groups.forEach(group => {
                         const groupQuestionIds = group.question_order || [];
-                        // Check if *all* questions required by the group are present in the *filtered* list
-                        const groupQuestionsPresent = groupQuestionIds.every(id => questionsById.has(id));
+                        const groupUnit = []; // Array to hold the question objects for this group
 
-                        if (groupQuestionsPresent && groupQuestionIds.length > 0) {
-                            groupQuestionIds.forEach(qId => {
-                                const question = questionsById.get(qId);
-                                if (question && !addedQuestionIds.has(qId)) {
-                                    masterQuestionList.push(question);
-                                    addedQuestionIds.add(qId);
-                                }
-                            });
-                            processedGroupIds.add(group.group_id);
+                        // Check if *any* question from this group survived the filtering
+                        let groupHasFilteredQuestions = false;
+                        groupQuestionIds.forEach(qId => {
+                            if (filteredQuestionsMap.has(qId)) {
+                                groupHasFilteredQuestions = true;
+                                // Add the actual question object from the filtered map
+                                const question = filteredQuestionsMap.get(qId);
+                                groupUnit.push(question);
+                                processedQuestionIds.add(qId); // Mark as processed
+                            }
+                            // If a question in the group order was filtered out, it's simply skipped here.
+                        });
+
+                        // Only add the group unit if it contains at least one question after filtering
+                        if (groupUnit.length > 0) {
+                            quizUnits.push(groupUnit); // Add the array of questions as a single unit
                         }
                     });
                 }
 
-                // Add remaining filtered questions that were not part of a processed group
+                // Add remaining standalone questions (those not part of a processed group)
                 filteredQuestions.forEach(question => {
-                    if (!addedQuestionIds.has(question.question_id)) {
-                        masterQuestionList.push(question);
-                        addedQuestionIds.add(question.question_id);
+                    if (!processedQuestionIds.has(question.question_id)) {
+                        // This is a standalone question OR belonged to a group where NO questions passed the filter
+                        quizUnits.push(question); // Add the single question object as a unit
+                        processedQuestionIds.add(question.question_id); // Mark as processed
                     }
                 });
 
-
-                // 3. Scramble (if selected)
+                // 3. Shuffle Units (if selected)
                 if (filters.scramble) {
-                    masterQuestionList = shuffleArray(masterQuestionList);
+                    quizUnits = shuffleArray(quizUnits); // Shuffle the list of units
                 }
 
-                // 4. Start the Quiz
+                // 4. Reconstruct Master List by expanding units
+                masterQuestionList = [];
+                quizUnits.forEach(unit => {
+                    if (Array.isArray(unit)) {
+                        // It's a group unit (array of questions)
+                        masterQuestionList.push(...unit); // Spread the questions into the master list
+                    } else {
+                        // It's a standalone question object
+                        masterQuestionList.push(unit); // Add the single question
+                    }
+                });
+
+                // --- Apply Question Limit ---
+                // Slice the list *after* potential shuffling and expansion
+                if (questionLimit > 0 && masterQuestionList.length > questionLimit) {
+                    masterQuestionList = masterQuestionList.slice(0, questionLimit);
+                    console.log(`Limiting quiz to the first ${questionLimit} questions after filtering and shuffling.`);
+                }
+
+                // 5. Start the Quiz (using the reconstructed masterQuestionList)
                 if (masterQuestionList.length > 0) {
                     currentQuestionIndex = -1; // Reset index for the new list
                     lastDisplayedGroupId = null;
@@ -2152,7 +2179,7 @@
                     displayNextQuestionInternal(); // Display the first question
 
                     // Update progress display AFTER starting
-                    quizProgressElement.textContent = `Showing ${masterQuestionList.length} questions (1 of ${masterQuestionList.length})`;
+                    quizProgressElement.textContent = `Question 1 of ${masterQuestionList.length}`;
 
                     closeSidebar();
                 } else {
@@ -2186,7 +2213,31 @@
                 deactivateAnnotationMode();
                 // clearCanvas(); // Clear canvas handled in displayNextQuestionInternal
 
-                groupIntroElement.innerHTML = '';
+                // --- Group Intro Handling (Revised) ---
+                groupIntroElement.innerHTML = ''; // Clear previous intro
+                groupIntroElement.style.display = 'none'; // Hide by default
+
+                // Check if the current question belongs to a group
+                if (question.group_id && quizData && Array.isArray(quizData.groups)) {
+                    // Find the corresponding group definition
+                    const group = quizData.groups.find(g => g.group_id === question.group_id);
+                    if (group) {
+                        // Prefer group.text as the main fact pattern, fallback to intro_text if text is missing
+                        const factPattern = group.text || group.intro_text || `Fact Pattern for Group ${group.group_id} (Details Missing)`;
+                        const groupTitle = group.text ? `Fact Pattern` : `Group Intro`; // Simpler title
+
+                        // Display the fact pattern in the designated element
+                        groupIntroElement.innerHTML = `<h3>${groupTitle}</h3><p>${escapeHtml(factPattern)}</p>`;
+                        groupIntroElement.style.display = 'block'; // *Always* show the intro element if the question is part of a group
+                    } else {
+                        // Optional: Handle case where group_id exists but group definition is missing in the JSON
+                        groupIntroElement.innerHTML = `<h3>Fact Pattern Error</h3><p>Details for group ${question.group_id} not found.</p>`;
+                        groupIntroElement.style.display = 'block';
+                    }
+                }
+                // If question.group_id is null, groupIntroElement remains hidden (display: 'none')
+
+
                 choicesFormElement.innerHTML = '';
                 feedbackAreaElement.style.display = 'none';
                 feedbackAreaElement.innerHTML = '';
