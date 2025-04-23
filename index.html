@@ -25,8 +25,8 @@
             --dark-gray: #6c757d;
             --text-color: #333;
             --border-color: #dee2e6;
-            --sidebar-width: 280px;
-            --sidebar-width-mobile: 250px;
+            --sidebar-width: 400px;
+            --sidebar-width-mobile: 320px;
             --font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             --base-font-size: 16px;
             /* Base for rem units */
@@ -277,29 +277,38 @@
         }
 
         /* --- File/Quiz Controls --- */
-        .file-controls,
-        .quiz-controls {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
+        .file-controls {
+            margin-top: 2rem;
+            /* Add space above */
+            margin-bottom: 1rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            /* Use top border */
             display: flex;
-            /* Better alignment */
-            flex-wrap: wrap;
-            /* Allow wrapping */
-            align-items: center;
+            flex-direction: column;
+            /* Stack vertically */
             gap: 0.75rem;
             /* Spacing between items */
+            align-items: flex-start;
+            /* Align items left */
+        }
+
+        .file-controls .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
         }
 
         .file-controls label {
             margin: 0;
-            /* Remove default margin */
             font-weight: 500;
+            white-space: nowrap;
+            /* Prevent label wrapping */
         }
 
         .file-controls input[type="file"] {
             margin: 0;
-            /* Consider custom styling for file input later if needed */
             border: 1px solid var(--border-color);
             padding: 0.4rem 0.8rem;
             border-radius: var(--border-radius);
@@ -307,18 +316,48 @@
             cursor: pointer;
             flex-grow: 1;
             /* Allow input to take space */
+            /* Limit max width if needed */
+            max-width: calc(100% - 150px);
+            /* Adjust based on button size */
+        }
+
+        .file-controls button {
+            width: auto;
+            /* Let button size naturally */
+            flex-shrink: 0;
+            /* Prevent button shrinking */
+        }
+
+        .file-controls p.auto-save-info {
+            font-size: 0.85rem;
+            color: var(--secondary-color);
+            margin: 0.5rem 0 0 0;
+            width: 100%;
+            /* Span full width */
+            text-align: center;
+            /* Center the text */
         }
 
         .quiz-controls {
+            margin-bottom: 1.5rem;
+            /* Added */
+            padding-bottom: 0;
+            /* Modified */
             border-bottom: none;
             /* No border for bottom controls */
-            padding-bottom: 0;
+            display: flex;
+            /* Added */
             justify-content: flex-end;
             /* Align Next button right */
+            gap: 0.75rem;
+            /* Added */
         }
+
 
         #quiz-area {
             display: none;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
             /* Initially hidden */
         }
 
@@ -858,19 +897,37 @@
             }
 
             .file-controls {
+                align-items: stretch;
+                /* Stretch items like input */
+            }
+
+            .file-controls .control-group {
                 flex-direction: column;
+                /* Stack label/input/button */
                 align-items: stretch;
                 gap: 0.5rem;
             }
 
             .file-controls input[type="file"] {
                 width: 100%;
+                max-width: 100%;
+                /* Override desktop max-width */
+                margin-bottom: 0.5rem;
+                /* Space before button */
             }
 
             .file-controls button {
                 width: 100%;
+                /* Full width buttons */
                 margin-right: 0;
             }
+
+            .file-controls p.auto-save-info {
+                text-align: left;
+                /* Align left on mobile */
+                margin-top: 0.75rem;
+            }
+
 
             #quiz-progress {
                 margin-bottom: 0.75rem;
@@ -1069,8 +1126,170 @@
         .timer.flashing .timer-value {
             color: var(--danger-color) !important;
         }
+
+        /* --- Modal Styles --- */
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1002;
+            /* Sit on top (above sidebar overlay) */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgba(0, 0, 0, 0.5);
+            /* Black w/ opacity */
+            animation: fadeIn 0.3s ease-in-out;
+            /* Simple fade-in */
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            /* 10% from the top and centered */
+            padding: 25px 30px;
+            /* More padding */
+            border: 1px solid #888;
+            width: 85%;
+            /* Responsive width */
+            max-width: 700px;
+            /* Max width */
+            border-radius: var(--border-radius);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: slideIn 0.3s ease-in-out;
+            /* Simple slide-in */
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+
+        .modal-content h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            /* Larger title */
+        }
+
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            /* Position relative to modal-content */
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            line-height: 1;
+            /* Ensure tight spacing */
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #performance-stats-content ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #performance-stats-content li {
+            padding: 0.6rem 0;
+            /* Vertical spacing */
+            border-bottom: 1px solid var(--medium-gray);
+            /* Separator lines */
+            font-size: 0.95rem;
+        }
+
+        #performance-stats-content li:last-child {
+            border-bottom: none;
+            /* Remove border from last item */
+        }
+
+        #performance-stats-content strong {
+            display: inline-block;
+            min-width: 200px;
+            /* Align values */
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+
+        #performance-stats-content .category-stats {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 2px solid var(--primary-color);
+        }
+
+        #performance-stats-content .category-stats h3 {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+
+        /* Responsive Modal */
+        @media (max-width: 767px) {
+            .modal-content {
+                width: 95%;
+                margin: 15% auto;
+                /* Adjust margin for mobile */
+                padding: 20px;
+            }
+
+            #performance-stats-content strong {
+                min-width: 150px;
+                /* Adjust alignment for mobile */
+            }
+
+            .modal-content h2 {
+                font-size: 1.3rem;
+            }
+        }
     </style>
 </head>
+
+<!-- Performance Dashboard Modal -->
+<div id="performance-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="close-performance-modal">×</span>
+        <h2>Performance Dashboard</h2>
+        <div id="performance-stats-content">
+            <p>Loading statistics...</p>
+        </div>
+    </div>
+</div>
 
 <body>
 
@@ -1159,18 +1378,23 @@
 
         <button id="apply-filters-button" disabled>Apply Filters & Start Quiz</button>
         <button id="close-sidebar-button">Close Settings</button>
+
+        <div class="sidebar-footer">
+            <!-- Buy me a coffee button -->
+            <p class="small mt-2" style="text-align: center; margin-bottom: 5px;"><strong>Found this site
+                    helpful?</strong></p>
+            <div style="text-align: center; margin-top: 5px;">
+                <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+                    data-name="bmc-button" data-slug="ansonlai" data-color="#FFDD00" data-emoji="" data-font="Lato"
+                    data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000"
+                    data-coffee-color="#ffffff"></script>
+            </div>
+        </div>
     </div>
 
     <!-- Main Content Container -->
     <div class="container">
         <h1>MBE Practice Questions</h1>
-
-        <div class="file-controls">
-            <label for="jsonFile">Load Quiz Data (JSON):</label>
-            <input type="file" id="jsonFile" accept=".json">
-            <button id="loadJsonButton">Load Data</button>
-            <button id="saveJsonButton" disabled>Save Progress</button>
-        </div>
 
         <div id="quiz-area">
             <div id="quiz-progress"></div>
@@ -1227,14 +1451,31 @@
                 <textarea id="attempt-notes" rows="4" placeholder="Enter notes here to be saved..." disabled></textarea>
             </div>
 
+            <!-- Moved Quiz Controls Up -->
             <div class="quiz-controls">
                 <button id="next-question-button" style="display:none;">Next Question</button>
             </div>
+
 
             <div id="past-attempts" class="past-attempts" style="display:none;"></div>
         </div>
 
         <div id="end-of-quiz-message"></div>
+
+        <!-- Modified File Controls Section -->
+        <div class="file-controls">
+            <p class="auto-save-info">💾 Your progress is automatically saved locally. You can load a backup from
+                another device.</p>
+            <div class="control-group">
+                <label for="jsonFile">Load <u>New</u> Quiz Data (JSON):</label>
+                <input type="file" id="jsonFile" accept=".json">
+                <button id="loadJsonButton">Load New Data</button>
+            </div>
+            <div class="control-group">
+                <label for="saveJsonButton">Export / Backup Data:</label>
+                <button id="saveJsonButton" disabled>Export Backup</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1248,7 +1489,6 @@
             const groupIntroElement = document.getElementById('current-group-intro');
             const questionMetaContainer = document.querySelector('.question-meta-container');
             const metaTooltipContentElement = document.getElementById('meta-tooltip-content');
-            // const questionMetaElement = document.getElementById('question-meta'); // No longer used directly
             const questionTextElement = document.getElementById('question-text');
             const choicesFormElement = document.getElementById('choices-form');
             const attemptNotesElement = document.getElementById('attempt-notes');
@@ -1282,6 +1522,11 @@
             const clearProvidersButton = document.getElementById('clear-providers-filter');
             const clearYearsButton = document.getElementById('clear-years-filter');
 
+            // *** NEW: Performance Modal Refs ***
+            const performanceModal = document.getElementById('performance-modal');
+            const closePerformanceModalButton = document.getElementById('close-performance-modal');
+            const performanceStatsContent = document.getElementById('performance-stats-content');
+
 
             // --- State Vars ---
             let quizData = null; // Holds the full loaded JSON data
@@ -1290,6 +1535,7 @@
             let currentQuestionObject = null;
             let questionStartTime = null;
             let lastDisplayedGroupId = null;
+            const LOCAL_STORAGE_KEY = 'mbeQuizData'; // Key for localStorage
 
             // Annotation State
             let isAnnotationActive = false;
@@ -1319,9 +1565,60 @@
             let stopwatchInterval = null;
 
 
+            // --- Local Storage Functions ---
+
+            function loadFromLocalStorage() {
+                const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (storedData) {
+                    try {
+                        const loadedData = JSON.parse(storedData);
+                        if (loadedData && Array.isArray(loadedData.questions)) {
+                            quizData = loadedData;
+                            // Ensure attempts arrays exist (important for data integrity after load)
+                            quizData.questions.forEach(q => {
+                                if (!q.user_attempts) q.user_attempts = [];
+                            });
+                            if (!Array.isArray(quizData.groups)) { quizData.groups = []; }
+
+                            console.log('Quiz data loaded from localStorage.');
+                            return true; // Indicate success
+                        } else {
+                            console.warn('Invalid data format found in localStorage. Ignoring.');
+                            localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear invalid data
+                            return false;
+                        }
+                    } catch (error) {
+                        console.error('Error parsing data from localStorage:', error);
+                        localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear corrupted data
+                        return false;
+                    }
+                }
+                return false; // No data found
+            }
+
+            function saveToLocalStorage() {
+                if (quizData) {
+                    try {
+                        // Ensure latest notes are captured before saving
+                        saveNotesForCurrentAttempt();
+                        const dataString = JSON.stringify(quizData);
+                        localStorage.setItem(LOCAL_STORAGE_KEY, dataString);
+                        console.log('Quiz data saved to localStorage.');
+                    } catch (error) {
+                        console.error('Error saving data to localStorage:', error);
+                        if (error.name === 'QuotaExceededError') {
+                            alert('Could not save progress: Local storage quota exceeded. Please export your data manually or clear some space.');
+                        } else {
+                            alert('An error occurred while trying to automatically save progress.');
+                        }
+                    }
+                }
+            }
+
+
             // --- Event Listeners ---
-            loadJsonButton.addEventListener('click', handleLoadJson);
-            saveJsonButton.addEventListener('click', handleSaveJson);
+            loadJsonButton.addEventListener('click', handleLoadJson); // Now loads NEW data
+            saveJsonButton.addEventListener('click', handleSaveJson); // Exports a backup
             submitAnswerButton.addEventListener('click', handleSubmitAnswer);
             nextQuestionButton.addEventListener('click', handleNextQuestion);
             sidebarToggleButton.addEventListener('click', toggleSidebar);
@@ -1338,6 +1635,29 @@
 
             document.getElementById('clear-notes-filter').addEventListener('click', () => {
                 document.querySelector('input[name="filter-notes"][value="all"]').checked = true;
+            });
+
+            // *** NEW: Performance Modal Listeners ***
+            // Get reference to the "Apply Filters" button to insert the new button before it
+            const referenceButtonForPerformance = applyFiltersButton; // Or closeSidebarButton if you prefer it last
+            const performanceButton = document.createElement('button');
+            performanceButton.id = 'show-performance-button';
+            performanceButton.textContent = 'Performance Dashboard';
+            performanceButton.disabled = true; // Initially disabled until data is loaded
+            // Insert the new button before the reference button within the sidebar
+            referenceButtonForPerformance.parentNode.insertBefore(performanceButton, referenceButtonForPerformance.nextSibling); // Insert AFTER apply filters
+
+            // Add margin between buttons if needed via CSS or inline style
+            performanceButton.style.marginTop = "1rem"; // Add some space above
+            applyFiltersButton.style.marginBottom = "0"; // Reset margin if needed
+
+            performanceButton.addEventListener('click', showPerformanceModal);
+            closePerformanceModalButton.addEventListener('click', closePerformanceModal);
+            // Optional: Close modal if clicked outside the content
+            performanceModal.addEventListener('click', (event) => {
+                if (event.target === performanceModal) {
+                    closePerformanceModal();
+                }
             });
 
             // Add timer-related settings event listeners
@@ -1383,6 +1703,15 @@
             eraserButton.addEventListener('click', () => setTool('eraser'));
             clearAnnotationButton.addEventListener('click', clearCanvas); // Explicit clear stays
 
+            // Save progress before leaving the page
+            window.addEventListener('beforeunload', () => {
+                // Save current notes one last time
+                saveNotesForCurrentAttempt();
+                // Save the entire state
+                saveToLocalStorage();
+            });
+
+
             // --- Sidebar Functions ---
 
             function toggleSidebar() {
@@ -1409,7 +1738,14 @@
             }
 
             function populateFilterOptions() {
-                if (!quizData || !Array.isArray(quizData.questions)) return;
+                if (!quizData || !Array.isArray(quizData.questions)) {
+                    filterCategoriesList.innerHTML = '<p>Load data or clear storage to see categories.</p>';
+                    filterProvidersList.innerHTML = '<p>Load data or clear storage to see providers.</p>';
+                    filterYearsList.innerHTML = '<p>Load data or clear storage to see years.</p>';
+                    applyFiltersButton.disabled = true;
+                    return;
+                }
+
 
                 const categories = new Set();
                 const providers = new Set();
@@ -1425,8 +1761,15 @@
                 populateCheckboxList(filterProvidersList, [...providers].sort());
                 populateCheckboxList(filterYearsList, [...years].sort((a, b) => b - a)); // Sort years descending
 
-                applyFiltersButton.disabled = false; // Enable button now that data is loaded
+                applyFiltersButton.disabled = false; // Enable button now that data is loaded/available
+
+                // *** NEW: Enable/Disable Performance Button based on data ***
+                const performanceBtn = document.getElementById('show-performance-button');
+                if (performanceBtn) {
+                    performanceBtn.disabled = !(quizData && Array.isArray(quizData.questions));
+                }
             }
+
 
             function populateCheckboxList(container, items) {
                 container.innerHTML = ''; // Clear previous content
@@ -1477,354 +1820,294 @@
             }
 
 
-            // Timer Functions
+            // Timer Functions (Unchanged - keeping for brevity)
             function formatTime(seconds) {
                 const isNegative = seconds < 0;
                 const absoluteSeconds = Math.abs(seconds);
                 const minutes = Math.floor(absoluteSeconds / 60);
                 const remainderSeconds = Math.floor(absoluteSeconds % 60);
-
                 return `${isNegative ? '-' : ''}${minutes.toString().padStart(2, '0')}:${remainderSeconds.toString().padStart(2, '0')}`;
             }
-
             function updateTimerVisibility() {
                 const timerContainer = document.getElementById('timer-container');
                 const sessionTimerElement = document.getElementById('session-timer');
                 const questionTimerElement = document.getElementById('question-timer');
                 const stopwatchElement = document.getElementById('stopwatch');
-
                 if (!timerContainer) return;
-
                 sessionTimerElement.style.display = sessionTimerEnabled ? 'flex' : 'none';
                 questionTimerElement.style.display = questionTimerEnabled ? 'flex' : 'none';
                 stopwatchElement.style.display = stopwatchEnabled ? 'flex' : 'none';
-
-                // Hide the entire container if all timers are disabled
-                timerContainer.style.display =
-                    (sessionTimerEnabled || questionTimerEnabled || stopwatchEnabled) ? 'flex' : 'none';
+                timerContainer.style.display = (sessionTimerEnabled || questionTimerEnabled || stopwatchEnabled) ? 'flex' : 'none';
             }
-
             function startSessionTimer() {
                 if (!sessionTimerEnabled) return;
-
                 clearInterval(sessionTimerInterval);
                 sessionTimeRemaining = sessionTimeLimit;
                 updateSessionTimerDisplay();
-
                 sessionTimerInterval = setInterval(() => {
                     sessionTimeRemaining--;
                     updateSessionTimerDisplay();
-
                     if (sessionTimeRemaining <= 0) {
                         clearInterval(sessionTimerInterval);
                         handleSessionTimeout();
                     }
                 }, 1000);
             }
-
             function updateSessionTimerDisplay() {
                 const sessionTimerElement = document.getElementById('session-timer');
                 const sessionTimerValue = sessionTimerElement?.querySelector('.timer-value');
                 if (!sessionTimerValue) return;
-
                 sessionTimerValue.textContent = formatTime(sessionTimeRemaining);
-
-                // Update visual indicators
                 sessionTimerElement.classList.remove('warning', 'danger');
-                if (sessionTimeRemaining <= 60) { // Last minute
-                    sessionTimerElement.classList.add('danger');
-                } else if (sessionTimeRemaining <= 300) { // Last 5 minutes
-                    sessionTimerElement.classList.add('warning');
-                }
+                if (sessionTimeRemaining <= 60) { sessionTimerElement.classList.add('danger'); }
+                else if (sessionTimeRemaining <= 300) { sessionTimerElement.classList.add('warning'); }
             }
-
             function startQuestionTimer() {
                 if (!questionTimerEnabled) return;
-
                 clearInterval(questionTimerInterval);
                 questionTimeRemaining = questionTimeLimit;
                 updateQuestionTimerDisplay();
-
                 questionTimerInterval = setInterval(() => {
                     questionTimeRemaining--;
                     updateQuestionTimerDisplay();
-
-                    if (questionTimeRemaining === 0) {
-                        // When hitting exactly zero, trigger the visual changes
-                        handleQuestionTimeout();
-                        // But don't clear the interval - let it keep going negative
-                    }
+                    if (questionTimeRemaining === 0) { handleQuestionTimeout(); }
                 }, 1000);
             }
-
-
             function updateQuestionTimerDisplay() {
                 const questionTimerElement = document.getElementById('question-timer');
                 const questionTimerValue = questionTimerElement?.querySelector('.timer-value');
                 if (!questionTimerValue) return;
-
                 questionTimerValue.textContent = formatTime(questionTimeRemaining);
-
-                // Update visual indicators
                 questionTimerElement.classList.remove('warning', 'danger', 'flashing');
-
-                if (questionTimeRemaining < 0) {
-                    // Negative time - add flashing red effect
-                    questionTimerElement.classList.add('danger', 'flashing');
-                } else if (questionTimeRemaining <= 10) { // Last 10 seconds
-                    questionTimerElement.classList.add('danger');
-                } else if (questionTimeRemaining <= 30) { // Last 30 seconds
-                    questionTimerElement.classList.add('warning');
-                }
+                if (questionTimeRemaining < 0) { questionTimerElement.classList.add('danger', 'flashing'); }
+                else if (questionTimeRemaining <= 10) { questionTimerElement.classList.add('danger'); }
+                else if (questionTimeRemaining <= 30) { questionTimerElement.classList.add('warning'); }
             }
-
-
             function startStopwatch() {
                 if (!stopwatchEnabled) return;
-
                 clearInterval(stopwatchInterval);
                 stopwatchTime = 0;
                 updateStopwatchDisplay();
-
                 stopwatchInterval = setInterval(() => {
                     stopwatchTime++;
                     updateStopwatchDisplay();
                 }, 1000);
             }
-
             function updateStopwatchDisplay() {
                 const stopwatchElement = document.getElementById('stopwatch');
                 const stopwatchValue = stopwatchElement?.querySelector('.timer-value');
                 if (!stopwatchValue) return;
                 stopwatchValue.textContent = formatTime(stopwatchTime);
             }
-
-            function pauseQuestionTimer() {
-                clearInterval(questionTimerInterval);
-            }
-
-            function pauseSessionTimer() {
-                clearInterval(sessionTimerInterval);
-            }
-
-            function pauseStopwatch() {
-                clearInterval(stopwatchInterval);
-            }
-
+            function pauseQuestionTimer() { clearInterval(questionTimerInterval); }
+            function pauseSessionTimer() { clearInterval(sessionTimerInterval); }
+            function pauseStopwatch() { clearInterval(stopwatchInterval); }
             function resetQuestionTimer() {
                 clearInterval(questionTimerInterval);
                 questionTimeRemaining = questionTimeLimit;
                 updateQuestionTimerDisplay();
             }
-
             function resetSessionTimer() {
                 clearInterval(sessionTimerInterval);
                 sessionTimeRemaining = sessionTimeLimit;
                 updateSessionTimerDisplay();
             }
-
             function resetStopwatch() {
                 clearInterval(stopwatchInterval);
                 stopwatchTime = 0;
                 updateStopwatchDisplay();
             }
-
             function handleSessionTimeout() {
-                // Handle the session ending
                 alert("Session time has expired!");
-
-                // Display end of quiz
                 quizAreaElement.style.display = 'none';
                 endOfQuizMessageElement.innerHTML = `<h2>Time's Up!</h2><p>You completed ${currentQuestionIndex + 1} of ${masterQuestionList.length} questions in this session.</p>`;
                 endOfQuizMessageElement.style.display = 'block';
                 currentQuestionObject = null;
                 toggleAnnotationButton.style.display = 'none';
                 deactivateAnnotationMode();
-
-                // Pause all timers
                 pauseQuestionTimer();
                 pauseSessionTimer();
                 pauseStopwatch();
+                saveToLocalStorage(); // Save state on session end
             }
-
             function handleQuestionTimeout() {
-                // Instead of automatically submitting or moving to next question,
-                // simply update the display to show negative time
                 const questionTimerElement = document.getElementById('question-timer');
-                if (questionTimerElement) {
-                    questionTimerElement.classList.add('danger', 'flashing');
-                }
-
-                // Continue the timer (don't clear the interval)
-                // We just keep counting down into negative values
+                if (questionTimerElement) { questionTimerElement.classList.add('danger', 'flashing'); }
             }
-
-
             function initializeTimerSettings() {
-                // Get DOM elements
                 const sessionTimeLimitInput = document.getElementById('session-time-limit');
                 const questionTimeLimitInput = document.getElementById('question-time-limit');
                 const questionLimitInput = document.getElementById('question-limit');
                 const enableSessionTimerCheckbox = document.getElementById('enable-session-timer');
                 const enableQuestionTimerCheckbox = document.getElementById('enable-question-timer');
                 const enableStopwatchCheckbox = document.getElementById('enable-stopwatch');
-
-                // Set initial values from the DOM elements
                 sessionTimerEnabled = enableSessionTimerCheckbox?.checked || false;
                 questionTimerEnabled = enableQuestionTimerCheckbox?.checked || false;
                 stopwatchEnabled = enableStopwatchCheckbox?.checked || true;
-
-                // Get values from inputs, with fallbacks
-                sessionTimeLimit = (parseInt(sessionTimeLimitInput?.value, 10) || 60) * 60; // Convert minutes to seconds
+                sessionTimeLimit = (parseInt(sessionTimeLimitInput?.value, 10) || 60) * 60;
                 questionTimeLimit = parseInt(questionTimeLimitInput?.value, 10) || 90;
                 questionLimit = parseInt(questionLimitInput?.value, 10) || 50;
-
-                // Update timer visibility
                 updateTimerVisibility();
-                // Additional line to ensure the correct behavior for negative times
                 document.documentElement.style.setProperty('--negative-time-color', 'var(--danger-color)');
             }
 
 
             // --- Core Quiz Logic ---
 
+            /**
+             * Handles loading NEW quiz data from a user-selected JSON file.
+             * This will overwrite any data currently in localStorage.
+             */
             function handleLoadJson() {
                 const file = jsonFileElement.files[0];
-                if (!file) { alert('Please select a JSON file first.'); return; }
+                if (!file) {
+                    alert('Please select a JSON file first.');
+                    return;
+                }
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
                         const loadedData = JSON.parse(e.target.result);
                         if (loadedData && Array.isArray(loadedData.questions)) {
-                            quizData = loadedData;
+                            quizData = loadedData; // Overwrite current data
                             // Initialize user_attempts if missing
                             quizData.questions.forEach(q => {
-                                console.log(q);
                                 if (!q.user_attempts) q.user_attempts = [];
                             });
-                            if (!Array.isArray(quizData.groups)) { quizData.groups = []; } // Ensure groups array exists
+                            if (!Array.isArray(quizData.groups)) { quizData.groups = []; }
+
+                            // Save the NEWLY loaded data to localStorage immediately
+                            saveToLocalStorage();
 
                             populateFilterOptions();
-                            applyFiltersAndStartQuiz(); // Start with default filters
+                            applyFiltersAndStartQuiz(); // Start with default filters based on NEW data
                             saveJsonButton.disabled = false;
+                            // *** NEW: Enable performance button ***
+                            const performanceBtn = document.getElementById('show-performance-button');
+                            if (performanceBtn) performanceBtn.disabled = false;
                             closeSidebar();
+                            alert(`Successfully loaded new data from ${file.name}. Previous progress (if any) has been replaced.`);
+                            jsonFileElement.value = ''; // Clear file input
                         } else {
                             alert('Invalid JSON format. Expected an object with a "questions" array.');
-                            resetQuizState();
+                            // Do NOT reset quiz state here - keep existing localStorage data if load fails
+                            jsonFileElement.value = '';
                         }
                     } catch (error) {
                         alert(`Error parsing JSON: ${error.message}`);
                         console.error(error);
-                        resetQuizState();
+                        jsonFileElement.value = '';
+                        // Do NOT reset quiz state
                     }
                 };
                 reader.onerror = () => {
                     alert('Error reading file.');
                     console.error(reader.error);
-                    resetQuizState();
+                    jsonFileElement.value = '';
+                    // Do NOT reset quiz state
                 };
                 reader.readAsText(file);
             }
 
+            /**
+             * Handles exporting the current quiz data (including progress) to a JSON file.
+             * This is now primarily a backup/transfer function.
+             */
             function handleSaveJson() {
-                if (!quizData) { alert('No quiz data loaded.'); return; }
-                // *** MODIFICATION: Save notes for the current question *before* saving the file ***
+                if (!quizData) { alert('No quiz data available to export.'); return; }
+
+                // Ensure latest notes are captured before exporting
                 saveNotesForCurrentAttempt();
+
                 try {
                     const jsonDataString = JSON.stringify(quizData, null, 2);
                     const blob = new Blob([jsonDataString], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    const fn = (jsonFileElement.files[0]?.name || 'quiz.json').replace(/(\.json)?$/, '_progress.json');
+                    // Use a generic name or derive from loaded file if possible
+                    const baseName = quizData.fileName || 'mbe_quiz_backup'; // Add fileName property if you store it
+                    const fn = `${baseName}_${new Date().toISOString().slice(0, 10)}.json`;
                     a.download = fn;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-                    alert('Progress saved!');
+                    alert('Current progress exported!');
                 } catch (error) {
-                    alert(`Error saving JSON: ${error.message}`);
+                    alert(`Error exporting JSON backup: ${error.message}`);
                     console.error(error);
                 }
             }
 
             /**
              * Applies selected filters and scrambling, then starts the quiz.
+             * Uses the quizData already loaded (either from file or localStorage).
              */
             function applyFiltersAndStartQuiz() {
-                // Initialize timer settings
+                // Initialize timer settings first (needed for the session)
                 initializeTimerSettings();
 
                 if (!quizData) {
-                    alert("Please load quiz data first.");
+                    alert("No quiz data loaded. Please load a JSON file or check local storage.");
                     return;
                 }
-                // *** MODIFICATION: Save notes for the potentially *previous* question before applying filters ***
+
+                // Save any pending notes from the *previous* question before filtering
                 saveNotesForCurrentAttempt();
-                // *** MODIFICATION: Clear canvas for the new quiz session ***
-                clearCanvas();
+                clearCanvas(); // Clear canvas for the new quiz session/filter application
 
                 const filters = getFilterSettings();
 
-                // 1. Filter Questions - Update the existing filter logic
+                // 1. Filter Questions
                 let filteredQuestions = quizData.questions.filter(q => {
                     const hasAttempts = q.user_attempts && q.user_attempts.length > 0;
 
-                    // Basic status filter (existing code)
+                    // Status filter
                     if (filters.status === 'unanswered' && hasAttempts) return false;
                     if (filters.status === 'answered' && !hasAttempts) return false;
 
-                    // New attempt-based filters
+                    // Attempts filter
                     if (filters.attempts === 'attempted' && !hasAttempts) return false;
                     if (filters.attempts === 'unattempted' && hasAttempts) return false;
-
-                    // Check for questions with correct/incorrect attempts
                     if (filters.attempts === 'correct' || filters.attempts === 'incorrect') {
                         if (!hasAttempts) return false;
-
-                        const hasCorrectAttempt = q.user_attempts.some(attempt =>
-                            attempt.chosen_answer === q.answer?.correct_choice);
-
+                        const hasCorrectAttempt = q.user_attempts.some(attempt => attempt.chosen_answer === q.answer?.correct_choice);
                         if (filters.attempts === 'correct' && !hasCorrectAttempt) return false;
-                        if (filters.attempts === 'incorrect' && hasCorrectAttempt &&
-                            q.user_attempts.every(attempt => attempt.chosen_answer === q.answer?.correct_choice)) return false;
+                        if (filters.attempts === 'incorrect' && q.user_attempts.every(attempt => attempt.chosen_answer === q.answer?.correct_choice)) return false; // Need at least one incorrect
                     }
 
-                    // Notes filters
+                    // Notes filter
                     if (filters.notes === 'with-notes') {
                         if (!hasAttempts) return false;
-                        const hasNotes = q.user_attempts.some(attempt => attempt.notes && attempt.notes.trim() !== '');
-                        if (!hasNotes) return false;
+                        if (!q.user_attempts.some(attempt => attempt.notes && attempt.notes.trim() !== '')) return false;
                     }
-
                     if (filters.notes === 'without-notes') {
-                        if (!hasAttempts) return false;
-                        const allAttemptsHaveNotes = q.user_attempts.every(attempt => attempt.notes && attempt.notes.trim() !== '');
-                        if (allAttemptsHaveNotes) return false;
+                        // Show if no attempts OR if attempts exist but none have notes
+                        if (hasAttempts && q.user_attempts.every(attempt => attempt.notes && attempt.notes.trim() !== '')) return false;
                     }
 
-                    // Existing category/provider/year filters
+                    // Category/Provider/Year filters
                     if (filters.categories.length > 0 && !filters.categories.includes(q.category)) return false;
                     if (filters.providers.length > 0 && !filters.providers.includes(q.source?.provider)) return false;
-                    if (filters.years.length > 0 &&
-                        !filters.years.includes(parseInt(q.source?.year, 10)) &&
-                        !filters.years.includes(String(q.source?.year))) return false;
+                    if (filters.years.length > 0 && !filters.years.includes(q.source?.year?.toString())) return false; // Compare as strings for safety
 
                     return true;
                 });
 
-
-                // 2. Prepare Master List (unchanged logic, respecting groups)
+                // 2. Prepare Master List (respecting groups)
                 masterQuestionList = [];
                 const processedGroupIds = new Set();
                 const questionsById = new Map(filteredQuestions.map(q => [q.question_id, q]));
                 const addedQuestionIds = new Set();
+
                 if (quizData.groups) {
                     quizData.groups.forEach(group => {
                         const groupQuestionIds = group.question_order || [];
-                        const allGroupQuestionsFiltered = groupQuestionIds.every(id => questionsById.has(id));
-                        if (allGroupQuestionsFiltered && groupQuestionIds.length > 0) {
+                        // Check if *all* questions required by the group are present in the *filtered* list
+                        const groupQuestionsPresent = groupQuestionIds.every(id => questionsById.has(id));
+
+                        if (groupQuestionsPresent && groupQuestionIds.length > 0) {
                             groupQuestionIds.forEach(qId => {
                                 const question = questionsById.get(qId);
                                 if (question && !addedQuestionIds.has(qId)) {
@@ -1836,12 +2119,15 @@
                         }
                     });
                 }
+
+                // Add remaining filtered questions that were not part of a processed group
                 filteredQuestions.forEach(question => {
                     if (!addedQuestionIds.has(question.question_id)) {
                         masterQuestionList.push(question);
                         addedQuestionIds.add(question.question_id);
                     }
                 });
+
 
                 // 3. Scramble (if selected)
                 if (filters.scramble) {
@@ -1850,22 +2136,23 @@
 
                 // 4. Start the Quiz
                 if (masterQuestionList.length > 0) {
-                    currentQuestionIndex = -1;
+                    currentQuestionIndex = -1; // Reset index for the new list
                     lastDisplayedGroupId = null;
                     quizAreaElement.style.display = 'block';
                     endOfQuizMessageElement.style.display = 'none';
                     toggleAnnotationButton.style.display = 'inline-block';
-                    displayNextQuestionInternal(); // Display the first question
 
-                    // Start timers
+                    // Start timers AFTER confirming there are questions
                     resetSessionTimer();
                     resetQuestionTimer();
                     resetStopwatch();
-                    startSessionTimer();
-                    startStopwatch();
+                    startSessionTimer(); // Start session timer for the whole filtered set
+                    startStopwatch();  // Start stopwatch for the whole filtered set
 
-                    // Add this line to show filter count in the quiz progress
-                    quizProgressElement.textContent = `Showing ${masterQuestionList.length} questions (${currentQuestionIndex + 1} of ${masterQuestionList.length})`;
+                    displayNextQuestionInternal(); // Display the first question
+
+                    // Update progress display AFTER starting
+                    quizProgressElement.textContent = `Showing ${masterQuestionList.length} questions (1 of ${masterQuestionList.length})`;
 
                     closeSidebar();
                 } else {
@@ -1876,10 +2163,14 @@
                     currentQuestionObject = null;
                     toggleAnnotationButton.style.display = 'none';
                     deactivateAnnotationMode(); // Ensure annotation mode is off
+                    pauseQuestionTimer(); // Stop any stray timers
+                    pauseSessionTimer();
+                    pauseStopwatch();
                     alert("No questions match your filter settings.");
                     closeSidebar();
                 }
             }
+
 
             function shuffleArray(array) {
                 let currentIndex = array.length, randomIndex;
@@ -1892,10 +2183,8 @@
             }
 
             function renderQuestion(question) {
-                // Reset UI elements, BUT NOT the canvas content
-                deactivateAnnotationMode(); // Hide controls/canvas, but drawing persists
-                // *** MODIFICATION: Do NOT clear canvas here ***
-                // clearCanvas(); // REMOVED
+                deactivateAnnotationMode();
+                // clearCanvas(); // Clear canvas handled in displayNextQuestionInternal
 
                 groupIntroElement.innerHTML = '';
                 choicesFormElement.innerHTML = '';
@@ -1920,17 +2209,17 @@
                             lastDisplayedGroupId = question.group_id;
                         }
                     } else {
-                        displayGroupIntro = true; // Keep container visible
+                        displayGroupIntro = true; // Keep container visible for subsequent questions in the group
                     }
                 } else {
-                    lastDisplayedGroupId = null;
+                    lastDisplayedGroupId = null; // Reset if standalone question
                 }
                 groupIntroElement.style.display = displayGroupIntro && groupIntroElement.innerHTML.trim() !== '' ? 'block' : 'none';
 
+
                 // Display Question Meta in Tooltip
                 const sourceInfo = question.source || {};
-                // Removed <strong>ID:</strong> ${question.question_id}<br>
-                const metaHtml = `<strong>Category:</strong> ${question.category || 'N/A'}<br>
+                const metaHtml = `<strong>Category:</strong> ${escapeHtml(question.category || 'N/A')}<br>
                                   <strong>Source:</strong> ${escapeHtml(sourceInfo.name || 'Unknown')}<br>
                                   <strong>Provider:</strong> ${escapeHtml(sourceInfo.provider || 'N/A')}<br>
                                   <strong>Year:</strong> ${sourceInfo.year || 'N/A'} | <strong>Q#:</strong> ${sourceInfo.question || 'N/A'}`;
@@ -1965,9 +2254,8 @@
                 submitAnswerButton.style.display = 'inline-block';
                 submitAnswerButton.disabled = false;
                 nextQuestionButton.style.display = 'none';
-                attemptNotesElement.value = ''; // Clear notes from previous question
-                // *** MODIFICATION: Enable notes from the start ***
-                attemptNotesElement.disabled = false;
+                attemptNotesElement.value = ''; // Clear notes visually for new question
+                attemptNotesElement.disabled = false; // Enable notes area
 
                 renderPastAttempts(question);
 
@@ -1977,10 +2265,13 @@
                 } else {
                     toggleAnnotationButton.style.display = 'none';
                 }
+
+                // Ensure the container is ready for potential annotation
+                resizeCanvas(); // Adjust canvas size to match content
             }
 
+
             function renderPastAttempts(question) {
-                // Ensure user_attempts exists
                 if (!question.user_attempts) question.user_attempts = [];
 
                 const attempts = question.user_attempts;
@@ -2001,7 +2292,7 @@
                             resultClass = 'attempt-incorrect';
                             resultText = `Incorrect (Correct: ${correctAnswer})`;
                         } else {
-                            resultText = 'N/A';
+                            resultText = 'N/A (Answer Unknown)'; // Handle cases with no defined correct answer
                         }
 
                         listHtml += `<li>Attempt #${attemptNumber}: Chose <strong class="${resultClass}">${escapeHtml(attempt.chosen_answer) || 'N/A'}</strong> (${resultText}) <br>
@@ -2011,15 +2302,16 @@
                     });
                     listHtml += '</ul>';
                     pastAttemptsContainer.innerHTML = listHtml;
-                    // Visibility controlled in handleSubmitAnswer
+                    pastAttemptsContainer.style.display = 'block'; // Show if attempts exist
                 } else {
                     pastAttemptsContainer.innerHTML = '';
                     pastAttemptsContainer.style.display = 'none'; // Hide if no attempts
                 }
             }
 
+
             function handleSubmitAnswer() {
-                pauseQuestionTimer();
+                pauseQuestionTimer(); // Pause timer for this question
 
                 const selectedChoiceInput = choicesFormElement.querySelector('input[type="radio"]:checked');
                 if (!selectedChoiceInput) {
@@ -2030,40 +2322,35 @@
                 const chosenAnswer = selectedChoiceInput.value;
                 const timeSpentSeconds = questionStartTime ? (Date.now() - questionStartTime) / 1000 : 0;
                 const correctAnswer = currentQuestionObject.answer?.correct_choice;
-                // *** MODIFICATION: Capture notes *before* creating the attempt ***
                 const currentNotes = attemptNotesElement.value.trim();
 
+                // Find the original question in quizData to modify it directly
                 const originalQuestion = quizData.questions.find(q => q.question_id === currentQuestionObject.question_id);
                 if (!originalQuestion) {
-                    console.error("Could not find original question object to record attempt!");
-                    alert("Error: Could not save attempt. Original question data not found.");
+                    console.error("Fatal Error: Could not find original question object in quizData to record attempt!");
+                    alert("Error: Could not save attempt. Data inconsistency detected.");
                     return;
                 }
                 if (!Array.isArray(originalQuestion.user_attempts)) {
                     originalQuestion.user_attempts = [];
                 }
 
-                // Create and add the new attempt record
+                // Create and add the new attempt record to the main quizData object
                 const newAttempt = {
                     attempt_id: originalQuestion.user_attempts.length + 1,
                     chosen_answer: chosenAnswer,
                     time_submitted: new Date().toISOString(),
                     time_spent_seconds: parseFloat(timeSpentSeconds.toFixed(1)),
-                    // *** MODIFICATION: Add captured notes here ***
                     notes: currentNotes
                 };
-                originalQuestion.user_attempts.push(newAttempt);
-                // Update local copy if different
-                if (currentQuestionObject !== originalQuestion) {
-                    if (!Array.isArray(currentQuestionObject.user_attempts)) {
-                        currentQuestionObject.user_attempts = [];
-                    }
-                    currentQuestionObject.user_attempts.push({ ...newAttempt }); // Add a copy to local object
-                }
+                originalQuestion.user_attempts.push(newAttempt); // <<< This is the ONLY addition needed
+
+                // --- The redundant addition to currentQuestionObject has been removed ---
+
+                // Save the updated quizData to localStorage immediately
+                saveToLocalStorage();
 
                 // --- UI Updates ---
-                // *** MODIFICATION: Do NOT clear canvas here ***
-                // clearCanvas(); // REMOVED
                 deactivateAnnotationMode(); // Hide controls, keep drawing
 
                 // Show feedback
@@ -2077,8 +2364,8 @@
                     feedbackAreaElement.className = 'feedback-area incorrect';
                 }
                 const explanationText = currentQuestionObject.answer?.explanation || "No explanation provided.";
-
-                feedbackHtml += `<div class="explanation"><strong>Explanation:</strong>${currentQuestionObject.answer?.ai_generated === true ? ' <span class="ai-generated-flag">(AI Generated)</span>' : ''}<br>${escapeHtml(explanationText)}</div>`;
+                const aiFlag = currentQuestionObject.answer?.ai_generated === true ? ' <span class="ai-generated-flag">(AI Generated)</span>' : '';
+                feedbackHtml += `<div class="explanation"><strong>Explanation:</strong>${aiFlag}<br>${escapeHtml(explanationText)}</div>`;
                 feedbackAreaElement.innerHTML = feedbackHtml;
                 feedbackAreaElement.style.display = 'block';
 
@@ -2096,11 +2383,11 @@
                 submitAnswerButton.style.display = 'none';
                 submitAnswerButton.disabled = true;
                 nextQuestionButton.style.display = 'inline-block';
-                // *** MODIFICATION: Notes area remains enabled ***
-                // attemptNotesElement.disabled = false; // Already enabled
+                // Notes area remains enabled for editing *after* submission
 
-                // Update and show past attempts
-                renderPastAttempts(currentQuestionObject);
+                // Update and show past attempts (using the now updated currentQuestionObject)
+                // Since originalQuestion was updated, currentQuestionObject (referencing it) now has the correct single new attempt
+                renderPastAttempts(currentQuestionObject); // Re-render to show the new attempt
                 pastAttemptsContainer.style.display = 'block';
 
                 // Focus notes and scroll feedback into view
@@ -2108,30 +2395,34 @@
                 feedbackAreaElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
 
+
             /**
              * Saves the current notes from the textarea to the *last* attempt of the *current* question
-             * in the original quizData. Called before moving to the next question or saving the file.
+             * in the main quizData object. Called before moving to the next question or saving the file/state.
+             * Does NOT call saveToLocalStorage itself - that's handled by the calling function.
              */
             function saveNotesForCurrentAttempt() {
+                // Check if there's a current question and it has attempts recorded
                 if (currentQuestionObject && quizData?.questions) {
                     const originalQuestion = quizData.questions.find(q => q.question_id === currentQuestionObject.question_id);
-                    // Ensure attempts array exists and has items
+
+                    // Ensure the question and its attempts array exist in the main data source
                     if (originalQuestion && Array.isArray(originalQuestion.user_attempts) && originalQuestion.user_attempts.length > 0) {
                         const lastAttemptIndex = originalQuestion.user_attempts.length - 1;
-                        const lastAttempt = originalQuestion.user_attempts[lastAttemptIndex];
+                        const lastAttemptInQuizData = originalQuestion.user_attempts[lastAttemptIndex];
 
-                        // *** MODIFICATION: Always save the current notes, no need to check disabled status ***
-                        if (lastAttempt) {
+                        if (lastAttemptInQuizData) {
                             const notesValue = attemptNotesElement.value.trim();
-                            if (lastAttempt.notes !== notesValue) { // Only update if changed
-                                lastAttempt.notes = notesValue;
+                            // Only update if the notes actually changed
+                            if (lastAttemptInQuizData.notes !== notesValue) {
+                                lastAttemptInQuizData.notes = notesValue;
+                                console.log(`Notes updated for attempt ${lastAttemptInQuizData.attempt_id} on question ${originalQuestion.question_id}`);
 
-                                // Update local copy too if different
-                                if (currentQuestionObject !== originalQuestion && currentQuestionObject.user_attempts?.length > 0) {
-                                    const localLastAttempt = currentQuestionObject.user_attempts[lastAttemptIndex];
-                                    // Check attempt_id for safety, though index should match if logic is sound
-                                    if (localLastAttempt && localLastAttempt.attempt_id === lastAttempt.attempt_id) {
-                                        localLastAttempt.notes = notesValue;
+                                // Also update the local currentQuestionObject's last attempt for consistency
+                                if (currentQuestionObject.user_attempts && currentQuestionObject.user_attempts.length > lastAttemptIndex) {
+                                    const lastAttemptInCurrent = currentQuestionObject.user_attempts[lastAttemptIndex];
+                                    if (lastAttemptInCurrent && lastAttemptInCurrent.attempt_id === lastAttemptInQuizData.attempt_id) {
+                                        lastAttemptInCurrent.notes = notesValue;
                                     }
                                 }
                             }
@@ -2140,9 +2431,11 @@
                 }
             }
 
+
             function handleNextQuestion() {
-                saveNotesForCurrentAttempt(); // Save potentially updated notes before moving on
-                pauseQuestionTimer();
+                saveNotesForCurrentAttempt(); // Save notes from the question we're leaving
+                saveToLocalStorage(); // Persist the potentially updated notes
+                pauseQuestionTimer(); // Pause timer explicitly before loading next
                 displayNextQuestionInternal();
             }
 
@@ -2150,62 +2443,76 @@
              * Displays the next question in the masterQuestionList or ends the quiz.
              */
             function displayNextQuestionInternal() {
-                // *** MODIFICATION: Clear canvas *before* loading the new question ***
-                clearCanvas();
+                clearCanvas(); // Clear annotations for the NEW question
 
-                // Reset question timer for the new question
+                // Reset and start question timer for the new question
                 resetQuestionTimer();
-                startQuestionTimer();
+                if (questionTimerEnabled) { // Only start if enabled
+                    startQuestionTimer();
+                }
 
-                // Check question limit
-                if (questionLimit > 0 && currentQuestionIndex >= questionLimit) {
-                    // End the quiz when the question limit is reached
+                // Check question limit BEFORE incrementing index
+                if (questionLimit > 0 && (currentQuestionIndex + 1) >= questionLimit) {
                     quizAreaElement.style.display = 'none';
-                    endOfQuizMessageElement.innerHTML = `<h2>Quiz Complete!</h2><p>You completed the ${questionLimit}-question sprint session.</p>`;
+                    endOfQuizMessageElement.innerHTML = `<h2>Quiz Sprint Complete!</h2><p>You finished the ${questionLimit}-question session.</p>`;
                     endOfQuizMessageElement.style.display = 'block';
                     currentQuestionObject = null;
                     toggleAnnotationButton.style.display = 'none';
                     deactivateAnnotationMode();
-                    pauseQuestionTimer();
+                    pauseQuestionTimer(); // Stop timers at end
                     pauseSessionTimer();
                     pauseStopwatch();
+                    saveToLocalStorage(); // Final save on quiz end
                     return;
                 }
 
 
-                currentQuestionIndex++;
+                currentQuestionIndex++; // Move to the next index
+
                 if (currentQuestionIndex < masterQuestionList.length) {
                     currentQuestionObject = masterQuestionList[currentQuestionIndex];
                     if (!currentQuestionObject) {
                         console.error(`Error: Undefined question at index ${currentQuestionIndex}. Skipping.`);
-                        displayNextQuestionInternal(); // Attempt to skip
+                        displayNextQuestionInternal(); // Attempt to skip to the next valid one
                         return;
                     }
                     renderQuestion(currentQuestionObject);
                     quizProgressElement.textContent = `Question ${currentQuestionIndex + 1} of ${masterQuestionList.length}`;
-                    questionStartTime = Date.now();
+                    questionStartTime = Date.now(); // Start timing for *this* question
                     const questionCardElement = document.getElementById('current-question-card');
                     if (questionCardElement) {
                         questionCardElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
 
                 } else {
+                    // Reached the end of the filtered list
                     quizAreaElement.style.display = 'none';
-                    endOfQuizMessageElement.innerHTML = `<h2>Quiz Complete!</h2><p>You answered ${masterQuestionList.length} questions in this session.</p>`;
+                    endOfQuizMessageElement.innerHTML = `<h2>Quiz Complete!</h2><p>You answered all ${masterQuestionList.length} questions in this filtered set.</p>`;
                     endOfQuizMessageElement.style.display = 'block';
                     currentQuestionObject = null;
                     toggleAnnotationButton.style.display = 'none';
                     deactivateAnnotationMode();
+                    pauseQuestionTimer(); // Stop timers at end
+                    pauseSessionTimer();
+                    pauseStopwatch();
+                    saveToLocalStorage(); // Final save on quiz end
                 }
             }
 
-            function resetQuizState() {
+            /**
+             * Resets the entire application state, typically used when no data is loaded.
+             * Does NOT clear localStorage here - that happens explicitly if needed (e.g., invalid data).
+             */
+            function resetQuizState(keepLoadedData = false) {
+                if (!keepLoadedData) {
+                    quizData = null; // Clear the main data if not keeping it
+                }
                 masterQuestionList = [];
                 currentQuestionIndex = -1;
                 currentQuestionObject = null;
                 lastDisplayedGroupId = null;
 
-                // Reset UI
+                // Reset UI Elements
                 quizAreaElement.style.display = 'none';
                 endOfQuizMessageElement.style.display = 'none';
                 endOfQuizMessageElement.innerHTML = '';
@@ -2217,8 +2524,7 @@
                 pastAttemptsContainer.innerHTML = '';
                 pastAttemptsContainer.style.display = 'none';
                 attemptNotesElement.value = '';
-                // *** MODIFICATION: Ensure notes are disabled initially if no quiz loaded ***
-                attemptNotesElement.disabled = true;
+                attemptNotesElement.disabled = true; // Disable notes if no quiz active
                 choicesFormElement.innerHTML = '';
                 questionTextElement.textContent = '';
                 metaTooltipContentElement.innerHTML = '';
@@ -2227,217 +2533,368 @@
                 pauseQuestionTimer();
                 pauseSessionTimer();
                 pauseStopwatch();
-
+                updateSessionTimerDisplay(); // Reset display
+                updateQuestionTimerDisplay();
+                updateStopwatchDisplay();
 
                 // Reset Buttons
-                saveJsonButton.disabled = true;
-                jsonFileElement.value = '';
+                saveJsonButton.disabled = !quizData; // Disable export if no data
+                jsonFileElement.value = ''; // Clear file input
 
                 // Reset Sidebar Filters
-                if (quizData) { // Only reset filters if data is loaded
-                    document.querySelectorAll('input[name="filter-status"]').forEach(rb => rb.checked = (rb.value === 'all'));
-                    clearCheckboxes(filterCategoriesList);
-                    clearCheckboxes(filterProvidersList);
-                    clearCheckboxes(filterYearsList);
-                    filterScrambleCheckbox.checked = false;
-                    applyFiltersButton.disabled = false;
-                } else {
-                    filterCategoriesList.innerHTML = '<p>Load data to see categories.</p>';
-                    filterProvidersList.innerHTML = '<p>Load data to see providers.</p>';
-                    filterYearsList.innerHTML = '<p>Load data to see years.</p>';
-                    applyFiltersButton.disabled = true;
-                }
+                populateFilterOptions(); // Repopulate based on current quizData (might be null)
+                // Set default filter radio buttons
+                document.querySelector('input[name="filter-status"][value="all"]').checked = true;
+                document.querySelector('input[name="filter-attempts"][value="all"]').checked = true;
+                document.querySelector('input[name="filter-notes"][value="all"]').checked = true;
+                filterScrambleCheckbox.checked = false;
 
                 // Reset Annotation
                 deactivateAnnotationMode();
                 clearCanvas(); // Clear canvas on full reset
                 setTool('pen');
-                toggleAnnotationButton.style.display = 'none';
+                toggleAnnotationButton.style.display = 'none'; // Hide annotation toggle
+
+                console.log('Quiz state reset.');
             }
 
 
-            // --- Annotation Functions ---
-            // (resizeCanvas, activateAnnotationMode, deactivateAnnotationMode, toggleAnnotationMode,
-            //  getCoords, startDrawing, draw, stopDrawing, setTool, clearCanvas - remain mostly unchanged
-            //  except for the modified highlighter color maybe)
 
+            // --- Annotation Functions --- (Unchanged - keeping for brevity)
             function resizeCanvas() {
-                // Debounce or throttle this if resize events fire too rapidly
                 const rect = annotationArea.getBoundingClientRect();
-                // Use integer values for canvas width/height to avoid sub-pixel issues
                 const newWidth = Math.floor(annotationArea.offsetWidth);
                 const newHeight = Math.floor(annotationArea.offsetHeight);
-
-                // Check if resize is actually needed to avoid unnecessary redraws/context resets
                 if (annotationCanvas.width !== newWidth || annotationCanvas.height !== newHeight) {
-                    // Capture existing drawing temporarily
                     let tempImageData = null;
                     if (annotationCanvas.width > 0 && annotationCanvas.height > 0) {
-                        try {
-                            tempImageData = annotationCtx.getImageData(0, 0, annotationCanvas.width, annotationCanvas.height);
-                        } catch (e) {
-                            console.warn("Could not get ImageData (tainted canvas?):", e);
-                            tempImageData = null; // Ensure it's null if error occurs
-                        }
+                        try { tempImageData = annotationCtx.getImageData(0, 0, annotationCanvas.width, annotationCanvas.height); }
+                        catch (e) { console.warn("Could not get ImageData:", e); tempImageData = null; }
                     }
-
                     annotationCanvas.width = newWidth;
                     annotationCanvas.height = newHeight;
-
-                    // Reset context properties
                     annotationCtx.lineCap = 'round';
                     annotationCtx.lineJoin = 'round';
-
-                    // Restore the drawing if we captured it
-                    if (tempImageData) {
-                        annotationCtx.putImageData(tempImageData, 0, 0);
-                        console.log("Canvas resized, drawing restored.");
-                    } else {
-                        console.log("Canvas resized, drawing NOT restored (no prior image data or error).");
-                    }
+                    if (tempImageData) { annotationCtx.putImageData(tempImageData, 0, 0); }
                 }
             }
-
             function activateAnnotationMode() {
                 if (isAnnotationActive) return;
                 isAnnotationActive = true;
-                // Ensure canvas dimensions match container *before* displaying
-                resizeCanvas(); // Call resize to check/set dimensions and potentially restore drawing
+                resizeCanvas();
                 annotationCanvas.style.display = 'block';
                 annotationCanvas.style.pointerEvents = 'auto';
                 annotationControls.style.display = 'block';
                 toggleAnnotationButton.textContent = 'Hide Annotations';
                 toggleAnnotationButton.classList.add('annotation-active');
-                setTool(currentTool); // Re-apply tool settings
-                console.log("Annotation Mode Activated");
-                // Re-check size after layout changes might affect offsetWidth/Height
-                requestAnimationFrame(resizeCanvas);
+                setTool(currentTool);
+                requestAnimationFrame(resizeCanvas); // Re-check size after display change
             }
-
             function deactivateAnnotationMode() {
                 if (!isAnnotationActive) return;
                 isAnnotationActive = false;
-                // Just hide, don't clear
                 annotationCanvas.style.display = 'none';
                 annotationCanvas.style.pointerEvents = 'none';
                 annotationControls.style.display = 'none';
                 toggleAnnotationButton.textContent = 'Annotate Question';
                 toggleAnnotationButton.classList.remove('annotation-active');
                 isDrawing = false;
-                console.log("Annotation Mode Deactivated (Drawing Persists)");
             }
-
-            function toggleAnnotationMode() {
-                if (isAnnotationActive) {
-                    deactivateAnnotationMode();
-                } else {
-                    activateAnnotationMode();
-                }
-            }
-
+            function toggleAnnotationMode() { if (isAnnotationActive) { deactivateAnnotationMode(); } else { activateAnnotationMode(); } }
             function getCoords(e) {
                 let x, y;
                 const rect = annotationCanvas.getBoundingClientRect();
-                if (e.touches && e.touches.length > 0) {
-                    x = e.touches[0].clientX - rect.left;
-                    y = e.touches[0].clientY - rect.top;
-                    e.preventDefault(); // Prevent scrolling
-                } else {
-                    x = e.offsetX;
-                    y = e.offsetY;
-                }
+                if (e.touches && e.touches.length > 0) { x = e.touches[0].clientX - rect.left; y = e.touches[0].clientY - rect.top; e.preventDefault(); }
+                else { x = e.offsetX; y = e.offsetY; }
                 return { x, y };
             }
-
             function startDrawing(e) {
                 if (!isAnnotationActive) return;
-                // Check size again right before drawing, in case of late layout shifts
-                if (annotationCanvas.width !== annotationArea.offsetWidth || annotationCanvas.height !== annotationArea.offsetHeight) {
-                    resizeCanvas(); // This might restore old drawing, ensure it happens before new path starts
-                }
-
+                if (annotationCanvas.width !== annotationArea.offsetWidth || annotationCanvas.height !== annotationArea.offsetHeight) { resizeCanvas(); } // Check size before draw
                 const { x, y } = getCoords(e);
                 isDrawing = true;
                 [lastX, lastY] = [x, y];
-
                 annotationCtx.beginPath();
                 annotationCtx.moveTo(lastX, lastY);
-
-                // Set Tool Properties
-                annotationCtx.globalAlpha = 1.0; // Reset alpha
-                annotationCtx.globalCompositeOperation = 'source-over'; // Reset blend mode
-
-                if (currentTool === 'pen') {
-                    annotationCtx.strokeStyle = penColor;
-                    annotationCtx.lineWidth = penWidth;
-                } else if (currentTool === 'highlighter') {
-                    annotationCtx.globalCompositeOperation = 'multiply'; // Blend mode for highlighter
-                    annotationCtx.strokeStyle = highlighterColor;
-                    annotationCtx.lineWidth = highlighterWidth;
-                    annotationCtx.globalAlpha = 0.01;
-                    // Note: globalAlpha adjustment might be needed depending on color alpha,
-                    // but 'multiply' often handles the transparency effect well.
-                } else if (currentTool === 'eraser') {
-                    annotationCtx.globalCompositeOperation = 'destination-out'; // Blend mode for eraser
-                    annotationCtx.lineWidth = eraserWidth;
-                }
+                annotationCtx.globalAlpha = 1.0;
+                annotationCtx.globalCompositeOperation = 'source-over';
+                if (currentTool === 'pen') { annotationCtx.strokeStyle = penColor; annotationCtx.lineWidth = penWidth; }
+                else if (currentTool === 'highlighter') { annotationCtx.strokeStyle = highlighterColor; annotationCtx.lineWidth = highlighterWidth; annotationCtx.globalAlpha = 0.01; } // Adjusted alpha for highlighter
+                else if (currentTool === 'eraser') { annotationCtx.globalCompositeOperation = 'destination-out'; annotationCtx.lineWidth = eraserWidth; }
             }
-
             function draw(e) {
                 if (!isDrawing || !isAnnotationActive) return;
                 const { x, y } = getCoords(e);
-
                 annotationCtx.lineTo(x, y);
                 annotationCtx.stroke();
-
                 [lastX, lastY] = [x, y];
             }
-
-            function stopDrawing() {
-                if (!isDrawing) return;
-                // Don't closePath for continuous line drawing unless you specifically want the start/end joined
-                // annotationCtx.closePath();
-                isDrawing = false;
-            }
-
+            function stopDrawing() { if (!isDrawing) return; isDrawing = false; }
             function setTool(toolName) {
                 currentTool = toolName;
-                console.log("Tool set to:", currentTool);
                 penButton.classList.toggle('active-tool', currentTool === 'pen');
                 highlighterButton.classList.toggle('active-tool', currentTool === 'highlighter');
                 eraserButton.classList.toggle('active-tool', currentTool === 'eraser');
                 annotationCanvas.style.cursor = (currentTool === 'eraser') ? 'cell' : 'crosshair';
             }
-
-            // Clear canvas function remains essential for explicit clear / next question
-            function clearCanvas() {
-                if (annotationCanvas.width > 0 && annotationCanvas.height > 0) {
-                    annotationCtx.clearRect(0, 0, annotationCanvas.width, annotationCanvas.height);
-                    console.log("Canvas cleared");
-                } else {
-                    console.log("Canvas not cleared (zero dimensions or context issue)");
-                }
-            }
+            function clearCanvas() { if (annotationCanvas.width > 0 && annotationCanvas.height > 0) { annotationCtx.clearRect(0, 0, annotationCanvas.width, annotationCanvas.height); console.log("Canvas cleared"); } }
 
 
             // --- Utility Functions ---
             function escapeHtml(unsafe) {
                 if (unsafe === null || unsafe === undefined) return '';
                 return unsafe.toString()
-                    .replace(/&/g, "&")
-                    .replace(/</g, "<")
-                    .replace(/>/g, ">")
-                    .replace(/"/g, '"')
-                    .replace(/'/g, "'");
+                    .replace(/&/g, "&amp;") // Use &amp; for proper escaping
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;"); // Use &#039; for single quote
             }
 
-            // --- Initial Page State ---
-            resetQuizState(); // Initialize everything
-            setTool('pen');
-            closeSidebar();
+            // *** NEW: Performance Modal Functions ***
 
-            // Initialize timer visibility on page load
-            updateTimerVisibility();
+            /**
+             * Calculates various performance statistics from the quizData.
+             * @param {object} data The full quizData object.
+             * @returns {object|null} An object containing statistics, or null if no data.
+             */
+            function calculatePerformanceStats(data) {
+                if (!data || !Array.isArray(data.questions) || data.questions.length === 0) {
+                    return null;
+                }
+
+                let totalQuestionsInSet = data.questions.length;
+                let answeredQuestionIds = new Set();
+                let correctlyAnsweredQuestionIds = new Set();
+                let questionsWithNotesIds = new Set();
+                let totalTimeSpent = 0;
+                let totalAttemptsCount = 0;
+                let categoryStats = {};
+                const knownCategories = ['Torts', 'Contracts', 'Criminal Law', 'Criminal Procedure', 'Evidence', 'Real Property', 'Civil Procedure', 'Constitutional Law', 'Business Associations']; // Add more known MBE cats if needed
+
+                // Initialize known categories
+                knownCategories.forEach(cat => {
+                    categoryStats[cat] = { answered: 0, correct: 0, totalTime: 0, attempts: 0, totalQuestions: 0 };
+                });
+
+                data.questions.forEach(q => {
+                    const category = q.category || 'Uncategorized';
+                    const questionId = q.question_id;
+
+                    // Initialize category if not already known
+                    if (!categoryStats[category]) {
+                        categoryStats[category] = { answered: 0, correct: 0, totalTime: 0, attempts: 0, totalQuestions: 0 };
+                    }
+                    categoryStats[category].totalQuestions++;
+
+
+                    if (q.user_attempts && q.user_attempts.length > 0) {
+                        answeredQuestionIds.add(questionId);
+                        categoryStats[category].answered++;
+                        let questionCorrect = false;
+
+                        q.user_attempts.forEach(attempt => {
+                            totalAttemptsCount++;
+                            if (typeof attempt.time_spent_seconds === 'number') {
+                                totalTimeSpent += attempt.time_spent_seconds;
+                                categoryStats[category].totalTime += attempt.time_spent_seconds;
+                            }
+                            categoryStats[category].attempts++;
+
+                            if (attempt.chosen_answer === q.answer?.correct_choice) {
+                                questionCorrect = true; // Mark question as correct if any attempt was right
+                            }
+
+                            if (attempt.notes && attempt.notes.trim() !== '') {
+                                questionsWithNotesIds.add(questionId);
+                            }
+                        });
+
+                        if (questionCorrect) {
+                            correctlyAnsweredQuestionIds.add(questionId);
+                            categoryStats[category].correct++;
+                        }
+                    }
+                });
+
+                const numQuestionsAnswered = answeredQuestionIds.size;
+                const numCorrectlyAnswered = correctlyAnsweredQuestionIds.size;
+                const numQuestionsWithNotes = questionsWithNotesIds.size;
+                const numUnansweredQuestions = totalQuestionsInSet - numQuestionsAnswered;
+
+                const overallCorrectPercentage = numQuestionsAnswered > 0 ? (numCorrectlyAnswered / numQuestionsAnswered) * 100 : 0;
+                const avgTimePerAttempt = totalAttemptsCount > 0 ? totalTimeSpent / totalAttemptsCount : 0;
+                // Calculate average time per *answered question* (considers total time spent on questions that have been attempted)
+                const avgTimePerAnsweredQuestion = numQuestionsAnswered > 0 ? totalTimeSpent / numQuestionsAnswered : 0;
+                const avgAttemptsPerAnsweredQuestion = numQuestionsAnswered > 0 ? totalAttemptsCount / numQuestionsAnswered : 0;
+
+
+                // Calculate percentages for categories
+                Object.values(categoryStats).forEach(stats => {
+                    stats.percentageCorrect = stats.answered > 0 ? (stats.correct / stats.answered) * 100 : 0;
+                    stats.avgTimePerAttempt = stats.attempts > 0 ? stats.totalTime / stats.attempts : 0;
+                });
+
+                // Sort categories by performance (worst first) then alphabetically
+                const sortedCategories = Object.entries(categoryStats)
+                    .filter(([name, stats]) => stats.totalQuestions > 0) // Keep filter destructuring - it's fine here
+                    .sort((a, b) => { // Use standard 'a' and 'b' parameters for the sort callback
+                        // 'a' and 'b' are the array pairs: [categoryName, statsObject]
+                        const statsA = a[1]; // The stats object for element 'a'
+                        const statsB = b[1]; // The stats object for element 'b'
+                        const nameA = a[0];  // The category name for element 'a'
+                        const nameB = b[0];  // The category name for element 'b'
+
+                        // Sort primarily by percentage correct (ascending - worst first)
+                        if (statsA.percentageCorrect !== statsB.percentageCorrect) {
+                            return statsA.percentageCorrect - statsB.percentageCorrect;
+                        }
+                        // If percentages are equal, sort by name alphabetically
+                        return nameA.localeCompare(nameB); // Use the correctly retrieved names
+                    });
+
+
+                return {
+                    totalQuestionsInSet,
+                    numQuestionsAnswered,
+                    numUnansweredQuestions,
+                    numCorrectlyAnswered,
+                    numQuestionsWithNotes,
+                    overallCorrectPercentage,
+                    totalTimeSpent, // Total time across *all* attempts
+                    totalAttemptsCount,
+                    avgTimePerAttempt, // Avg time per individual *try*
+                    avgTimePerAnsweredQuestion, // Avg total time spent on questions that were answered at least once
+                    avgAttemptsPerAnsweredQuestion,
+                    sortedCategories // Array of [categoryName, statsObject]
+                };
+            }
+
+            /**
+             * Displays the calculated performance statistics in the modal.
+             * @param {object} stats The statistics object from calculatePerformanceStats.
+             */
+            function displayPerformanceStats(stats) {
+                if (!stats) {
+                    performanceStatsContent.innerHTML = '<p>No data available to calculate statistics.</p>';
+                    return;
+                }
+
+                let html = '<ul>';
+                // Overall Stats
+                html += `<li><strong>Total Questions Loaded:</strong> ${stats.totalQuestionsInSet}</li>`;
+                html += `<li><strong>Questions Answered:</strong> ${stats.numQuestionsAnswered} (${((stats.numQuestionsAnswered / stats.totalQuestionsInSet) * 100).toFixed(1)}%)</li>`;
+                html += `<li><strong>Questions Unanswered:</strong> ${stats.numUnansweredQuestions}</li>`;
+                html += `<li><strong>Overall Accuracy (Answered):</strong> ${stats.numCorrectlyAnswered} / ${stats.numQuestionsAnswered} (${stats.overallCorrectPercentage.toFixed(1)}%)</li>`;
+                html += `<li><strong>Questions with Notes:</strong> ${stats.numQuestionsWithNotes}</li>`;
+                html += `<li><strong>Total Attempts Made:</strong> ${stats.totalAttemptsCount}</li>`;
+                html += `<li><strong>Total Time Spent (All Attempts):</strong> ${formatTime(stats.totalTimeSpent)}</li>`;
+                html += `<li><strong>Avg. Time per Attempt:</strong> ${stats.avgTimePerAttempt.toFixed(1)} sec</li>`;
+                html += `<li><strong>Avg. Time per Answered Question:</strong> ${stats.avgTimePerAnsweredQuestion.toFixed(1)} sec</li>`;
+                html += `<li><strong>Avg. Attempts per Answered Question:</strong> ${stats.avgAttemptsPerAnsweredQuestion.toFixed(1)}</li>`;
+                html += '</ul>';
+
+                // Category Stats
+                if (stats.sortedCategories.length > 0) {
+                    html += '<div class="category-stats">';
+                    html += '<h3>Performance by Category (Worst First)</h3>';
+                    html += '<ul>';
+                    stats.sortedCategories.forEach(([categoryName, catStats]) => {
+                        html += `<li>
+                            <strong>${escapeHtml(categoryName)} (${catStats.totalQuestions} Qs):</strong>
+                            ${catStats.correct}/${catStats.answered} answered correctly (${catStats.percentageCorrect.toFixed(1)}%)
+                            - Avg Time/Attempt: ${catStats.avgTimePerAttempt.toFixed(1)}s
+                         </li>`;
+                    });
+                    html += '</ul>';
+                    html += '</div>';
+                } else {
+                    html += '<p>No category-specific data available.</p>';
+                }
+
+
+                performanceStatsContent.innerHTML = html;
+            }
+
+            /** Shows the performance modal */
+            function showPerformanceModal() {
+                if (!quizData) {
+                    alert("No quiz data loaded. Please load a JSON file first.");
+                    return;
+                }
+                // Ensure latest notes are saved before calculating stats if a question is currently displayed
+                saveNotesForCurrentAttempt();
+
+                performanceStatsContent.innerHTML = '<p>Calculating statistics...</p>'; // Show loading state
+                performanceModal.style.display = 'block';
+
+                // Calculate and display stats (can be slightly delayed if calculation is heavy)
+                // Using setTimeout to allow the 'loading' message to render first,
+                // though for this calculation it's likely fast enough not to matter much.
+                setTimeout(() => {
+                    const stats = calculatePerformanceStats(quizData);
+                    displayPerformanceStats(stats);
+                }, 10); // Short delay
+            }
+
+            /** Hides the performance modal */
+            function closePerformanceModal() {
+                performanceModal.style.display = 'none';
+                performanceStatsContent.innerHTML = ''; // Clear content when closing
+            }
+
+            // *** END NEW Performance Modal Functions ***
+
+            // --- Initial Page Load Sequence ---
+            function initializeApp() {
+                const loadedFromStorage = loadFromLocalStorage(); // Attempt to load first
+
+                if (loadedFromStorage) {
+                    resetQuizState(true); // Reset UI but keep loaded data
+                    populateFilterOptions(); // Populate filters based on loaded data
+                    saveJsonButton.disabled = false; // Enable export button
+                    // Don't auto-start quiz, let user apply filters if they want
+                    alert("Loaded previous quiz progress from browser storage.");
+                    console.log("Applying default filters (Unanswered, Scrambled) and starting quiz...");
+
+                    // 1. Programmatically set the desired default filters in the UI
+                    // Uncheck 'Show All' and check 'Show Unanswered Only'
+                    const statusAllRadio = document.querySelector('input[name="filter-status"][value="all"]');
+                    const statusUnansweredRadio = document.querySelector('input[name="filter-status"][value="unanswered"]');
+                    if (statusAllRadio) statusAllRadio.checked = false;
+                    if (statusUnansweredRadio) statusUnansweredRadio.checked = true;
+
+                    // Check the 'Scramble Question Order' checkbox
+                    const scrambleCheckbox = document.getElementById('filter-scramble');
+                    if (scrambleCheckbox) scrambleCheckbox.checked = true;
+
+                    // Ensure other filters are reset (resetQuizState should handle most, but be explicit if needed)
+                    // clearCheckboxes(filterCategoriesList); // Already done by resetQuizState
+                    // clearCheckboxes(filterProvidersList); // Already done by resetQuizState
+                    // clearCheckboxes(filterYearsList);     // Already done by resetQuizState
+                    // const attemptsAllRadio = document.querySelector('input[name="filter-attempts"][value="all"]');
+                    // if (attemptsAllRadio) attemptsAllRadio.checked = true; // Already done by resetQuizState
+                    // const notesAllRadio = document.querySelector('input[name="filter-notes"][value="all"]');
+                    // if (notesAllRadio) notesAllRadio.checked = true; // Already done by resetQuizState
+
+
+                    // 2. Immediately apply these filters and start the quiz
+                    applyFiltersAndStartQuiz();
+
+                    // Optionally modify the alert
+                    // alert("Loaded previous quiz progress. Starting with unanswered questions scrambled.");
+                    // --- END OF ADDED LINES ---
+                } else {
+                    resetQuizState(false); // Full reset if nothing loaded
+                }
+                initializeTimerSettings(); // Initialize timers based on default/loaded settings
+                setTool('pen');
+                closeSidebar();
+                updateTimerVisibility();
+            }
+
+            // Start the application initialization
+            initializeApp();
 
         });
     </script>
