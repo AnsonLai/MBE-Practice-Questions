@@ -1,0 +1,25 @@
+{
+  "name": "MBE Practice Quiz",
+  "short_name": "MBE Quiz",
+  "description": "A Progressive Web App for practicing US Multistate Bar Examination (MBE) questions.",
+  "start_url": "./", // Or your specific starting page if not index.html in root
+  "display": "standalone", // Makes it look like a native app
+  "background_color": "#ffffff", // Splash screen background
+  "theme_color": "#007bff", // Browser UI theme color (matches your primary CSS color)
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon-192x192.png", // Create this icon file
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable" // 'maskable' helps with adaptive icons on Android
+    },
+    {
+      "src": "icons/icon-512x512.png", // Create this icon file
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+    // Add other sizes if desired (e.g., 72x72, 96x96, 128x128, 144x144, 152x152, 256x256)
+  ]
+}

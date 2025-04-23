@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MBE Practice Questions</title>
+    <meta name="theme-color" content="#007bff">
+    <link rel="manifest" href="manifest.json">
     <style>
         /* --- Global Styles & Variables --- */
         :root {
@@ -2958,6 +2960,7 @@
 
             // --- Initial Page Load Sequence ---
             function initializeApp() {
+                registerServiceWorker();
                 const loadedFromStorage = loadFromLocalStorage(); // Attempt to load first
 
                 if (loadedFromStorage) {
@@ -3002,6 +3005,49 @@
                 setTool('pen');
                 closeSidebar();
                 updateTimerVisibility();
+            }
+
+            /**
+           * Registers the service worker.
+           */
+            function registerServiceWorker() {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/service-worker.js') // Ensure the path is correct
+                        .then(registration => {
+                            console.log('Service Worker registered successfully with scope:', registration.scope);
+                            // Optional: Listen for updates to the service worker
+                            registration.onupdatefound = () => {
+                                const installingWorker = registration.installing;
+                                if (installingWorker) {
+                                    installingWorker.onstatechange = () => {
+                                        if (installingWorker.state === 'installed') {
+                                            if (navigator.serviceWorker.controller) {
+                                                // New update available
+                                                console.log('New content is available; please refresh.');
+                                                // You could show a notification to the user here
+                                                // Example: showRefreshUI(registration);
+                                            } else {
+                                                // Content is cached for the first time
+                                                console.log('Content is cached for offline use.');
+                                            }
+                                        }
+                                    };
+                                }
+                            };
+                        })
+                        .catch(error => {
+                            console.error('Service Worker registration failed:', error);
+                        });
+
+                    // Optional: Detect controller change (e.g., after refresh following an update)
+                    navigator.serviceWorker.oncontrollerchange = () => {
+                        console.log('Controller changed. Reloading for latest updates.');
+                        window.location.reload();
+                    };
+
+                } else {
+                    console.log('Service workers are not supported in this browser.');
+                }
             }
 
             // Start the application initialization
