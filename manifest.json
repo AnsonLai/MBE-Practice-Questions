@@ -1,6 +1,6 @@
 {
-  "name": "MBE Practice Quiz",
-  "short_name": "MBE Quiz",
+  "name": "MBE Practice Questions",
+  "short_name": "MBE Questions",
   "description": "A Progressive Web App for practicing US Multistate Bar Examination (MBE) questions.",
   "start_url": "./", // Or your specific starting page if not index.html in root
   "display": "standalone", // Makes it look like a native app
