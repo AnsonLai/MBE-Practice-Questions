@@ -631,6 +631,11 @@
             /* Make 'Explanation:' stand out */
         }
 
+        .ai-generated-flag {
+            background: grey;
+            color: white;
+        }
+
 
         /* User Notes */
         .user-notes {
@@ -1470,6 +1475,7 @@
                 <label for="jsonFile">Load <u>New</u> Quiz Data (JSON):</label>
                 <input type="file" id="jsonFile" accept=".json">
                 <button id="loadJsonButton">Load New Data</button>
+                <button id="loadSampleButton">Load Sample Data</button> <!-- ADD THIS BUTTON -->
             </div>
             <div class="control-group">
                 <label for="saveJsonButton">Export / Backup Data:</label>
@@ -1497,6 +1503,7 @@
             const nextQuestionButton = document.getElementById('next-question-button');
             const pastAttemptsContainer = document.getElementById('past-attempts');
             const endOfQuizMessageElement = document.getElementById('end-of-quiz-message');
+            const loadSampleButton = document.getElementById('loadSampleButton'); // ADD THIS LINE
 
             // Annotation Elements
             const toggleAnnotationButton = document.getElementById('toggleAnnotationButton');
@@ -1615,6 +1622,41 @@
                 }
             }
 
+            /**
+             * Handles fetching and loading the sample JSON data from GitHub.
+             */
+            async function handleLoadSampleData() {
+                const sampleUrl = 'https://ansonlai.github.io/MBE-Practice-Questions/ncbe-sample.json';
+                loadSampleButton.disabled = true; // Disable button during fetch
+                loadSampleButton.textContent = 'Loading Sample...';
+                loadJsonButton.disabled = true; // Also disable manual load button temporarily
+
+                try {
+                    console.log(`Fetching sample data from ${sampleUrl}`);
+                    const response = await fetch(sampleUrl);
+                    if (!response.ok) {
+                        // Log more details for debugging network issues
+                        console.error(`HTTP error! status: ${response.status}, statusText: ${response.statusText}`);
+                        let errorBody = '';
+                        try { errorBody = await response.text(); } catch (e) {/* ignore */ }
+                        console.error("Response body (if any):", errorBody);
+                        throw new Error(`Failed to fetch sample data. Status: ${response.status}`);
+                    }
+                    const sampleData = await response.json();
+                    console.log("Sample data fetched and parsed successfully.");
+                    // Use the refactored processing function
+                    processLoadedData(sampleData, "NCBE Online Practice Exam 1 Sample");
+                } catch (error) {
+                    console.error('Error fetching or processing sample data:', error);
+                    // Provide more context in the alert
+                    alert(`Failed to load sample data. Please check the browser console for details. Error: ${error.message}`);
+                } finally {
+                    loadSampleButton.disabled = false; // Re-enable button
+                    loadSampleButton.textContent = 'Load Sample Data';
+                    loadJsonButton.disabled = false; // Re-enable manual load button
+                }
+            }
+
 
             // --- Event Listeners ---
             loadJsonButton.addEventListener('click', handleLoadJson); // Now loads NEW data
@@ -1627,6 +1669,7 @@
             clearCategoriesButton.addEventListener('click', () => clearCheckboxes(filterCategoriesList));
             clearProvidersButton.addEventListener('click', () => clearCheckboxes(filterProvidersList));
             clearYearsButton.addEventListener('click', () => clearCheckboxes(filterYearsList));
+            loadSampleButton.addEventListener('click', handleLoadSampleData);
 
             // Clear attempts filter
             document.getElementById('clear-attempts-filter').addEventListener('click', () => {
@@ -1955,9 +1998,9 @@
             // --- Core Quiz Logic ---
 
             /**
-             * Handles loading NEW quiz data from a user-selected JSON file.
-             * This will overwrite any data currently in localStorage.
-             */
+                         * Handles loading NEW quiz data from a user-selected JSON file.
+                         * This will overwrite any data currently in localStorage.
+                         */
             function handleLoadJson() {
                 const file = jsonFileElement.files[0];
                 if (!file) {
@@ -1968,45 +2011,62 @@
                 reader.onload = (e) => {
                     try {
                         const loadedData = JSON.parse(e.target.result);
-                        if (loadedData && Array.isArray(loadedData.questions)) {
-                            quizData = loadedData; // Overwrite current data
-                            // Initialize user_attempts if missing
-                            quizData.questions.forEach(q => {
-                                if (!q.user_attempts) q.user_attempts = [];
-                            });
-                            if (!Array.isArray(quizData.groups)) { quizData.groups = []; }
-
-                            // Save the NEWLY loaded data to localStorage immediately
-                            saveToLocalStorage();
-
-                            populateFilterOptions();
-                            applyFiltersAndStartQuiz(); // Start with default filters based on NEW data
-                            saveJsonButton.disabled = false;
-                            // *** NEW: Enable performance button ***
-                            const performanceBtn = document.getElementById('show-performance-button');
-                            if (performanceBtn) performanceBtn.disabled = false;
-                            closeSidebar();
-                            alert(`Successfully loaded new data from ${file.name}. Previous progress (if any) has been replaced.`);
-                            jsonFileElement.value = ''; // Clear file input
-                        } else {
-                            alert('Invalid JSON format. Expected an object with a "questions" array.');
-                            // Do NOT reset quiz state here - keep existing localStorage data if load fails
-                            jsonFileElement.value = '';
-                        }
+                        // Call the refactored function to handle the actual data processing
+                        processLoadedData(loadedData, file.name);
                     } catch (error) {
                         alert(`Error parsing JSON: ${error.message}`);
-                        console.error(error);
-                        jsonFileElement.value = '';
-                        // Do NOT reset quiz state
+                        console.error("Error parsing JSON from file:", error);
+                        jsonFileElement.value = ''; // Clear file input on error
+                        // Do NOT reset quiz state - keep existing data if load fails
                     }
                 };
                 reader.onerror = () => {
                     alert('Error reading file.');
-                    console.error(reader.error);
-                    jsonFileElement.value = '';
+                    console.error("Error reading file:", reader.error);
+                    jsonFileElement.value = ''; // Clear file input on error
                     // Do NOT reset quiz state
                 };
                 reader.readAsText(file);
+            }
+
+            /**
+ * Processes loaded quiz data, updates state, saves, and refreshes UI.
+ * @param {object} loadedData The parsed JSON data object.
+ * @param {string} sourceDescription A description of the data source (e.g., filename or "Sample Data").
+ */
+            function processLoadedData(loadedData, sourceDescription) {
+                try {
+                    if (loadedData && Array.isArray(loadedData.questions)) {
+                        quizData = loadedData; // Overwrite current data
+                        // Initialize user_attempts if missing
+                        quizData.questions.forEach(q => {
+                            if (!q.user_attempts) q.user_attempts = [];
+                        });
+                        if (!Array.isArray(quizData.groups)) { quizData.groups = []; }
+
+                        // Save the NEWLY loaded data to localStorage immediately
+                        saveToLocalStorage();
+
+                        populateFilterOptions();
+                        applyFiltersAndStartQuiz(); // Start with default filters based on NEW data
+                        saveJsonButton.disabled = false;
+                        // Enable performance button
+                        const performanceBtn = document.getElementById('show-performance-button');
+                        if (performanceBtn) performanceBtn.disabled = false;
+                        closeSidebar();
+                        alert(`Successfully loaded data from ${escapeHtml(sourceDescription)}. Previous progress (if any) has been replaced.`);
+                        jsonFileElement.value = ''; // Clear file input (relevant if called from file load)
+                    } else {
+                        alert('Invalid JSON format. Expected an object with a "questions" array.');
+                        // Keep existing localStorage data if load fails
+                        jsonFileElement.value = '';
+                    }
+                } catch (error) {
+                    alert(`Error processing loaded data: ${error.message}`);
+                    console.error("Error in processLoadedData:", error);
+                    jsonFileElement.value = '';
+                    // Keep existing localStorage data
+                }
             }
 
             /**
@@ -2415,7 +2475,7 @@
                     feedbackAreaElement.className = 'feedback-area incorrect';
                 }
                 const explanationText = currentQuestionObject.answer?.explanation || "No explanation provided.";
-                const aiFlag = currentQuestionObject.answer?.ai_generated === true ? ' <span class="ai-generated-flag">(AI Generated)</span>' : '';
+                const aiFlag = currentQuestionObject.answer?.ai_generated === true ? ' <span class="ai-generated-flag">AI Generated</span>' : '';
                 feedbackHtml += `<div class="explanation"><strong>Explanation:</strong>${aiFlag}<br>${escapeHtml(explanationText)}</div>`;
                 feedbackAreaElement.innerHTML = feedbackHtml;
                 feedbackAreaElement.style.display = 'block';
