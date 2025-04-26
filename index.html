@@ -237,6 +237,10 @@
             background-color: var(--secondary-hover-color) !important;
         }
 
+        #show-performance-button {
+            background-color: var(--info-color);
+        }
+
         #close-sidebar-button {
             background-color: var(--secondary-color);
         }
@@ -1342,18 +1346,16 @@
             <label><input type="radio" name="filter-attempts" value="correct"> Questions with Correct Attempts</label>
             <label><input type="radio" name="filter-attempts" value="incorrect"> Questions with Incorrect
                 Attempts</label>
+            <button id="clear-attempts-filter" class="clear-filter-button">Reset Attempts Filter</button>
         </div>
-
-        <button id="clear-attempts-filter" class="clear-filter-button">Reset Attempts Filter</button>
 
         <div class="sidebar-section">
             <h3>Notes</h3>
             <label><input type="radio" name="filter-notes" value="all" checked> Show All Questions</label>
             <label><input type="radio" name="filter-notes" value="with-notes"> Questions with Notes</label>
             <label><input type="radio" name="filter-notes" value="without-notes"> Questions without Notes</label>
+            <button id="clear-notes-filter" class="clear-filter-button">Reset Notes Filter</button>
         </div>
-
-        <button id="clear-notes-filter" class="clear-filter-button">Reset Notes Filter</button>
 
         <div class="sidebar-section">
             <h3>Order</h3>
@@ -1477,11 +1479,11 @@
             <div class="control-group">
                 <label for="jsonFile">Load <u>New</u> Quiz Data (JSON):</label>
                 <input type="file" id="jsonFile" accept=".json">
-                <button id="loadJsonButton">Load New Data</button>
-                <button id="loadSampleButton">Load Sample Data</button> <!-- ADD THIS BUTTON -->
+                <button id="loadJsonButton" style="margin-right: -0.1rem;">Load</button>
+                <button id="loadSampleButton">Use Sample</button>
             </div>
             <div class="control-group">
-                <label for="saveJsonButton">Export / Backup Data:</label>
+                <label for="saveJsonButton">Export / Backup Data for Another Device:</label>
                 <button id="saveJsonButton" disabled>Export Backup</button>
             </div>
         </div>
