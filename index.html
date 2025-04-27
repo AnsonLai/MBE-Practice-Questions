@@ -1378,13 +1378,22 @@
                 <label><input type="checkbox" id="enable-question-timer"> Enable Question Timer</label>
             </div>
             <div class="setting-item">
-                <label><input type="checkbox" id="enable-stopwatch" checked> Enable Stopwatch</label>
+            <label><input type="checkbox" id="enable-stopwatch" checked> Enable Stopwatch</label>
             </div>
             <div class="setting-item">
                 <label for="question-time-limit">Question Time Limit (seconds):</label>
                 <input type="number" id="question-time-limit" min="10" max="600" value="90" step="5">
             </div>
         </div>
+
+        <div class="sidebar-section">
+            <h3>Exam Mode</h3>
+            <div class="setting-item">
+                <label><input type="checkbox" id="setting-hide-answer"> Hide Answer After Submission</label>
+                <p style="font-size: 0.8rem; color: var(--dark-gray); margin-top: 0.2rem;">(Review answers at the end or reveal individually)</p>
+            </div>
+        </div>
+
 
         <button id="apply-filters-button" disabled>Apply Filters & Start Quiz</button>
         <button id="close-sidebar-button">Close Settings</button>
@@ -1453,6 +1462,7 @@
             </div>
 
             <button id="submit-answer-button">Submit Answer</button>
+            <button id="show-answer-button" style="display:none; margin-left: 10px; background-color: var(--info-color);">Show Answer</button>
 
             <div id="feedback-area" class="feedback-area" style="display:none;"></div>
 
@@ -1463,6 +1473,7 @@
 
             <!-- Moved Quiz Controls Up -->
             <div class="quiz-controls">
+                <button id="review-answers-button" style="display:none; background-color: var(--success-color);">Review Answers & End</button>
                 <button id="next-question-button" style="display:none;">Next Question</button>
             </div>
 
@@ -1471,6 +1482,14 @@
         </div>
 
         <div id="end-of-quiz-message"></div>
+
+        <!-- Final Review Area -->
+        <div id="final-review-area" style="display:none; margin-top: 2rem;">
+            <h2>Quiz Review</h2>
+            <div id="final-review-content"></div>
+            <button id="restart-quiz-button" style="margin-top: 1rem;">Restart with Same Filters</button>
+            <button id="back-to-settings-button" style="margin-top: 1rem; background-color: var(--secondary-color);">Back to Settings</button>
+        </div>
 
         <!-- Modified File Controls Section -->
         <div class="file-controls">
@@ -1508,7 +1527,17 @@
             const nextQuestionButton = document.getElementById('next-question-button');
             const pastAttemptsContainer = document.getElementById('past-attempts');
             const endOfQuizMessageElement = document.getElementById('end-of-quiz-message');
-            const loadSampleButton = document.getElementById('loadSampleButton'); // ADD THIS LINE
+            const loadSampleButton = document.getElementById('loadSampleButton');
+
+            // New Exam Mode Elements
+            const settingHideAnswerCheckbox = document.getElementById('setting-hide-answer');
+            const showAnswerButton = document.getElementById('show-answer-button');
+            const reviewAnswersButton = document.getElementById('review-answers-button');
+            const finalReviewArea = document.getElementById('final-review-area');
+            const finalReviewContent = document.getElementById('final-review-content');
+            const restartQuizButton = document.getElementById('restart-quiz-button');
+            const backToSettingsButton = document.getElementById('back-to-settings-button');
+
 
             // Annotation Elements
             const toggleAnnotationButton = document.getElementById('toggleAnnotationButton');
@@ -1547,6 +1576,8 @@
             let currentQuestionObject = null;
             let questionStartTime = null;
             let lastDisplayedGroupId = null;
+            let hideAnswerMode = false; // NEW: Track if answers should be hidden
+            let sessionAttempts = new Map(); // NEW: Track attempts *within this session* for review
             const LOCAL_STORAGE_KEY = 'mbeQuizData'; // Key for localStorage
 
             // Annotation State
@@ -1675,6 +1706,10 @@
             clearProvidersButton.addEventListener('click', () => clearCheckboxes(filterProvidersList));
             clearYearsButton.addEventListener('click', () => clearCheckboxes(filterYearsList));
             loadSampleButton.addEventListener('click', handleLoadSampleData);
+            showAnswerButton.addEventListener('click', showCurrentAnswer); // NEW
+            reviewAnswersButton.addEventListener('click', showFinalReview); // NEW
+            restartQuizButton.addEventListener('click', handleRestartQuiz); // NEW
+            backToSettingsButton.addEventListener('click', handleBackToSettings); // NEW
 
             // Clear attempts filter
             document.getElementById('clear-attempts-filter').addEventListener('click', () => {
@@ -2113,6 +2148,10 @@
                 // Initialize timer settings first (needed for the session)
                 initializeTimerSettings();
 
+                // Read the hide answer setting
+                hideAnswerMode = settingHideAnswerCheckbox.checked;
+                sessionAttempts.clear(); // Clear attempts from previous session
+
                 if (!quizData) {
                     alert("No quiz data loaded. Please load a JSON file or check local storage.");
                     return;
@@ -2232,6 +2271,7 @@
                     lastDisplayedGroupId = null;
                     quizAreaElement.style.display = 'block';
                     endOfQuizMessageElement.style.display = 'none';
+                    finalReviewArea.style.display = 'none'; // Hide review area
                     toggleAnnotationButton.style.display = 'inline-block';
 
                     // Start timers AFTER confirming there are questions
@@ -2251,6 +2291,7 @@
                     quizAreaElement.style.display = 'none';
                     endOfQuizMessageElement.innerHTML = `<h2>No Questions Found</h2><p>No questions matched the selected filter criteria.</p>`;
                     endOfQuizMessageElement.style.display = 'block';
+                    finalReviewArea.style.display = 'none'; // Hide review area
                     quizProgressElement.textContent = '0 questions';
                     currentQuestionObject = null;
                     toggleAnnotationButton.style.display = 'none';
@@ -2309,6 +2350,8 @@
                 pastAttemptsContainer.style.display = 'none';
                 pastAttemptsContainer.innerHTML = '';
                 metaTooltipContentElement.innerHTML = '';
+                showAnswerButton.style.display = 'none'; // Hide show answer button initially
+                reviewAnswersButton.style.display = 'none'; // Hide review button initially
 
                 // Display Group Intro
                 let displayGroupIntro = false;
@@ -2370,6 +2413,8 @@
                 submitAnswerButton.style.display = 'inline-block';
                 submitAnswerButton.disabled = false;
                 nextQuestionButton.style.display = 'none';
+                showAnswerButton.style.display = 'none'; // Ensure hidden on new question render
+                reviewAnswersButton.style.display = 'none'; // Ensure hidden on new question render
                 attemptNotesElement.value = ''; // Clear notes visually for new question
                 attemptNotesElement.disabled = false; // Enable notes area
 
@@ -2463,14 +2508,72 @@
 
                 // --- The redundant addition to currentQuestionObject has been removed ---
 
+                // NEW: Store this attempt for the final review
+                sessionAttempts.set(originalQuestion.question_id, {
+                    question: originalQuestion, // Reference to the full question object
+                    attempt: newAttempt // The attempt made in this session
+                });
+
                 // Save the updated quizData to localStorage immediately
                 saveToLocalStorage();
 
                 // --- UI Updates ---
                 deactivateAnnotationMode(); // Hide controls, keep drawing
 
-                // Show feedback
+                // Disable choices immediately
+                choicesFormElement.querySelectorAll('input[type="radio"]').forEach(input => input.disabled = true);
+
+                // Update button states
+                submitAnswerButton.style.display = 'none';
+                submitAnswerButton.disabled = true;
+                nextQuestionButton.style.display = 'inline-block';
+
+                if (hideAnswerMode) {
+                    // Exam Mode: Hide feedback, show 'Show Answer' and 'Review' buttons
+                    feedbackAreaElement.style.display = 'none';
+                    showAnswerButton.style.display = 'inline-block';
+                    reviewAnswersButton.style.display = 'inline-block'; // Show review button
+                } else {
+                    // Normal Mode: Show feedback immediately
+                    showCurrentAnswerFeedback(true); // Show feedback and highlighting
+                    showAnswerButton.style.display = 'none';
+                    reviewAnswersButton.style.display = 'none';
+                }
+
+                // Update and show past attempts (always show history)
+                renderPastAttempts(currentQuestionObject);
+                pastAttemptsContainer.style.display = 'block';
+
+                // Focus notes area
+                attemptNotesElement.focus();
+                // Scroll feedback into view only if it's displayed
+                if (!hideAnswerMode) {
+                    feedbackAreaElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
+            /**
+             * Displays the feedback (correct/incorrect, explanation) and highlights choices.
+             * Can be called immediately or when 'Show Answer' is clicked.
+             * @param {boolean} highlightChoices - Whether to apply the correct/incorrect styling to choices.
+             */
+            function showCurrentAnswerFeedback(highlightChoices = true) {
+                if (!currentQuestionObject || !currentQuestionObject.answer) return;
+
+                const lastAttempt = sessionAttempts.get(currentQuestionObject.question_id)?.attempt;
+                if (!lastAttempt) {
+                    console.warn("No attempt found for current question in this session to show feedback for.");
+                    // Optionally show a message or just do nothing
+                    // feedbackAreaElement.innerHTML = "<p>No answer submitted in this session yet.</p>";
+                    // feedbackAreaElement.style.display = 'block';
+                    return;
+                }
+
+                const chosenAnswer = lastAttempt.chosen_answer;
+                const correctAnswer = currentQuestionObject.answer.correct_choice;
                 const isCorrect = correctAnswer && chosenAnswer === correctAnswer;
+
+                // Build feedback HTML
                 let feedbackHtml = '';
                 if (isCorrect) {
                     feedbackHtml = '<p><strong>Correct!</strong></p>';
@@ -2479,38 +2582,40 @@
                     feedbackHtml = `<p><strong>Incorrect.</strong> You chose ${chosenAnswer}. The correct answer was ${correctAnswer || 'N/A'}.</p>`;
                     feedbackAreaElement.className = 'feedback-area incorrect';
                 }
-                const explanationText = currentQuestionObject.answer?.explanation || "No explanation provided.";
-                const aiFlag = currentQuestionObject.answer?.ai_generated === true ? ' <span class="ai-generated-flag">AI Generated</span>' : '';
+                const explanationText = currentQuestionObject.answer.explanation || "No explanation provided.";
+                const aiFlag = currentQuestionObject.answer.ai_generated === true ? ' <span class="ai-generated-flag">AI Generated</span>' : '';
                 feedbackHtml += `<div class="explanation"><strong>Explanation:</strong>${aiFlag}<br>${escapeHtml(explanationText)}</div>`;
+
                 feedbackAreaElement.innerHTML = feedbackHtml;
                 feedbackAreaElement.style.display = 'block';
 
-                // Disable choices and highlight
-                choicesFormElement.querySelectorAll('label').forEach(label => {
-                    const input = label.querySelector('input[type="radio"]');
-                    if (input) {
-                        input.disabled = true;
-                        if (input.value === correctAnswer) label.classList.add('correct-answer');
-                        if (input.value === chosenAnswer && !isCorrect) label.classList.add('selected-incorrect');
-                    }
-                });
+                // Highlight choices if requested
+                if (highlightChoices) {
+                    choicesFormElement.querySelectorAll('label').forEach(label => {
+                        const input = label.querySelector('input[type="radio"]');
+                        if (input) {
+                            // Ensure input is disabled (should be already, but double-check)
+                            input.disabled = true;
+                            // Remove previous highlighting classes first
+                            label.classList.remove('correct-answer', 'selected-incorrect');
+                            // Apply new highlighting
+                            if (input.value === correctAnswer) label.classList.add('correct-answer');
+                            if (input.value === chosenAnswer && !isCorrect) label.classList.add('selected-incorrect');
+                        }
+                    });
+                }
 
-                // Update button states
-                submitAnswerButton.style.display = 'none';
-                submitAnswerButton.disabled = true;
-                nextQuestionButton.style.display = 'inline-block';
-                // Notes area remains enabled for editing *after* submission
-
-                // Update and show past attempts (using the now updated currentQuestionObject)
-                // Since originalQuestion was updated, currentQuestionObject (referencing it) now has the correct single new attempt
-                renderPastAttempts(currentQuestionObject); // Re-render to show the new attempt
-                pastAttemptsContainer.style.display = 'block';
-
-                // Focus notes and scroll feedback into view
-                attemptNotesElement.focus();
+                // Scroll feedback into view
                 feedbackAreaElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
 
+            /**
+             * Handles the click on the "Show Answer" button in hideAnswerMode.
+             */
+            function showCurrentAnswer() {
+                showCurrentAnswerFeedback(true); // Show feedback and highlight
+                showAnswerButton.style.display = 'none'; // Hide the button after showing
+            }
 
             /**
              * Saves the current notes from the textarea to the *last* attempt of the *current* question
@@ -2552,6 +2657,11 @@
                 saveNotesForCurrentAttempt(); // Save notes from the question we're leaving
                 saveToLocalStorage(); // Persist the potentially updated notes
                 pauseQuestionTimer(); // Pause timer explicitly before loading next
+                showAnswerButton.style.display = 'none'; // Hide show answer button when moving
+                // Keep review button visible if in hideAnswerMode
+                if (!hideAnswerMode) {
+                    reviewAnswersButton.style.display = 'none';
+                }
                 displayNextQuestionInternal();
             }
 
@@ -2571,7 +2681,7 @@
                 if (questionLimit > 0 && (currentQuestionIndex + 1) >= questionLimit) {
                     quizAreaElement.style.display = 'none';
                     endOfQuizMessageElement.innerHTML = `<h2>Quiz Sprint Complete!</h2><p>You finished the ${questionLimit}-question session.</p>`;
-                    endOfQuizMessageElement.style.display = 'block';
+                    endOfQuizMessageElement.style.display = 'block'; // Show standard message first
                     currentQuestionObject = null;
                     toggleAnnotationButton.style.display = 'none';
                     deactivateAnnotationMode();
@@ -2579,6 +2689,11 @@
                     pauseSessionTimer();
                     pauseStopwatch();
                     saveToLocalStorage(); // Final save on quiz end
+
+                    // NEW: If in hide answer mode, immediately show the review
+                    if (hideAnswerMode) {
+                        showFinalReview();
+                    }
                     return;
                 }
 
@@ -2604,7 +2719,7 @@
                     // Reached the end of the filtered list
                     quizAreaElement.style.display = 'none';
                     endOfQuizMessageElement.innerHTML = `<h2>Quiz Complete!</h2><p>You answered all ${masterQuestionList.length} questions in this filtered set.</p>`;
-                    endOfQuizMessageElement.style.display = 'block';
+                    endOfQuizMessageElement.style.display = 'block'; // Show standard message first
                     currentQuestionObject = null;
                     toggleAnnotationButton.style.display = 'none';
                     deactivateAnnotationMode();
@@ -2612,6 +2727,11 @@
                     pauseSessionTimer();
                     pauseStopwatch();
                     saveToLocalStorage(); // Final save on quiz end
+
+                    // NEW: If in hide answer mode, immediately show the review
+                    if (hideAnswerMode) {
+                        showFinalReview();
+                    }
                 }
             }
 
@@ -2632,6 +2752,8 @@
                 quizAreaElement.style.display = 'none';
                 endOfQuizMessageElement.style.display = 'none';
                 endOfQuizMessageElement.innerHTML = '';
+                finalReviewArea.style.display = 'none'; // Hide review area
+                finalReviewContent.innerHTML = ''; // Clear review content
                 quizProgressElement.textContent = '';
                 groupIntroElement.innerHTML = '';
                 groupIntroElement.style.display = 'none';
@@ -2670,6 +2792,8 @@
                 clearCanvas(); // Clear canvas on full reset
                 setTool('pen');
                 toggleAnnotationButton.style.display = 'none'; // Hide annotation toggle
+                showAnswerButton.style.display = 'none';
+                reviewAnswersButton.style.display = 'none';
 
                 console.log('Quiz state reset.');
             }
@@ -2961,6 +3085,140 @@
 
             // *** END NEW Performance Modal Functions ***
 
+            // --- NEW Review Functions ---
+
+            /**
+             * Generates and displays the final review screen.
+             */
+            function showFinalReview() {
+                console.log("Showing final review. Session attempts:", sessionAttempts);
+                saveNotesForCurrentAttempt(); // Ensure last notes are saved
+                saveToLocalStorage(); // Persist final state
+
+                // Stop timers
+                pauseQuestionTimer();
+                pauseSessionTimer();
+                pauseStopwatch();
+
+                // Hide quiz area, show review area
+                quizAreaElement.style.display = 'none';
+                endOfQuizMessageElement.style.display = 'none'; // Hide standard end message
+                finalReviewArea.style.display = 'block';
+                finalReviewContent.innerHTML = ''; // Clear previous review
+
+                let reviewHtml = '';
+                let correctCount = 0;
+                const totalReviewed = masterQuestionList.length; // Review all questions in the current filtered list
+
+                if (totalReviewed === 0) {
+                    finalReviewContent.innerHTML = "<p>No questions were included in this quiz session.</p>";
+                    return;
+                }
+
+                masterQuestionList.forEach((question, index) => {
+                    const sessionAttemptData = sessionAttempts.get(question.question_id);
+                    const lastAttempt = sessionAttemptData?.attempt; // Get the attempt from *this* session
+                    const chosenAnswer = lastAttempt?.chosen_answer || 'Not Answered';
+                    const correctAnswer = question.answer?.correct_choice;
+                    const isCorrect = correctAnswer && lastAttempt && chosenAnswer === correctAnswer;
+                    const notes = lastAttempt?.notes || '';
+
+                    if (isCorrect) {
+                        correctCount++;
+                    }
+
+                    reviewHtml += `<div class="question-card" style="margin-bottom: 1rem; border-left: 5px solid ${isCorrect ? 'var(--success-color)' : (lastAttempt ? 'var(--danger-color)' : 'var(--secondary-color)')};">`;
+                    reviewHtml += `<p><strong>Question ${index + 1} of ${totalReviewed}</strong> (ID: ${question.question_id})</p>`;
+                    // Include group text if applicable
+                    if (question.group_id && quizData.groups) {
+                        const group = quizData.groups.find(g => g.group_id === question.group_id);
+                        if (group && group.text) {
+                            reviewHtml += `<div style="background-color: #f0f0f0; padding: 5px; margin-bottom: 10px; border-radius: 4px; font-size: 0.9em;"><strong>Fact Pattern:</strong> ${escapeHtml(group.text)}</div>`;
+                        }
+                    }
+                    reviewHtml += `<p style="font-weight: 500;">${escapeHtml(question.question_text)}</p>`;
+                    reviewHtml += '<ul>';
+                    ['A', 'B', 'C', 'D'].forEach(choiceKey => {
+                        if (question.choices[choiceKey] !== undefined) {
+                            let style = '';
+                            let indicator = '';
+                            if (lastAttempt) { // Only highlight if attempted
+                                if (choiceKey === correctAnswer) {
+                                    style = 'color: var(--success-color); font-weight: bold;';
+                                    indicator = ' ✔️ (Correct)';
+                                }
+                                if (choiceKey === chosenAnswer && !isCorrect) {
+                                    style = 'color: var(--danger-color); text-decoration: line-through;';
+                                    indicator = ' ❌ (Your Answer)';
+                                } else if (choiceKey === chosenAnswer && isCorrect) {
+                                    indicator = ' ✔️ (Your Answer)';
+                                }
+                            } else if (choiceKey === correctAnswer) {
+                                // Indicate correct if not answered
+                                style = 'color: var(--success-color);';
+                                indicator = ' (Correct)';
+                            }
+                            reviewHtml += `<li style="${style}">${choiceKey}. ${escapeHtml(question.choices[choiceKey])}${indicator}</li>`;
+                        }
+                    });
+                    reviewHtml += '</ul>';
+                    reviewHtml += `<div class="explanation" style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed #ccc; font-size: 0.9em;"><strong>Explanation:</strong><br>${escapeHtml(question.answer?.explanation || 'N/A')}</div>`;
+                    if (notes) {
+                        reviewHtml += `<div style="margin-top: 0.5rem; font-style: italic; color: #555;"><strong>Your Notes:</strong> ${escapeHtml(notes)}</div>`;
+                    }
+                    reviewHtml += `</div>`; // Close question-card
+                });
+
+                const scorePercentage = totalReviewed > 0 ? (correctCount / totalReviewed) * 100 : 0;
+                const summaryHtml = `<h3>Review Complete</h3><p><strong>Score: ${correctCount} / ${totalReviewed} (${scorePercentage.toFixed(1)}%)</strong></p><hr>`;
+
+                finalReviewContent.innerHTML = summaryHtml + reviewHtml;
+                finalReviewArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            /**
+             * Handles restarting the quiz with the exact same filters and questions.
+             */
+            function handleRestartQuiz() {
+                // No need to re-apply filters, just reset the index and UI state
+                if (masterQuestionList.length > 0) {
+                    currentQuestionIndex = -1;
+                    lastDisplayedGroupId = null;
+                    sessionAttempts.clear(); // Clear attempts for the new run
+
+                    quizAreaElement.style.display = 'block';
+                    endOfQuizMessageElement.style.display = 'none';
+                    finalReviewArea.style.display = 'none';
+                    toggleAnnotationButton.style.display = 'inline-block';
+
+                    // Restart timers
+                    resetSessionTimer();
+                    resetQuestionTimer();
+                    resetStopwatch();
+                    startSessionTimer();
+                    startStopwatch();
+
+                    displayNextQuestionInternal(); // Display the first question
+                    quizProgressElement.textContent = `Question 1 of ${masterQuestionList.length}`;
+                    console.log("Quiz restarted with the same questions.");
+                } else {
+                    alert("Cannot restart, no questions were loaded in the previous session.");
+                    handleBackToSettings(); // Go back if restart isn't possible
+                }
+            }
+
+            /**
+             * Handles going back to the main settings/file load view from the review screen.
+             */
+            function handleBackToSettings() {
+                resetQuizState(true); // Reset UI but keep the loaded quizData
+                // Optionally open the sidebar automatically
+                // openSidebar();
+            }
+
+            // --- END NEW Review Functions ---
+
+
             // --- Initial Page Load Sequence ---
             function initializeApp() {
                 registerServiceWorker();
@@ -2996,11 +3254,11 @@
 
 
                     // 2. Immediately apply these filters and start the quiz
-                    applyFiltersAndStartQuiz();
+                    // applyFiltersAndStartQuiz(); // DON'T auto-start anymore, let user initiate
 
                     // Optionally modify the alert
-                    // alert("Loaded previous quiz progress. Starting with unanswered questions scrambled.");
-                    // --- END OF ADDED LINES ---
+                    alert("Loaded previous quiz progress. Adjust settings and click 'Apply Filters & Start Quiz' to begin.");
+                    // --- END OF MODIFIED LINES ---
                 } else {
                     resetQuizState(false); // Full reset if nothing loaded
                 }
