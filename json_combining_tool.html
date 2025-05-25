@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Combiner & Editor</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 1000px;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        .json-inputs {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .json-input-area {
+            flex: 1;
+        }
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .output-area, .source-editor {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .source-editor-fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .source-editor-fields input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        #applySourceChangesButton {
+            background-color: #ffc107;
+            color: #333;
+        }
+        #applySourceChangesButton:hover {
+            background-color: #e0a800;
+        }
+        #copyButton {
+            background-color: #28a745;
+            margin-top: 5px;
+        }
+        #copyButton:hover {
+            background-color: #1e7e34;
+        }
+        .message-area { 
+            color: #333; 
+            margin-top: 10px;
+            text-align: left; 
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            min-height: 20px;
+        }
+        .message-area.error {
+            color: red;
+            font-weight: bold;
+            background-color: #ffebee;
+            border-color: #ffcdd2;
+        }
+        .message-area.success {
+            color: green;
+            background-color: #e8f5e9;
+            border-color: #c8e6c9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>JSON Combiner & Editor</h1>
+
+        <div class="json-inputs">
+            <div class="json-input-area">
+                <label for="jsonInput1">JSON Block 1:</label>
+                <textarea id="jsonInput1" placeholder="Paste first JSON here..."></textarea>
+            </div>
+            <div class="json-input-area">
+                <label for="jsonInput2">JSON Block 2:</label>
+                <textarea id="jsonInput2" placeholder="Paste second JSON here..."></textarea>
+            </div>
+        </div>
+
+        <button id="combineButton">Combine JSON</button>
+
+        <div id="messages" class="message-area"></div>
+
+        <div class="source-editor">
+            <h2>Modify Source Details (for all questions)</h2>
+            <div class="source-editor-fields">
+                <div>
+                    <label for="sourceName">New Source Name:</label>
+                    <input type="text" id="sourceName" placeholder="e.g., Combined Review">
+                </div>
+                <div>
+                    <label for="sourceProvider">New Source Provider:</label>
+                    <input type="text" id="sourceProvider" placeholder="e.g., My Company">
+                </div>
+                <div>
+                    <label for="sourceYear">New Source Year:</label>
+                    <input type="number" id="sourceYear" placeholder="e.g., 2024">
+                </div>
+            </div>
+            <button id="applySourceChangesButton">Apply Source Changes</button>
+        </div>
+
+
+        <div class="output-area">
+            <label for="jsonOutput">Combined & Modified JSON:</label>
+            <textarea id="jsonOutput" readonly placeholder="Combined JSON will appear here..."></textarea>
+            <button id="copyButton">Copy to Clipboard</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const jsonInput1 = document.getElementById('jsonInput1');
+            const jsonInput2 = document.getElementById('jsonInput2');
+            const combineButton = document.getElementById('combineButton');
+            const jsonOutput = document.getElementById('jsonOutput');
+            const copyButton = document.getElementById('copyButton');
+            const messagesDiv = document.getElementById('messages');
+
+            const sourceNameInput = document.getElementById('sourceName');
+            const sourceProviderInput = document.getElementById('sourceProvider');
+            const sourceYearInput = document.getElementById('sourceYear');
+            const applySourceChangesButton = document.getElementById('applySourceChangesButton');
+
+            let currentCombinedJsonObject = null;
+
+            function generateUUID() {
+                var d = new Date().getTime();
+                var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now()*1000)) || 0;
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = Math.random() * 16;
+                    if(d > 0){
+                        r = (d + r)%16 | 0;
+                        d = Math.floor(d/16);
+                    } else {
+                        r = (d2 + r)%16 | 0;
+                        d2 = Math.floor(d2/16);
+                    }
+                    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+                });
+            }
+
+            function displayMessage(message, type = 'info') {
+                messagesDiv.innerHTML = message;
+                messagesDiv.className = 'message-area'; 
+                if (type === 'error') {
+                    messagesDiv.classList.add('error');
+                } else if (type === 'success') {
+                    messagesDiv.classList.add('success');
+                }
+            }
+
+            function clearMessages() {
+                messagesDiv.innerHTML = '';
+                messagesDiv.className = 'message-area';
+            }
+
+
+            combineButton.addEventListener('click', () => {
+                clearMessages();
+                jsonOutput.value = '';
+                currentCombinedJsonObject = null;
+
+                let obj1, obj2;
+
+                try {
+                    if (!jsonInput1.value.trim()) {
+                        displayMessage('JSON Block 1 is empty.', 'error');
+                        return;
+                    }
+                    obj1 = JSON.parse(jsonInput1.value);
+                } catch (e) {
+                    displayMessage('Error parsing JSON Block 1: ' + e.message, 'error');
+                    return;
+                }
+
+                try {
+                    if (!jsonInput2.value.trim()) {
+                        displayMessage('JSON Block 2 is empty.', 'error');
+                        return;
+                    }
+                    obj2 = JSON.parse(jsonInput2.value);
+                } catch (e) {
+                    displayMessage('Error parsing JSON Block 2: ' + e.message, 'error');
+                    return;
+                }
+
+                if (!isValidSchema(obj1, "JSON Block 1") || !isValidSchema(obj2, "JSON Block 2")) {
+                    return;
+                }
+
+                const combinedJson = {
+                    questions: [],
+                    groups: []
+                };
+
+                const existingQuestionIds = new Set();
+                const idChangesMap = {}; 
+                const processingLog = []; // Unified log for all changes
+
+                // Process first JSON questions
+                obj1.questions.forEach(q => {
+                    combinedJson.questions.push(q);
+                    existingQuestionIds.add(q.question_id);
+                });
+
+                // Process second JSON questions
+                obj2.questions.forEach(q2 => {
+                    let currentQuestionId = q2.question_id;
+                    if (existingQuestionIds.has(currentQuestionId)) {
+                        const oldId = currentQuestionId;
+                        const newId = generateUUID();
+                        q2.question_id = newId;
+                        idChangesMap[oldId] = newId;
+                        existingQuestionIds.add(newId);
+                        processingLog.push(`Question ID '${oldId}' (from Block 2) was duplicate, <strong>changed to '${newId}'</strong>.`);
+                    } else {
+                        existingQuestionIds.add(currentQuestionId);
+                    }
+                    combinedJson.questions.push(q2); 
+                });
+
+                // --- NEW Group Processing Logic ---
+                const processedGroups = [];
+                const groupContentSignatures = new Set(); 
+                const finalGroupIds = new Set();        
+
+                function getGroupContentSignatureForDedup(group) {
+                    // Signature based on 'text' and 'question_order'
+                    // Ensure question_order is part of the signature for content comparison
+                    return JSON.stringify({ 
+                        text: group.text, // Will be undefined if not present, that's fine for signature
+                        question_order: group.question_order 
+                    });
+                }
+
+                function processGroupForCombining(originalGroup, sourceName, idChangesMapForQuestions) {
+                    const group = JSON.parse(JSON.stringify(originalGroup)); // Deep copy
+
+                    if (sourceName === "Block 2" && idChangesMapForQuestions) {
+                        group.question_order = group.question_order.map(
+                            qId => idChangesMapForQuestions[qId] || qId
+                        );
+                    }
+
+                    const contentSignature = getGroupContentSignatureForDedup(group);
+
+                    if (groupContentSignatures.has(contentSignature)) {
+                        processingLog.push(`Group with original ID '${originalGroup.group_id}' (text: '${group.text || "N/A"}') from ${sourceName} was an <strong>identical duplicate</strong> of an already processed group. It has been <strong>dropped</strong>.`);
+                        return; 
+                    }
+                    
+                    groupContentSignatures.add(contentSignature); // Add content signature for unique content
+
+                    let currentGroupId = group.group_id;
+                    if (finalGroupIds.has(currentGroupId)) {
+                        const oldGroupId = currentGroupId;
+                        currentGroupId = generateUUID();
+                        group.group_id = currentGroupId;
+                        processingLog.push(`Group with original ID '${oldGroupId}' (text: '${group.text || "N/A"}') from ${sourceName} had a conflicting ID (but different content). Its ID was <strong>renamed to '${currentGroupId}'</strong>.`);
+                    }
+
+                    finalGroupIds.add(currentGroupId);
+                    processedGroups.push(group);
+                }
+
+                if (obj1.groups && Array.isArray(obj1.groups)) {
+                    obj1.groups.forEach(g1 => {
+                        processGroupForCombining(g1, "Block 1", null);
+                    });
+                }
+                if (obj2.groups && Array.isArray(obj2.groups)) {
+                    obj2.groups.forEach(g2 => {
+                        processGroupForCombining(g2, "Block 2", idChangesMap);
+                    });
+                }
+                combinedJson.groups = processedGroups;
+                // --- END of NEW Group Processing Logic ---
+
+                currentCombinedJsonObject = combinedJson;
+                jsonOutput.value = JSON.stringify(currentCombinedJsonObject, null, 2);
+
+                let finalMessage = 'JSONs combined successfully!';
+                if (processingLog.length > 0) {
+                    finalMessage += "<br/><br/><strong>Processing Log:</strong><br/>" + processingLog.join("<br/>");
+                    displayMessage(finalMessage, 'success');
+                } else {
+                    displayMessage(finalMessage, 'success');
+                    setTimeout(() => {
+                        if (messagesDiv.classList.contains('success') && messagesDiv.innerHTML.includes('JSONs combined successfully!') && !messagesDiv.innerHTML.includes("Processing Log")) {
+                           clearMessages();
+                        }
+                    }, 3000);
+                }
+            });
+
+            applySourceChangesButton.addEventListener('click', () => {
+                clearMessages();
+                if (!currentCombinedJsonObject) {
+                    displayMessage('Please combine JSON files first before applying source changes.', 'error');
+                    return;
+                }
+                const newName = sourceNameInput.value.trim();
+                const newProvider = sourceProviderInput.value.trim();
+                const newYearString = sourceYearInput.value.trim();
+                let newYear = null;
+
+                if (newYearString) {
+                    newYear = parseInt(newYearString, 10);
+                    if (isNaN(newYear)) {
+                        displayMessage('Invalid year. Please enter a number.', 'error');
+                        return;
+                    }
+                }
+                if (!newName && !newProvider && newYear === null) {
+                    displayMessage('No source changes specified. Please enter at least one value to update.', 'error');
+                    return;
+                }
+                currentCombinedJsonObject.questions.forEach(question => {
+                    if (!question.source) {
+                        question.source = {}; 
+                    }
+                    if (newName) question.source.name = newName;
+                    if (newProvider) question.source.provider = newProvider;
+                    if (newYear !== null) question.source.year = newYear;
+                });
+                jsonOutput.value = JSON.stringify(currentCombinedJsonObject, null, 2);
+                displayMessage('Source details updated for all questions!', 'success');
+                 setTimeout(() => {
+                       if (messagesDiv.classList.contains('success') && messagesDiv.innerHTML.includes("Source details updated")) {
+                           clearMessages();
+                       }
+                 }, 3000);
+            });
+
+            copyButton.addEventListener('click', () => {
+                if (jsonOutput.value) {
+                    navigator.clipboard.writeText(jsonOutput.value)
+                        .then(() => {
+                            copyButton.textContent = 'Copied!';
+                            setTimeout(() => {
+                                copyButton.textContent = 'Copy to Clipboard';
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            displayMessage('Failed to copy: ' + err, 'error');
+                        });
+                } else {
+                    displayMessage('Nothing to copy.', 'error');
+                }
+            });
+
+            function isValidSchema(obj, blockName) {
+                if (!obj || typeof obj !== 'object') {
+                    displayMessage(`${blockName} is not a valid object.`, 'error'); return false;
+                }
+                if (!Array.isArray(obj.questions)) {
+                    displayMessage(`${blockName} does not have a "questions" array.`, 'error'); return false;
+                }
+                if (!Array.isArray(obj.groups)) {
+                    displayMessage(`${blockName} does not have a "groups" array.`, 'error'); return false;
+                }
+                for (const q of obj.questions) {
+                    if (typeof q.question_id !== 'string' || !q.question_id) {
+                        displayMessage(`A question in ${blockName} is missing a valid "question_id".`, 'error'); return false;
+                    }
+                    // Optional: Check for source object if you want to enforce it strictly before combining
+                    // if (typeof q.source !== 'object' || q.source === null) {
+                    //     displayMessage(`Question with id "${q.question_id}" in ${blockName} is missing the "source" object.`, 'error'); return false;
+                    // }
+                }
+                for (const g of obj.groups) {
+                    if (typeof g.group_id !== 'string' || !g.group_id) {
+                        displayMessage(`A group in ${blockName} is missing a valid "group_id".`, 'error'); return false;
+                    }
+                    if (!Array.isArray(g.question_order)) {
+                        displayMessage(`Group with id "${g.group_id}" in ${blockName} is missing the "question_order" array.`, 'error'); return false;
+                    }
+                }
+                return true;
+            }
+        });
+    </script>
+</body>
+</html>

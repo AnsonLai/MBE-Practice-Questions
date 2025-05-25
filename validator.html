@@ -26,14 +26,12 @@
         }
 
         #results {
-            margin-top: 20px; /* Corrected: removed space before top */
+            margin-top: 20px;
             padding: 15px;
             border: 1px solid #ccc;
             background-color: #f9f9f9;
             white-space: pre-wrap;
-            /* Preserve formatting */
             word-wrap: break-word;
-            /* Wrap long lines */
             min-height: 100px;
         }
 
@@ -57,6 +55,63 @@
             padding: 8px 15px;
             cursor: pointer;
         }
+        #fixGroupsBtn {
+            background-color: #ffc107;
+            color: black;
+            border: 1px solid #e0a800;
+        }
+
+        /* Modal Styling */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.5); 
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 70%; 
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .modal-close-btn {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .modal-close-btn:hover,
+        .modal-close-btn:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #modalJsonText {
+            width: 98%;
+            margin-bottom: 10px;
+            font-family: monospace;
+            font-size: 0.9em;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+        #copyJsonBtn {
+            padding: 8px 15px;
+        }
     </style>
 </head>
 
@@ -73,9 +128,20 @@
     </div>
 
     <button id="validateBtn">Validate Selected File</button>
+    <button id="fixGroupsBtn" style="display:none;">Fix Identical Duplicate Group IDs & Re-validate</button>
 
     <h2>Validation Results:</h2>
     <pre id="results">Results will appear here...</pre>
+
+    <div id="jsonModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close-btn">&times;</span>
+            <h3>Fixed JSON Output</h3>
+            <p>The following JSON includes the applied fixes. You can copy it to your clipboard.</p>
+            <textarea id="modalJsonText" readonly rows="15"></textarea>
+            <button id="copyJsonBtn">Copy to Clipboard</button>
+        </div>
+    </div>
 
 </body>
 <script>
@@ -84,50 +150,54 @@
         const validateBtn = document.getElementById('validateBtn');
         const resultsDiv = document.getElementById('results');
         const dropZone = document.getElementById('dropZone');
+        const fixGroupsBtn = document.getElementById('fixGroupsBtn');
 
-        // These categories remain the same - these are common for the MBE/MEE
+        // Modal elements
+        const jsonModal = document.getElementById('jsonModal');
+        const modalJsonText = document.getElementById('modalJsonText');
+        const copyJsonBtn = document.getElementById('copyJsonBtn');
+        const modalCloseBtn = document.querySelector('.modal-close-btn');
+
+
+        let currentJsonData = null; 
+        window.fixAttemptStatusMessage = ""; 
+
         const allowedCategories = [
-            "Contracts and Sales",
-            "Constitutional Law",
-            "Criminal Law and Procedure",
-            "Civil Procedure",
-            "Evidence",
-            "Real Property",
-            "Torts",
-            // You might add other Washington specific or other MEE subjects if needed:
-            // "Agency and Partnership", "Corporations and LLCs", "Family Law",
-            // "Secured Transactions", "Trusts and Estates (Decedents' Estates; Trusts and Future Interests)"
-            // For now, sticking to your original list.
+            "Contracts and Sales", "Constitutional Law", "Criminal Law and Procedure",
+            "Civil Procedure", "Evidence", "Real Property", "Torts",
         ];
 
         function processFile(file) {
-            resultsDiv.textContent = 'Processing...'; // Clear previous results
+            resultsDiv.textContent = 'Processing...';
+            currentJsonData = null; 
+            window.fixAttemptStatusMessage = ""; 
 
             if (!file) {
                 resultsDiv.innerHTML = '<span class="error">No file provided.</span>';
+                fixGroupsBtn.style.display = 'none';
                 return;
             }
-
             if (file.type !== "application/json") {
                 resultsDiv.innerHTML = `<span class="error">Error: File must be a .json file. Selected type: ${file.type}</span>`;
+                fixGroupsBtn.style.display = 'none';
                 return;
             }
-
             const reader = new FileReader();
-
             reader.onload = (event) => {
                 try {
-                    const jsonData = JSON.parse(event.target.result);
-                    validateJsonStructure(jsonData);
+                    currentJsonData = JSON.parse(event.target.result);
+                    validateJsonStructure(currentJsonData);
                 } catch (e) {
                     resultsDiv.innerHTML = `<span class="error">Error parsing JSON: ${e.message}</span>`;
+                    currentJsonData = null;
+                    fixGroupsBtn.style.display = 'none'; 
                 }
             };
-
             reader.onerror = (event) => {
                 resultsDiv.innerHTML = `<span class="error">Error reading file: ${event.target.error}</span>`;
+                currentJsonData = null;
+                fixGroupsBtn.style.display = 'none'; 
             };
-
             reader.readAsText(file);
         }
 
@@ -135,55 +205,165 @@
             const file = fileInput.files[0];
             if (!file) {
                 resultsDiv.innerHTML = '<span class="error">Please select a JSON file first.</span>';
+                fixGroupsBtn.style.display = 'none';
                 return;
             }
             processFile(file);
         });
 
-        // --- Drag and Drop Event Handlers ---
-        dropZone.addEventListener('dragover', (event) => {
-            event.preventDefault(); // Necessary to allow dropping
-            dropZone.classList.add('dragover');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
-        });
-
+        dropZone.addEventListener('dragover', (event) => event.preventDefault());
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
         dropZone.addEventListener('drop', (event) => {
-            event.preventDefault(); // Prevent default browser behavior (opening the file)
+            event.preventDefault();
             dropZone.classList.remove('dragover');
-            fileInput.files = event.dataTransfer.files; // Assign dropped files to file input
+            fileInput.files = event.dataTransfer.files;
             const file = event.dataTransfer.files[0];
-            if (file) {
-                processFile(file);
-            } else {
+            if (file) processFile(file);
+            else {
                 resultsDiv.innerHTML = '<span class="error">No file dropped.</span>';
+                fixGroupsBtn.style.display = 'none';
             }
         });
-
-        // Added click listener to dropZone to trigger file input
-        dropZone.addEventListener('click', () => {
-            fileInput.click(); // Programmatically click the hidden file input
-        });
-
-        // Update file input to also trigger processing if a file is selected
+        dropZone.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', () => {
             const file = fileInput.files[0];
-            if (file) {
-                processFile(file);
+            if (file) processFile(file);
+            else {
+                resultsDiv.textContent = 'Results will appear here...';
+                currentJsonData = null;
+                fixGroupsBtn.style.display = 'none';
             }
         });
+
+        // Modal control functions
+        function showJsonModal(jsonString) {
+            modalJsonText.value = jsonString;
+            jsonModal.style.display = 'block';
+            copyJsonBtn.textContent = 'Copy to Clipboard'; // Reset button text
+        }
+
+        function hideJsonModal() {
+            jsonModal.style.display = 'none';
+        }
+
+        // Modal event listeners
+        modalCloseBtn.addEventListener('click', hideJsonModal);
+        copyJsonBtn.addEventListener('click', () => {
+            modalJsonText.select();
+            modalJsonText.setSelectionRange(0, modalJsonText.value.length); // For mobile devices
+
+            try {
+                navigator.clipboard.writeText(modalJsonText.value)
+                    .then(() => {
+                        copyJsonBtn.textContent = 'Copied!';
+                    })
+                    .catch(err => {
+                        copyJsonBtn.textContent = 'Copy Failed!';
+                        console.error('Failed to copy text: ', err);
+                        // Try fallback for older browsers if navigator.clipboard failed
+                        if (!document.execCommand('copy')) {
+                           console.error('Fallback document.execCommand also failed.');
+                        } else {
+                           copyJsonBtn.textContent = 'Copied! (fallback)';
+                        }
+                    });
+            } catch (err) {
+                 // Fallback for older browsers if navigator.clipboard itself is not available
+                try {
+                    document.execCommand('copy');
+                    copyJsonBtn.textContent = 'Copied! (fallback)';
+                } catch (e) {
+                    copyJsonBtn.textContent = 'Copy Failed!';
+                    console.error('Initial navigator.clipboard failed, and fallback copy also failed: ', e);
+                }
+            }
+        });
+
+        window.addEventListener('click', (event) => { // Close modal on outside click
+            if (event.target === jsonModal) {
+                hideJsonModal();
+            }
+        });
+        window.addEventListener('keydown', (event) => { // Close modal with Escape key
+            if (event.key === 'Escape' && jsonModal.style.display === 'block') {
+                hideJsonModal();
+            }
+        });
+
+
+        // Fix button click handler
+        fixGroupsBtn.addEventListener('click', () => {
+            if (currentJsonData) {
+                resultsDiv.innerHTML = 'Attempting to fix duplicate group IDs...';
+
+                // applyFixesAndSetStatus modifies currentJsonData in place and returns if changes were made
+                const changesWereMade = applyFixesAndSetStatus(currentJsonData);
+
+                validateJsonStructure(currentJsonData); // Validate the (potentially) modified data
+
+                if (changesWereMade) {
+                    const fixedJsonString = JSON.stringify(currentJsonData, null, 2); // Pretty print
+                    showJsonModal(fixedJsonString);
+                }
+            } else {
+                resultsDiv.innerHTML = '<span class="error">No JSON data loaded to fix.</span>';
+            }
+        });
+
+        // This function applies fixes, sets the status message, and returns if data was changed
+        function applyFixesAndSetStatus(jsonData) {
+            if (!jsonData || !jsonData.groups || !Array.isArray(jsonData.groups)) {
+                window.fixAttemptStatusMessage = "<p style='color: orange;'>Fix attempt: No 'groups' array found to process.</p>";
+                return false; // No changes made
+            }
+
+            const originalGroups = jsonData.groups;
+            const newGroups = [];
+            const seenSignatures = new Set(); 
+            let changesMade = false;
+            let identicalDuplicatesRemoved = 0;
+
+            originalGroups.forEach(group => {
+                if (typeof group !== 'object' || group === null) {
+                    newGroups.push(group); 
+                    return;
+                }
+                if (typeof group.group_id !== 'string' || group.group_id.trim() === '') {
+                    newGroups.push(group); 
+                    return;
+                }
+                
+                const questionOrderForSignature = Array.isArray(group.question_order) ? group.question_order : [];
+                const signature = `${group.group_id}::${JSON.stringify(questionOrderForSignature)}`;
+
+                if (!seenSignatures.has(signature)) {
+                    seenSignatures.add(signature);
+                    newGroups.push(group);
+                } else {
+                    changesMade = true; 
+                    identicalDuplicatesRemoved++;
+                }
+            });
+
+            if (changesMade) {
+                jsonData.groups = newGroups; 
+                window.fixAttemptStatusMessage = `<p style="color: blue;">Fix attempt: ${identicalDuplicatesRemoved} identical duplicate group(s) removed. Re-evaluating structure.</p>`;
+            } else {
+                window.fixAttemptStatusMessage = "<p style='color: orange;'>Fix attempt: No identical duplicate groups were found/removed. Re-evaluating structure.</p>";
+            }
+            return changesMade;
+        }
 
 
         function validateJsonStructure(data) {
             let errors = [];
-            let warnings = []; // Keep warnings for other potential issues
+            let warnings = [];
+            let hasDuplicateGroupIdError = false;
 
-            // --- Basic Structure Check ---
-            if (!data || typeof data !== 'object' || Array.isArray(data)) { // Ensure root is a non-array object
+            if (!data || typeof data !== 'object' || Array.isArray(data)) {
                 errors.push("Invalid JSON structure: Root must be an object (e.g., {}).");
                 displayResults(errors, warnings);
+                fixGroupsBtn.style.display = 'none';
                 return;
             }
             if (!Array.isArray(data.questions)) {
@@ -193,124 +373,82 @@
                 errors.push("Invalid JSON structure: 'groups' property exists but is not an array.");
             }
 
-            if (errors.length > 0) {
-                // Stop further validation if basic structure is wrong
+            if (errors.length > 0 && !Array.isArray(data.questions) && (data.groups !== undefined && !Array.isArray(data.groups))) {
                 displayResults(errors, warnings);
+                fixGroupsBtn.style.display = 'none';
                 return;
             }
 
-            const questionIdsEncountered = new Set(); // Used to check for duplicate question_ids
-            const allValidQuestionIds = new Set(); // Used to validate group references
+            const questionIdsEncountered = new Set();
+            const allValidQuestionIds = new Set();
 
-            // --- Question Validation ---
-            if (data.questions && Array.isArray(data.questions)) { // Check if questions exists before forEach
+            if (data.questions && Array.isArray(data.questions)) {
                 data.questions.forEach((question, index) => {
-                    const questionIdDisplay = question.question_id || `(missing question_id at index ${index})`;
-
-                    // 1. Check for required 'question_id' and its uniqueness
-                    if (!question.question_id) {
-                        errors.push(`Question at index ${index}: Missing 'question_id'.`);
-                    } else if (typeof question.question_id !== 'string' || question.question_id.trim() === '') {
-                        errors.push(`Question at index ${index}: 'question_id' must be a non-empty string. Found: '${question.question_id}'`);
-                    } else {
-                        if (questionIdsEncountered.has(question.question_id)) {
-                            errors.push(`Question ID Error: Duplicate question_id found: '${question.question_id}'.`);
-                        }
+                    const qIdDisplay = question.question_id || `(index ${index})`;
+                    if (!question.question_id) errors.push(`Q index ${index}: Missing 'question_id'.`);
+                    else if (typeof question.question_id !== 'string' || question.question_id.trim() === '') errors.push(`Q index ${index}: 'question_id' not a non-empty string.`);
+                    else {
+                        if (questionIdsEncountered.has(question.question_id)) errors.push(`Q ID Error: Duplicate question_id: '${question.question_id}'.`);
                         questionIdsEncountered.add(question.question_id);
-                        allValidQuestionIds.add(question.question_id); // Store for group reference check
+                        allValidQuestionIds.add(question.question_id);
                     }
-
-                    // 2. Check for required 'question_text' field
-                    if (!question.question_text || typeof question.question_text !== 'string' || question.question_text.trim() === '') {
-                        errors.push(`Question '${questionIdDisplay}': Missing or empty 'question_text'.`);
-                    }
-
-                    // 3. Check 'answer' object and 'correct_choice'
-                    if (typeof question.answer !== 'object' || question.answer === null || Array.isArray(question.answer)) {
-                        errors.push(`Question '${questionIdDisplay}': 'answer' is missing or not an object.`);
-                    } else if (!question.answer.hasOwnProperty('correct_choice')) { // Use hasOwnProperty for safer check
-                        errors.push(`Question '${questionIdDisplay}': 'answer' object is missing the 'correct_choice' property.`);
-                    } else if (typeof question.answer.correct_choice !== 'string' || question.answer.correct_choice.trim() === '') {
-                        errors.push(`Question '${questionIdDisplay}': 'correct_choice' in 'answer' must be a non-empty string.`);
-                    }
-
-
-                    // 4. Check 'choices' object structure
-                    if (typeof question.choices !== 'object' || question.choices === null || Array.isArray(question.choices)) {
-                        errors.push(`Question '${questionIdDisplay}': 'choices' field is missing or is not an object.`);
-                    } else if (Object.keys(question.choices).length === 0) {
-                        errors.push(`Question '${questionIdDisplay}': 'choices' object has no keys (is empty {}). It needs choice letters like "A", "B", etc., each with a string value.`);
-                    } else {
-                        // Check if correct_choice exists as a key in choices
-                        if (question.answer && question.answer.hasOwnProperty('correct_choice') && !question.choices.hasOwnProperty(question.answer.correct_choice)) {
-                            errors.push(`Question '${questionIdDisplay}': The 'correct_choice' ('${question.answer.correct_choice}') does not exist as a key in the 'choices' object.`);
-                        }
-                        // Check if all choice values are strings
+                    if (!question.question_text || typeof question.question_text !== 'string' || question.question_text.trim() === '') errors.push(`Q '${qIdDisplay}': Missing/empty 'question_text'.`);
+                    if (typeof question.answer !== 'object' || question.answer === null || Array.isArray(question.answer)) errors.push(`Q '${qIdDisplay}': 'answer' not an object.`);
+                    else if (!question.answer.hasOwnProperty('correct_choice')) errors.push(`Q '${qIdDisplay}': 'answer' missing 'correct_choice'.`);
+                    else if (typeof question.answer.correct_choice !== 'string' || question.answer.correct_choice.trim() === '') errors.push(`Q '${qIdDisplay}': 'correct_choice' not a non-empty string.`);
+                    if (typeof question.choices !== 'object' || question.choices === null || Array.isArray(question.choices)) errors.push(`Q '${qIdDisplay}': 'choices' not an object.`);
+                    else if (Object.keys(question.choices).length === 0) errors.push(`Q '${qIdDisplay}': 'choices' object empty.`);
+                    else {
+                        if (question.answer && question.answer.hasOwnProperty('correct_choice') && !question.choices.hasOwnProperty(question.answer.correct_choice)) errors.push(`Q '${qIdDisplay}': 'correct_choice' ('${question.answer.correct_choice}') not in 'choices'.`);
                         for (const choiceKey in question.choices) {
-                            if (typeof question.choices[choiceKey] !== 'string') {
-                                errors.push(`Question '${questionIdDisplay}': Choice '${choiceKey}' in 'choices' does not have a string value. Found: ${typeof question.choices[choiceKey]}`);
-                            }
+                            if (typeof question.choices[choiceKey] !== 'string') errors.push(`Q '${qIdDisplay}': Choice '${choiceKey}' not a string.`);
                         }
                     }
+                    if (!question.category) errors.push(`Q '${qIdDisplay}': Missing 'category'.`);
+                    else if (!allowedCategories.includes(question.category)) errors.push(`Q '${qIdDisplay}': Invalid category '${question.category}'. Allowed: ${allowedCategories.join(', ')}.`);
+                });
+            }
 
-                    // 5. Check category
-                    if (!question.category) {
-                        errors.push(`Question '${questionIdDisplay}': Missing 'category'.`);
-                    } else if (!allowedCategories.includes(question.category)) {
-                        errors.push(`Question '${questionIdDisplay}': Invalid category '${question.category}'. Allowed categories are: ${allowedCategories.join(', ')}.`);
+            if (Array.isArray(data.groups)) {
+                const groupIdsVal = new Set();
+                data.groups.forEach((group, index) => {
+                    const gIdDisplay = group.group_id || `(index ${index})`;
+                    if (!group.group_id) errors.push(`Group index ${index}: Missing 'group_id'.`);
+                    else if (typeof group.group_id !== 'string' || group.group_id.trim() === '') errors.push(`Group index ${index}: 'group_id' not a non-empty string.`);
+                    else {
+                        if (groupIdsVal.has(group.group_id)) {
+                            errors.push(`Group ID Error: Duplicate group_id: '${group.group_id}'.`);
+                            hasDuplicateGroupIdError = true;
+                        }
+                        groupIdsVal.add(group.group_id);
+                    }
+                    if (!group.hasOwnProperty('question_order')) errors.push(`Group '${gIdDisplay}': Missing 'question_order'.`);
+                    else if (!Array.isArray(group.question_order)) errors.push(`Group '${gIdDisplay}': 'question_order' not an array.`);
+                    else {
+                        if (group.question_order.length === 0) warnings.push(`Group '${gIdDisplay}': 'question_order' empty.`);
+                        group.question_order.forEach((qId, oIdx) => {
+                            if (typeof qId !== 'string' || !qId.trim()) errors.push(`Group '${gIdDisplay}': item at index ${oIdx} in 'question_order' not a valid ID string.`);
+                            else if (!allValidQuestionIds.has(qId)) errors.push(`Group '${gIdDisplay}': 'question_order' has unknown/invalid q_id: '${qId}'.`);
+                        });
                     }
                 });
             }
 
-
-            // --- Group Validation (only if groups exist and is an array) ---
-            if (Array.isArray(data.groups)) {
-                const groupIdsEncountered = new Set(); // Changed name for clarity
-                data.groups.forEach((group, index) => {
-                    const groupIdDisplay = group.group_id || `(missing group_id at group index ${index})`;
-
-                    // 1. Check for unique Group ID (using group_id)
-                    if (!group.group_id) {
-                        errors.push(`Group at index ${index}: Missing 'group_id'.`);
-                    } else if (typeof group.group_id !== 'string' || group.group_id.trim() === '') {
-                        errors.push(`Group at index ${index}: 'group_id' must be a non-empty string. Found: '${group.group_id}'`);
-                    } else {
-                        if (groupIdsEncountered.has(group.group_id)) {
-                            errors.push(`Group ID Error: Duplicate group_id found: '${group.group_id}'.`);
-                        }
-                        groupIdsEncountered.add(group.group_id);
-                    }
-
-                    // 2. Check 'question_order' references (references should be question_id values)
-                    if (!group.hasOwnProperty('question_order')) { // Use hasOwnProperty for safer check
-                        errors.push(`Group '${groupIdDisplay}': Missing 'question_order' array.`);
-                    } else if (!Array.isArray(group.question_order)) {
-                        errors.push(`Group '${groupIdDisplay}': 'question_order' is not an array.`);
-                    } else {
-                        if (group.question_order.length === 0) {
-                            warnings.push(`Group '${groupIdDisplay}': 'question_order' array is empty. This might be intentional.`);
-                        }
-                        group.question_order.forEach((qId, orderIndex) => {
-                            if (typeof qId !== 'string' || !qId.trim()) {
-                                errors.push(`Group '${groupIdDisplay}': Item at index ${orderIndex} in 'question_order' is not a valid non-empty ID string.`);
-                            } else if (!allValidQuestionIds.has(qId)) { // Check against the set of all known question_ids from valid questions
-                                errors.push(`Group '${groupIdDisplay}': 'question_order' contains reference to an unknown, invalid, or duplicate question_id: '${qId}'. Ensure the referenced question_id exists and is valid in the main 'questions' list.`);
-                            }
-                        });
-                    }
-                });
-            } // End group validation block
-
+            fixGroupsBtn.style.display = hasDuplicateGroupIdError ? 'block' : 'none';
             displayResults(errors, warnings);
         }
 
         function displayResults(errors, warnings) {
             let html = '';
+            if (window.fixAttemptStatusMessage) {
+                html += window.fixAttemptStatusMessage; 
+                window.fixAttemptStatusMessage = ""; 
+            }
             if (errors.length === 0 && warnings.length === 0) {
-                html = '<span class="success">Validation Successful! No issues found.</span>';
+                html += '<span class="success">Validation Successful! No issues found.</span>';
             } else {
                 if (warnings.length > 0) {
-                    html += '<strong>Warnings:</strong>\n'; // Using \n for pre formatting
+                    html += '<strong>Warnings:</strong>\n';
                     warnings.forEach(w => html += `- ${w}\n`);
                     html += '\n';
                 }
@@ -318,11 +456,10 @@
                     html += '<span class="error">Validation Failed! Issues found:</span>\n';
                     errors.forEach(err => html += `- ${err}\n`);
                 } else {
-                    // Only warnings, no errors
                     html += '<span class="success">Validation Successful (with warnings noted above).</span>';
                 }
             }
-            resultsDiv.innerHTML = html; // Using innerHTML because of spans and \n in pre
+            resultsDiv.innerHTML = html;
         }
     });
 </script>
