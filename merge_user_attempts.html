@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON User Attempts Merger</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            margin: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .text-areas-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        @media (min-width: 768px) {
+            .text-areas-container {
+                flex-direction: row;
+            }
+        }
+        .text-area-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        textarea {
+            width: 95%; /* Adjusted for padding */
+            min-height: 250px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            resize: vertical;
+        }
+        button {
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+            align-self: flex-start;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:active {
+            background-color: #004085;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        #statusMessage {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .status-success {
+            background-color: #e6ffed;
+            color: #28a745;
+            border: 1px solid #c3e6cb;
+        }
+        .status-error {
+            background-color: #ffe6e6;
+            color: #dc3545;
+            border: 1px solid #f5c6cb;
+        }
+        .status-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        h1 {
+            color: #0056b3;
+            text-align: center;
+        }
+        .instructions {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid #007bff;
+        }
+        .instructions p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>JSON User Attempts Merger</h1>
+
+        <div class="instructions">
+            <p>This tool helps transfer <code>user_attempts</code> from an older JSON file to a newer one, matching by <code>question_id</code>.</p>
+            <p>It's designed to help you consolidate your bar exam practice question data. Good luck with your studies for the Washington State Bar Exam!</p>
+            <p><strong>Instructions:</strong></p>
+            <ol>
+                <li>Paste your newer JSON data (the file you want to update) into the 'Newer JSON (Target)' field.</li>
+                <li>Paste your older JSON data (the file containing the <code>user_attempts</code> you want to copy) into the 'Older JSON (Source)' field.</li>
+                <li>Click the 'Merge JSON Data' button.</li>
+                <li>The merged JSON will appear in the 'Merged JSON Output' field. Copy this data to your new file.</li>
+            </ol>
+        </div>
+
+        <div class="text-areas-container">
+            <div class="text-area-wrapper">
+                <label for="newJsonInput">Newer JSON (Target - will be modified)</label>
+                <textarea id="newJsonInput" placeholder="Paste the newer JSON content here..."></textarea>
+            </div>
+            <div class="text-area-wrapper">
+                <label for="oldJsonInput">Older JSON (Source - with user_attempts to copy)</label>
+                <textarea id="oldJsonInput" placeholder="Paste the older JSON content here..."></textarea>
+            </div>
+        </div>
+
+        <button onclick="mergeJsonData()">Merge JSON Data</button>
+
+        <div class="text-area-wrapper">
+            <label for="mergedJsonOutput">Merged JSON Output</label>
+            <textarea id="mergedJsonOutput" readonly placeholder="Merged JSON will appear here..."></textarea>
+        </div>
+        <div id="statusMessage"></div>
+    </div>
+
+    <script>
+        function mergeJsonData() {
+            const newerJsonString = document.getElementById('newJsonInput').value;
+            const olderJsonString = document.getElementById('oldJsonInput').value;
+            const outputArea = document.getElementById('mergedJsonOutput');
+            const statusArea = document.getElementById('statusMessage');
+
+            // Clear previous results and status
+            outputArea.value = "";
+            statusArea.textContent = "";
+            statusArea.className = ""; // Clear existing status classes
+
+            if (!newerJsonString.trim() || !olderJsonString.trim()) {
+                statusArea.textContent = "Please paste content into both JSON input areas.";
+                statusArea.className = "status-error";
+                return;
+            }
+
+            try {
+                let newerData = JSON.parse(newerJsonString);
+                const olderData = JSON.parse(olderJsonString);
+
+                // Validate basic structure (presence of 'questions' array)
+                if (!olderData || typeof olderData !== 'object' || !Array.isArray(olderData.questions)) {
+                    statusArea.textContent = "Invalid format for Older JSON: Must be an object with a 'questions' array.";
+                    statusArea.className = "status-error";
+                    return;
+                }
+                if (!newerData || typeof newerData !== 'object' || !Array.isArray(newerData.questions)) {
+                    statusArea.textContent = "Invalid format for Newer JSON: Must be an object with a 'questions' array.";
+                    statusArea.className = "status-error";
+                    return;
+                }
+
+                // 1. Create a map of question_id to user_attempts from the older data
+                const attemptsMap = new Map();
+                for (const oldQuestion of olderData.questions) {
+                    if (oldQuestion && oldQuestion.question_id && Array.isArray(oldQuestion.user_attempts) && oldQuestion.user_attempts.length > 0) {
+                        attemptsMap.set(oldQuestion.question_id, oldQuestion.user_attempts);
+                    }
+                }
+
+                if (attemptsMap.size === 0) {
+                     statusArea.textContent = "No questions with user attempts found in the Older JSON to merge. The newer JSON remains unchanged.";
+                     statusArea.className = "status-warning";
+                     outputArea.value = JSON.stringify(newerData, null, 2); // Output newer data as is
+                     return;
+                }
+
+                // 2. Iterate through newerData questions and update user_attempts
+                let matchesFound = 0;
+                // It's good practice to work on a deep copy if the original object needs to be preserved
+                // for other operations, but for this tool, modifying newerData directly is simpler.
+                // let processedNewerData = JSON.parse(JSON.stringify(newerData)); // For a deep copy approach
+
+                for (const newQuestion of newerData.questions) {
+                    if (newQuestion && newQuestion.question_id && attemptsMap.has(newQuestion.question_id)) {
+                        const attemptsToCopy = attemptsMap.get(newQuestion.question_id);
+                        // Overwrite existing user_attempts in the new question with those from the old one
+                        newQuestion.user_attempts = attemptsToCopy; // This assigns the array from older data
+                        matchesFound++;
+                    } else if (newQuestion && !newQuestion.hasOwnProperty('user_attempts')) {
+                        // If the question in the newer JSON doesn't have a user_attempts field,
+                        // and there's no match from the older JSON, initialize it as an empty array
+                        // to maintain schema consistency.
+                        newQuestion.user_attempts = [];
+                    }
+                    // If newQuestion.user_attempts already exists and there's no match, it remains untouched.
+                }
+
+                // 3. Output the merged JSON
+                outputArea.value = JSON.stringify(newerData, null, 2); // Pretty print with 2-space indent
+
+                if (matchesFound > 0) {
+                    statusArea.textContent = `Merge complete. User attempts from ${matchesFound} question(s) in the older JSON were transferred to the newer JSON.`;
+                    statusArea.className = "status-success";
+                } else { // This case means attemptsMap had items, but none matched.
+                    statusArea.textContent = "Merge complete. No matching question_ids found to transfer user attempts. The newer JSON remains unchanged regarding attempts from older data.";
+                    statusArea.className = "status-warning";
+                }
+
+            } catch (error) {
+                outputArea.value = "";
+                statusArea.textContent = "Error processing JSON: " + error.message + ". Please ensure both inputs are valid JSON.";
+                statusArea.className = "status-error";
+                console.error("JSON Processing Error:", error);
+            }
+        }
+    </script>
+
+</body>
+</html>

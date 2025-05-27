@@ -97,15 +97,16 @@
         #copyButton:hover {
             background-color: #1e7e34;
         }
-        .message-area { 
-            color: #333; 
+        .message-area {
+            color: #333;
             margin-top: 10px;
-            text-align: left; 
+            text-align: left;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             background-color: #f9f9f9;
             min-height: 20px;
+            word-wrap: break-word;
         }
         .message-area.error {
             color: red;
@@ -200,7 +201,7 @@
 
             function displayMessage(message, type = 'info') {
                 messagesDiv.innerHTML = message;
-                messagesDiv.className = 'message-area'; 
+                messagesDiv.className = 'message-area';
                 if (type === 'error') {
                     messagesDiv.classList.add('error');
                 } else if (type === 'success') {
@@ -213,7 +214,6 @@
                 messagesDiv.className = 'message-area';
             }
 
-
             combineButton.addEventListener('click', () => {
                 clearMessages();
                 jsonOutput.value = '';
@@ -223,24 +223,20 @@
 
                 try {
                     if (!jsonInput1.value.trim()) {
-                        displayMessage('JSON Block 1 is empty.', 'error');
-                        return;
+                        displayMessage('JSON Block 1 is empty.', 'error'); return;
                     }
                     obj1 = JSON.parse(jsonInput1.value);
                 } catch (e) {
-                    displayMessage('Error parsing JSON Block 1: ' + e.message, 'error');
-                    return;
+                    displayMessage('Error parsing JSON Block 1: ' + e.message, 'error'); return;
                 }
 
                 try {
                     if (!jsonInput2.value.trim()) {
-                        displayMessage('JSON Block 2 is empty.', 'error');
-                        return;
+                        displayMessage('JSON Block 2 is empty.', 'error'); return;
                     }
                     obj2 = JSON.parse(jsonInput2.value);
                 } catch (e) {
-                    displayMessage('Error parsing JSON Block 2: ' + e.message, 'error');
-                    return;
+                    displayMessage('Error parsing JSON Block 2: ' + e.message, 'error'); return;
                 }
 
                 if (!isValidSchema(obj1, "JSON Block 1") || !isValidSchema(obj2, "JSON Block 2")) {
@@ -252,88 +248,120 @@
                     groups: []
                 };
 
+                const processingLog = [];
                 const existingQuestionIds = new Set();
-                const idChangesMap = {}; 
-                const processingLog = []; // Unified log for all changes
-
-                // Process first JSON questions
+                const questionIdChangesMap = {}; // Maps old qID from obj2 to new qID if changed
+                
+                // Process questions from JSON Block 1
                 obj1.questions.forEach(q => {
-                    combinedJson.questions.push(q);
-                    existingQuestionIds.add(q.question_id);
+                    const questionCopy = JSON.parse(JSON.stringify(q)); // Deep copy
+                    questionCopy._source = 1; // Mark origin
+                    combinedJson.questions.push(questionCopy);
+                    existingQuestionIds.add(questionCopy.question_id);
                 });
 
-                // Process second JSON questions
+                // Process questions from JSON Block 2
                 obj2.questions.forEach(q2 => {
-                    let currentQuestionId = q2.question_id;
+                    const questionCopy = JSON.parse(JSON.stringify(q2)); // Deep copy
+                    questionCopy._source = 2; // Mark origin
+                    let currentQuestionId = questionCopy.question_id;
                     if (existingQuestionIds.has(currentQuestionId)) {
                         const oldId = currentQuestionId;
                         const newId = generateUUID();
-                        q2.question_id = newId;
-                        idChangesMap[oldId] = newId;
+                        questionCopy.question_id = newId;
+                        questionIdChangesMap[oldId] = newId; // Store change for group processing
                         existingQuestionIds.add(newId);
                         processingLog.push(`Question ID '${oldId}' (from Block 2) was duplicate, <strong>changed to '${newId}'</strong>.`);
                     } else {
                         existingQuestionIds.add(currentQuestionId);
                     }
-                    combinedJson.questions.push(q2); 
+                    combinedJson.questions.push(questionCopy);
                 });
 
-                // --- NEW Group Processing Logic ---
+                // --- Group Processing Logic ---
                 const processedGroups = [];
-                const groupContentSignatures = new Set(); 
-                const finalGroupIds = new Set();        
+                const groupContentSignatures = new Set(); // For content-based deduplication
+                const finalGroupIds = new Set();          // Tracks IDs committed to output groups
+                const groupCampaignChangesMapObj1 = {};   // Tracks group_id changes for obj1 groups
+                const groupCampaignChangesMapObj2 = {};   // Tracks group_id changes for obj2 groups
 
                 function getGroupContentSignatureForDedup(group) {
-                    // Signature based on 'text' and 'question_order'
-                    // Ensure question_order is part of the signature for content comparison
-                    return JSON.stringify({ 
-                        text: group.text, // Will be undefined if not present, that's fine for signature
-                        question_order: group.question_order 
+                    // Signature based on 'text' and final 'question_order'
+                    return JSON.stringify({
+                        text: group.text,
+                        question_order: group.question_order.slice().sort() // Sort for consistent signature
                     });
                 }
+                
+                function processSingleGroup(originalGroupData, sourceBlockName, sourceBlockNum, currentQuestionIdChangesMap, currentGroupCampaignChangesMap) {
+                    const group = JSON.parse(JSON.stringify(originalGroupData)); // Deep copy
 
-                function processGroupForCombining(originalGroup, sourceName, idChangesMapForQuestions) {
-                    const group = JSON.parse(JSON.stringify(originalGroup)); // Deep copy
-
-                    if (sourceName === "Block 2" && idChangesMapForQuestions) {
+                    // 1. Update question_ids in question_order if this group is from Block 2
+                    if (sourceBlockNum === 2 && currentQuestionIdChangesMap) {
                         group.question_order = group.question_order.map(
-                            qId => idChangesMapForQuestions[qId] || qId
+                            qId => currentQuestionIdChangesMap[qId] || qId
                         );
                     }
 
+                    // 2. Check for content-based duplicates using the (potentially updated) group
                     const contentSignature = getGroupContentSignatureForDedup(group);
-
                     if (groupContentSignatures.has(contentSignature)) {
-                        processingLog.push(`Group with original ID '${originalGroup.group_id}' (text: '${group.text || "N/A"}') from ${sourceName} was an <strong>identical duplicate</strong> of an already processed group. It has been <strong>dropped</strong>.`);
-                        return; 
+                        processingLog.push(`Group with original ID '${originalGroupData.group_id}' (text: '${group.text || "N/A"}') from ${sourceBlockName} was an <strong>identical duplicate</strong> (based on text and question order) of an already processed group. It has been <strong>dropped</strong>.`);
+                        return;
                     }
-                    
-                    groupContentSignatures.add(contentSignature); // Add content signature for unique content
+                    groupContentSignatures.add(contentSignature);
 
-                    let currentGroupId = group.group_id;
-                    if (finalGroupIds.has(currentGroupId)) {
-                        const oldGroupId = currentGroupId;
-                        currentGroupId = generateUUID();
-                        group.group_id = currentGroupId;
-                        processingLog.push(`Group with original ID '${oldGroupId}' (text: '${group.text || "N/A"}') from ${sourceName} had a conflicting ID (but different content). Its ID was <strong>renamed to '${currentGroupId}'</strong>.`);
+                    // 3. Handle group_id conflicts
+                    let groupOutputId = originalGroupData.group_id; // Start with the original ID
+                    if (finalGroupIds.has(groupOutputId)) {
+                        // Original ID conflicts with an already finalized group ID (different content)
+                        const oldConflictId = groupOutputId;
+                        groupOutputId = generateUUID(); // Assign a new ID to this group
+                        group.group_id = groupOutputId; // Update the group object that will be pushed
+
+                        // Record this change in the block-specific map
+                        currentGroupCampaignChangesMap[oldConflictId] = groupOutputId;
+                        processingLog.push(`Group with original ID '${oldConflictId}' (text: '${group.text || "N/A"}') from ${sourceBlockName} had a conflicting ID. Its ID was <strong>renamed to '${groupOutputId}'</strong>.`);
                     }
+                    // If no conflict, group.group_id (from the copy) remains originalGroupData.group_id
 
-                    finalGroupIds.add(currentGroupId);
+                    finalGroupIds.add(groupOutputId); // Add the chosen ID (original or new) to committed IDs
+                    group.group_id = groupOutputId; // Ensure the group object has the final ID
                     processedGroups.push(group);
                 }
 
                 if (obj1.groups && Array.isArray(obj1.groups)) {
                     obj1.groups.forEach(g1 => {
-                        processGroupForCombining(g1, "Block 1", null);
+                        processSingleGroup(g1, "Block 1", 1, null, groupCampaignChangesMapObj1);
                     });
                 }
                 if (obj2.groups && Array.isArray(obj2.groups)) {
                     obj2.groups.forEach(g2 => {
-                        processGroupForCombining(g2, "Block 2", idChangesMap);
+                        processSingleGroup(g2, "Block 2", 2, questionIdChangesMap, groupCampaignChangesMapObj2);
                     });
                 }
                 combinedJson.groups = processedGroups;
-                // --- END of NEW Group Processing Logic ---
+                
+                // --- Update group_id in questions based on group renames ---
+                combinedJson.questions.forEach(question => {
+                    if (question.group_id) {
+                        const originalGroupId = question.group_id;
+                        let newGroupId = null;
+
+                        if (question._source === 1 && groupCampaignChangesMapObj1[originalGroupId]) {
+                            newGroupId = groupCampaignChangesMapObj1[originalGroupId];
+                        } else if (question._source === 2 && groupCampaignChangesMapObj2[originalGroupId]) {
+                            newGroupId = groupCampaignChangesMapObj2[originalGroupId];
+                        }
+
+                        if (newGroupId) {
+                            question.group_id = newGroupId;
+                            processingLog.push(`Question '${question.question_id}' (from Block ${question._source}) had its group_id updated from '${originalGroupId}' to '${newGroupId}' to match its renamed group.`);
+                        }
+                    }
+                    delete question._source; // Clean up temporary marker
+                });
+                // --- END of Group Processing Logic ---
 
                 currentCombinedJsonObject = combinedJson;
                 jsonOutput.value = JSON.stringify(currentCombinedJsonObject, null, 2);
@@ -376,7 +404,7 @@
                 }
                 currentCombinedJsonObject.questions.forEach(question => {
                     if (!question.source) {
-                        question.source = {}; 
+                        question.source = {};
                     }
                     if (newName) question.source.name = newName;
                     if (newProvider) question.source.provider = newProvider;
@@ -385,13 +413,14 @@
                 jsonOutput.value = JSON.stringify(currentCombinedJsonObject, null, 2);
                 displayMessage('Source details updated for all questions!', 'success');
                  setTimeout(() => {
-                       if (messagesDiv.classList.contains('success') && messagesDiv.innerHTML.includes("Source details updated")) {
-                           clearMessages();
-                       }
-                 }, 3000);
+                        if (messagesDiv.classList.contains('success') && messagesDiv.innerHTML.includes("Source details updated")) {
+                            clearMessages();
+                        }
+                }, 3000);
             });
 
             copyButton.addEventListener('click', () => {
+                clearMessages();
                 if (jsonOutput.value) {
                     navigator.clipboard.writeText(jsonOutput.value)
                         .then(() => {
@@ -415,19 +444,20 @@
                 if (!Array.isArray(obj.questions)) {
                     displayMessage(`${blockName} does not have a "questions" array.`, 'error'); return false;
                 }
-                if (!Array.isArray(obj.groups)) {
-                    displayMessage(`${blockName} does not have a "groups" array.`, 'error'); return false;
+                 // Groups array is optional at input, will be created if missing.
+                if (obj.groups && !Array.isArray(obj.groups)) {
+                    displayMessage(`${blockName} has a "groups" field that is not an array.`, 'error'); return false;
                 }
+                if (!obj.groups) { // Ensure groups array exists for processing, even if empty
+                    obj.groups = [];
+                }
+
                 for (const q of obj.questions) {
                     if (typeof q.question_id !== 'string' || !q.question_id) {
                         displayMessage(`A question in ${blockName} is missing a valid "question_id".`, 'error'); return false;
                     }
-                    // Optional: Check for source object if you want to enforce it strictly before combining
-                    // if (typeof q.source !== 'object' || q.source === null) {
-                    //     displayMessage(`Question with id "${q.question_id}" in ${blockName} is missing the "source" object.`, 'error'); return false;
-                    // }
                 }
-                for (const g of obj.groups) {
+                for (const g of obj.groups) { // Now obj.groups is guaranteed to be an array
                     if (typeof g.group_id !== 'string' || !g.group_id) {
                         displayMessage(`A group in ${blockName} is missing a valid "group_id".`, 'error'); return false;
                     }

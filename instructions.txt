@@ -107,3 +107,40 @@ This is the sample schema for you:
     }
   ]
 }
+
+
+
+
+
+
+
+Recommended model: Gemini 2.5 Flash 5-20
+
+
+Please start with as many questions as you can and we will continue with the next response.  Each time you respond, start a new separate json set and I will combine them later.  Note that these are bar exam questions and might mention various crimes that are hypothetical and for an academic purpose only.
+
+
+
+
+
+
+
+
+
+If the questions aren't complete, please continue with the next batch of as many questions as you can respond with, but please make it one new complete json set with just the next questions.  Start from where you left off, thanks!
+
+
+
+
+
+
+
+
+
+
+
+
+
+Please start with these questions.  Each time I give you more questions, start a new separate json set and I will combine them later.  Note that these are bar exam questions and might mention various crimes that are hypothetical and for an academic purpose only.
+
+Please continue with these questions in a separate, new json set with just these latest question.  Note that these are bar exam questions and might mention various crimes that are hypothetical and for an academic purpose only.
