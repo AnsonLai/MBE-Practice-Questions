@@ -1648,6 +1648,7 @@
                         };
                         quizData.questions.forEach(q => {
                             if (!q.user_attempts) q.user_attempts = [];
+                            q.answer = q.answer || {}; // Initialize if not present after loading
                             q.source = q.source || {}; // Ensure source object exists for Dexie dot notation
                         });
                         console.log('Quiz data loaded from DexieDB.');
@@ -1822,6 +1823,35 @@
 
             // --- Core Quiz Logic (Modified for Dexie) ---
 
+            async function handleLoadSampleData() { // <--- ENSURE THIS FUNCTION IS DEFINED
+                const sampleUrl = 'https://ansonlai.github.io/MBE-Practice-Questions/ncbe-sample.json';
+                loadSampleButton.disabled = true;
+                loadSampleButton.textContent = 'Loading Sample...';
+                loadJsonButton.disabled = true;
+
+                try {
+                    console.log(`Fetching sample data from ${sampleUrl}`);
+                    const response = await fetch(sampleUrl);
+                    if (!response.ok) {
+                        console.error(`HTTP error! status: ${response.status}, statusText: ${response.statusText}`);
+                        let errorBody = '';
+                        try { errorBody = await response.text(); } catch (e) {/* ignore */ }
+                        console.error("Response body (if any):", errorBody);
+                        throw new Error(`Failed to fetch sample data. Status: ${response.status}`);
+                    }
+                    const sampleData = await response.json();
+                    console.log("Sample data fetched and parsed successfully.");
+                    await processLoadedData(sampleData, "NCBE Online Practice Exam 1 Sample"); // Ensure processLoadedData is async
+                } catch (error) {
+                    console.error('Error fetching or processing sample data:', error);
+                    alert(`Failed to load sample data. Please check the browser console for details. Error: ${error.message}`);
+                } finally {
+                    loadSampleButton.disabled = false;
+                    loadSampleButton.textContent = 'Load Sample Data';
+                    loadJsonButton.disabled = false;
+                }
+            }
+
             async function handleLoadJson() {
                 const file = jsonFileElement.files[0];
                 if (!file) {
@@ -1860,6 +1890,7 @@
 
                         const questionsToSave = loadedData.questions.map(q => {
                             q.user_attempts = q.user_attempts || [];
+                            q.answer = q.answer || {}; // Initialize if not present
                             q.source = q.source || {}; // CRITICAL for Dexie dot notation indexing
                             return q;
                         });
@@ -1954,6 +1985,7 @@
 
                 const filteredQuestions = questionsToFilter.filter(q => {
                     // ... (filtering logic unchanged) ...
+                    if (!q) return false; // Should not happen if quizData.questions is clean, but good guard
                     const hasAttempts = q.user_attempts && q.user_attempts.length > 0;
 
                     // Status filter
