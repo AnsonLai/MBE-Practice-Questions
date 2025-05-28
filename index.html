@@ -1393,12 +1393,6 @@
     <div id="settings-sidebar" class="sidebar">
         <h2>Quiz Settings</h2>
         <div class="sidebar-section">
-            <h3>Question Status</h3>
-            <label><input type="radio" name="filter-status" value="all" checked> Show All</label>
-            <label><input type="radio" name="filter-status" value="unanswered"> Show Unanswered Only</label>
-            <label><input type="radio" name="filter-status" value="answered"> Show Answered Only</label>
-        </div>
-        <div class="sidebar-section">
             <h3>Categories</h3>
             <div id="filter-categories-list" class="filter-options-list">
                 <p>Load data to see categories.</p>
@@ -1771,7 +1765,8 @@
                         'activeHideAnswerMode',
                         'activeQuestionLimit',
                         'activeSessionTimeRemaining',
-                        'activeStopwatchTime'
+                        'activeStopwatchTime',
+                        'activeSessionAttempts' // Added activeSessionAttempts
                     ]);
                 } catch (error) {
                     console.error("Error clearing active session state:", error);
@@ -1901,6 +1896,16 @@
                         await saveAppState('activeSessionTimeRemaining', sessionTimeRemaining);
                         await saveAppState('activeStopwatchTime', stopwatchTime);
                         console.log("beforeunload: Active quiz session state saved.");
+
+                        // Save sessionAttempts
+                        if (sessionAttempts && sessionAttempts.size > 0) {
+                            const serializableSessionAttempts = Array.from(sessionAttempts.entries());
+                            await saveAppState('activeSessionAttempts', serializableSessionAttempts);
+                            console.log("beforeunload: Active sessionAttempts saved.");
+                        } else {
+                            await db.appState.delete('activeSessionAttempts'); // Or saveAppState('activeSessionAttempts', null);
+                            console.log("beforeunload: No active sessionAttempts to save, or it's empty. Cleared from DB.");
+                        }
                     } catch (error) {
                         console.error("beforeunload: Error saving active quiz session state:", error);
                     }
@@ -1910,6 +1915,9 @@
                     // Consider clearing only if a quiz was previously active but is now finished/reset.
                     // For now, only save if active. Clearing will be handled at specific points (new quiz, end quiz).
                     console.log("beforeunload: No active quiz session to save.");
+                    // Also clear sessionAttempts from DB if no active quiz
+                    await db.appState.delete('activeSessionAttempts');
+                    console.log("beforeunload: No active quiz, ensuring activeSessionAttempts is cleared from DB.");
                 }
             });
 
@@ -1983,7 +1991,6 @@
                 // }
             }
             function getFilterSettings() {
-                const statusFilter = document.querySelector('input[name="filter-status"]:checked')?.value || 'all';
                 const attemptsFilter = document.querySelector('input[name="filter-attempts"]:checked')?.value || 'all';
                 const notesFilter = document.querySelector('input[name="filter-notes"]:checked')?.value || 'all';
                 const scramble = filterScrambleCheckbox.checked;
@@ -1996,7 +2003,6 @@
                     .map(cb => cb.value); // Consider if these years should be numbers or strings
 
                 return {
-                    status: statusFilter,
                     attempts: attemptsFilter,
                     notes: notesFilter,
                     categories: selectedCategories,
@@ -2359,9 +2365,11 @@
 
             async function applyFiltersAndStartQuiz() {
                 await clearActiveSessionState(); // Clear any previously saved session state before starting a new one
+                sessionAttempts.clear(); // Clear session attempts for the new sprint
+                console.log("applyFiltersAndStartQuiz: sessionAttempts cleared for new sprint.");
                 initializeTimerSettings();
                 hideAnswerMode = settingHideAnswerCheckbox.checked;
-                sessionAttempts.clear();
+                // sessionAttempts.clear(); // Moved up
 
                 if (!quizData || !quizData.questions || quizData.questions.length === 0) {
                     alert("No quiz data loaded. Please load a JSON file or use sample data.");
@@ -2387,10 +2395,6 @@
                     // ... (filtering logic unchanged) ...
                     if (!q) return false; // Should not happen if quizData.questions is clean, but good guard
                     const hasAttempts = q.user_attempts && q.user_attempts.length > 0;
-
-                    // Status filter
-                    if (filters.status === 'unanswered' && hasAttempts) return false;
-                    if (filters.status === 'answered' && !hasAttempts) return false;
 
                     // Attempts filter
                     if (filters.attempts === 'attempted' && !hasAttempts) return false;
@@ -2574,17 +2578,51 @@
                     });
                 }
 
-
+                // Default UI state for a question (can be overridden if already answered in session)
                 feedbackAreaElement.style.display = 'none';
                 feedbackAreaElement.innerHTML = '';
-                attemptNotesElement.value = ''; // Clear notes for new question
                 attemptNotesElement.disabled = false;
-
-                submitAnswerButton.disabled = false;
-                submitAnswerButton.style.display = 'inline-block';
-                nextQuestionButton.style.display = 'none';
-                showAnswerButton.style.display = 'none';
                 reviewSessionButton.style.display = 'none'; // Controlled by hideAnswerMode after submit
+
+
+                if (sessionAttempts.has(question.question_id)) {
+                    const sessionAttemptData = sessionAttempts.get(question.question_id);
+                    const attempt = sessionAttemptData.attempt;
+
+                    // Pre-select the radio button
+                    const chosenAnswerInput = choicesFormElement.querySelector(`input[type="radio"][value="${attempt.chosen_answer}"]`);
+                    if (chosenAnswerInput) {
+                        chosenAnswerInput.checked = true;
+                    }
+
+                    showCurrentAnswerFeedback(true); // Display feedback and style choices
+
+                    // Disable choices and submit button
+                    choicesFormElement.querySelectorAll('input[type="radio"]').forEach(input => input.disabled = true);
+                    submitAnswerButton.disabled = true;
+                    submitAnswerButton.style.display = 'none';
+
+                    // Show navigation buttons
+                    nextQuestionButton.style.display = 'inline-block';
+                    if (currentQuestionIndex > 0) {
+                        previousQuestionButton.style.display = 'inline-block';
+                    } else {
+                        previousQuestionButton.style.display = 'none';
+                    }
+
+                    // Populate notes
+                    attemptNotesElement.value = attempt.notes || '';
+                    showAnswerButton.style.display = 'none'; // Answer is already shown
+                } else {
+                    // Question not answered in this session, set to unanswered state
+                    attemptNotesElement.value = ''; // Clear notes for new question
+                    choicesFormElement.querySelectorAll('input[type="radio"]').forEach(input => input.disabled = false);
+
+                    submitAnswerButton.disabled = false;
+                    submitAnswerButton.style.display = 'inline-block';
+                    nextQuestionButton.style.display = 'none';
+                    showAnswerButton.style.display = 'none';
+                }
 
                 renderPastAttempts(question); // Display past attempts for this question
                 // pastAttemptsContainer visibility is handled within renderPastAttempts
@@ -2944,7 +2982,6 @@
                 if (!filters) return;
 
                 // Restore radio buttons
-                document.querySelector(`input[name="filter-status"][value="${filters.status || 'all'}"]`).checked = true;
                 document.querySelector(`input[name="filter-attempts"][value="${filters.attempts || 'all'}"]`).checked = true;
                 document.querySelector(`input[name="filter-notes"][value="${filters.notes || 'all'}"]`).checked = true;
 
@@ -3017,7 +3054,6 @@
                 jsonFileElement.value = '';
 
                 populateFilterOptions(); // Will use current quizData
-                document.querySelector('input[name="filter-status"][value="all"]').checked = true;
                 document.querySelector('input[name="filter-attempts"][value="all"]').checked = true;
                 document.querySelector('input[name="filter-notes"][value="all"]').checked = true;
                 filterScrambleCheckbox.checked = false;
@@ -3581,7 +3617,15 @@
                     const savedQuestionLimit = await loadAppState('activeQuestionLimit');
                     const savedSessionTimeRemaining = await loadAppState('activeSessionTimeRemaining');
                     const savedStopwatchTime = await loadAppState('activeStopwatchTime');
+                    const savedSerializableSessionAttempts = await loadAppState('activeSessionAttempts');
 
+                    if (savedSerializableSessionAttempts && Array.isArray(savedSerializableSessionAttempts)) {
+                        sessionAttempts = new Map(savedSerializableSessionAttempts);
+                        console.log("initializeApp: sessionAttempts restored from saved state.", sessionAttempts);
+                    } else {
+                        sessionAttempts = new Map(); // Ensure it's a fresh Map if nothing was restored
+                        console.log("initializeApp: No saved sessionAttempts found or format error, initialized as new Map.");
+                    }
 
                     if (savedMasterList && savedMasterList.length > 0 && savedIndex !== null && savedIndex >= 0 && savedIndex < savedMasterList.length) {
                         console.log("Found active session state. Attempting to restore.");
