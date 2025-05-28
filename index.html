@@ -2474,7 +2474,7 @@
                     toggleAnnotationButton.style.display = 'inline-block';
                     resetSessionTimer(); resetQuestionTimer(); resetStopwatch();
                     startSessionTimer(); startStopwatch();
-                    displayNextQuestionInternal();
+                    await displayNextQuestionInternal();
                     quizProgressElement.textContent = `Question 1 of ${masterQuestionList.length}`;
                     closeSidebar();
                 } else {
@@ -2826,10 +2826,10 @@
                 pauseQuestionTimer();
                 showAnswerButton.style.display = 'none';
                 if (!hideAnswerMode) reviewSessionButton.style.display = 'none';
-                displayNextQuestionInternal();
+                await displayNextQuestionInternal();
             }
 
-            function displayNextQuestionInternal() {
+            async function displayNextQuestionInternal() {
                 clearCanvas();
                 resetQuestionTimer();
                 if (questionTimerEnabled) startQuestionTimer();
@@ -2853,7 +2853,7 @@
                     currentQuestionObject = masterQuestionList[currentQuestionIndex];
                     if (!currentQuestionObject) {
                         console.error(`Error: Undefined question at index ${currentQuestionIndex}. Skipping.`);
-                        displayNextQuestionInternal(); return;
+                        await displayNextQuestionInternal(); return;
                     }
                     renderQuestion(currentQuestionObject);
                     quizProgressElement.textContent = `Question ${currentQuestionIndex + 1} of ${masterQuestionList.length}`;
@@ -3536,7 +3536,7 @@
                 // It also handles displaying the quiz area.
                 applyFiltersAndStartQuiz();
             }
-            function handleBackToSettings() {
+            async function handleBackToSettings() {
                 console.log("Returning to settings.");
                 await clearActiveSessionState(); // Clear session as the user is abandoning it
                 finalReviewArea.style.display = 'none';
@@ -3614,7 +3614,7 @@
                         if (savedFilters) restoreFilterUI(savedFilters); // Re-apply to ensure dynamic content is handled
 
 
-                        displayNextQuestionInternal(); // This will load currentQuestionObject, render, etc.
+                        await displayNextQuestionInternal(); // This will load currentQuestionObject, render, etc.
                                                        // and also increments currentQuestionIndex to the correct value.
 
                         startSessionTimer();
