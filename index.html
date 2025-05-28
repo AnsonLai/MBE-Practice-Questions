@@ -2514,6 +2514,8 @@
                     return;
                 }
 
+                console.log('Rendering question:', question); // Temporary logging
+
                 // Group Introduction
                 if (question.group_id && question.group_id !== lastDisplayedGroupId) {
                     const group = quizData.groups.find(g => g.group_id === question.group_id);
@@ -2545,9 +2547,19 @@
                 metaTooltipContentElement.innerHTML = metaHtml || "No metadata available.";
 
                 // Question Text (handle potential drawing on canvas)
+                console.log('questionTextElement classList before setting text:', questionTextElement.classList); // Temporary logging
                 questionTextElement.textContent = question.text;
+                console.log('questionTextElement classList after setting text:', questionTextElement.classList); // Temporary logging
                 questionTextElement.classList.remove('drawn-on-canvas');
                 groupIntroElement.classList.remove('drawn-on-canvas');
+
+                // Protective measure for display style if annotation is not active
+                if (!isAnnotationActive) {
+                    questionTextElement.style.display = ''; // Reset to default (typically block for h2)
+                    if (groupIntroElement.style.display !== 'none') { // Only change if it's supposed to be visible
+                        groupIntroElement.style.display = ''; // Reset to default (typically block)
+                    }
+                }
 
 
                 // Choices
@@ -2636,12 +2648,25 @@
                 }
             }
             function renderPastAttempts(question) {
-                pastAttemptsContainer.innerHTML = ''; // Clear previous attempts
+                console.log('Rendering past attempts for question:', question); // Temporary logging
                 // Ensure accordion content area (ul and its h4) is cleared
                 // The h4 and ul are now static inside accordion-content, we just need to clear the ul
                 const ul = pastAttemptsAccordionContent.querySelector('ul');
-                const h4 = pastAttemptsAccordionContent.querySelector('h4'); // To ensure it exists
-                ul.innerHTML = '';
+                // const h4 = pastAttemptsAccordionContent.querySelector('h4'); // To ensure it exists // h4 is static, no need to modify it here
+
+                if (ul) {
+                    ul.innerHTML = ''; // Clear only the list items
+                } else {
+                    console.error("Could not find UL element within pastAttemptsAccordionContent to clear.");
+                    // If ul doesn't exist, the structure is broken.
+                    // We might need to hide the container or avoid further processing.
+                    // For now, just logging the error. If pastAttemptsAccordionContent itself is missing, that's a bigger issue.
+                    if (!pastAttemptsAccordionContent) {
+                        console.error("pastAttemptsAccordionContent is also missing. Cannot render past attempts.");
+                        pastAttemptsContainer.style.display = 'none'; // Hide the whole thing if critically broken
+                        return;
+                    }
+                }
 
 
                 if (!question || !question.user_attempts || question.user_attempts.length === 0) {
