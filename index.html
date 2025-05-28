@@ -760,7 +760,7 @@
         }
 
         .accordion-toggle::after {
-            content: '\\25B6'; /* Right-pointing triangle (Play icon) */
+            content: '\25BC'; /* Right-pointing triangle (Play icon) */
             font-size: 0.8rem;
             color: var(--secondary-color);
             float: right;
@@ -2548,7 +2548,7 @@
 
                 // Question Text (handle potential drawing on canvas)
                 console.log('questionTextElement classList before setting text:', questionTextElement.classList); // Temporary logging
-                questionTextElement.textContent = question.text;
+                questionTextElement.innerText = question.text;
                 console.log('questionTextElement classList after setting text:', questionTextElement.classList); // Temporary logging
                 questionTextElement.classList.remove('drawn-on-canvas');
                 groupIntroElement.classList.remove('drawn-on-canvas');
