@@ -1981,6 +1981,14 @@
                 clearCanvas();
 
                 const filters = getFilterSettings();
+                console.log("Filters object in applyFiltersAndStartQuiz:", JSON.stringify(filters)); // DEBUG LINE
+
+                if (!filters) { // Add an explicit check
+                    console.error("CRITICAL: filters object is undefined in applyFiltersAndStartQuiz!");
+                    alert("Critical error in filter settings. Please check console.");
+                    return; // Stop further execution if filters is bad
+                }
+
                 const questionsToFilter = quizData.questions; // Use in-memory data for filtering
 
                 const filteredQuestions = questionsToFilter.filter(q => {
