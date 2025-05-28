@@ -1797,28 +1797,265 @@
                 }
             }
 
-            function populateCheckboxList(container, items) { /* ... (unchanged) ... */ }
-            function clearCheckboxes(container) { /* ... (unchanged) ... */ }
-            function getFilterSettings() { /* ... (unchanged) ... */ }
+            function populateCheckboxList(container, items) {
+                container.innerHTML = ''; // Clear previous options
+                if (!items || items.length === 0) {
+                    container.innerHTML = '<p>No items available for this filter.</p>';
+                    return;
+                }
+                items.forEach(item => {
+                    const label = document.createElement('label');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = item;
+                    // Generate a somewhat unique name for checkbox groups if needed, or use a common one
+                    checkbox.name = container.id.replace('-list', ''); // e.g., 'filter-categories'
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(` ${escapeHtml(String(item))}`)); // Ensure item is string and escaped
+                    container.appendChild(label);
+                });
+            }
+            function clearCheckboxes(container) {
+                const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                // Optional: If there's an "All" radio button associated, re-check it.
+                // This depends on your specific UI logic for radio buttons tied to these checkbox groups.
+                // Example:
+                // const filterName = container.id.replace('-list', '').replace('filter-', ''); // e.g. categories
+                // const allRadio = document.querySelector(`input[name="filter-${filterName}"][value="all"]`);
+                // if (allRadio) {
+                //     allRadio.checked = true;
+                // }
+            }
+            function getFilterSettings() {
+                const statusFilter = document.querySelector('input[name="filter-status"]:checked')?.value || 'all';
+                const attemptsFilter = document.querySelector('input[name="filter-attempts"]:checked')?.value || 'all';
+                const notesFilter = document.querySelector('input[name="filter-notes"]:checked')?.value || 'all';
+                const scramble = filterScrambleCheckbox.checked;
+
+                const selectedCategories = Array.from(filterCategoriesList.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(cb => cb.value);
+                const selectedProviders = Array.from(filterProvidersList.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(cb => cb.value);
+                const selectedYears = Array.from(filterYearsList.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(cb => cb.value); // Consider if these years should be numbers or strings
+
+                return {
+                    status: statusFilter,
+                    attempts: attemptsFilter,
+                    notes: notesFilter,
+                    categories: selectedCategories,
+                    providers: selectedProviders,
+                    years: selectedYears,
+                    scramble: scramble
+                };
+            }
 
             // --- Timer Functions --- (all unchanged)
-            function formatTime(seconds) { /* ... */ }
-            function updateTimerVisibility() { /* ... */ }
-            function startSessionTimer() { /* ... */ }
-            function updateSessionTimerDisplay() { /* ... */ }
-            function startQuestionTimer() { /* ... */ }
-            function updateQuestionTimerDisplay() { /* ... */ }
-            function startStopwatch() { /* ... */ }
-            function updateStopwatchDisplay() { /* ... */ }
-            function pauseQuestionTimer() { /* ... */ }
-            function pauseSessionTimer() { /* ... */ }
-            function pauseStopwatch() { /* ... */ }
-            function resetQuestionTimer() { /* ... */ }
-            function resetSessionTimer() { /* ... */ }
-            function resetStopwatch() { /* ... */ }
-            function handleSessionTimeout() { /* ... (remove saveToLocalStorage) ... */ }
-            function handleQuestionTimeout() { /* ... */ }
-            function initializeTimerSettings() { /* ... */ }
+            function formatTime(totalSeconds) {
+                if (isNaN(totalSeconds) || totalSeconds < 0) {
+                    return "00:00";
+                }
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = Math.floor(totalSeconds % 60);
+                return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+            function updateTimerVisibility() {
+                document.getElementById('session-timer').style.display = sessionTimerEnabled ? 'flex' : 'none';
+                document.getElementById('question-timer').style.display = questionTimerEnabled ? 'flex' : 'none';
+                document.getElementById('stopwatch').style.display = stopwatchEnabled ? 'flex' : 'none';
+
+                const timerContainer = document.getElementById('timer-container');
+                if (sessionTimerEnabled || questionTimerEnabled || stopwatchEnabled) {
+                    timerContainer.style.display = 'flex';
+                } else {
+                    timerContainer.style.display = 'none';
+                }
+            }
+            function startSessionTimer() {
+                if (!sessionTimerEnabled || !quizAreaElement.style.display || quizAreaElement.style.display === 'none') return;
+                clearInterval(sessionTimerInterval);
+                // sessionTimeRemaining is set from sessionTimeLimit in initialize or applyFilters
+                updateSessionTimerDisplay(); // Initial display
+                sessionTimerInterval = setInterval(() => {
+                    sessionTimeRemaining--;
+                    updateSessionTimerDisplay();
+                    if (sessionTimeRemaining <= 0) {
+                        clearInterval(sessionTimerInterval);
+                        handleSessionTimeout();
+                    }
+                }, 1000);
+            }
+            function updateSessionTimerDisplay() {
+                const timerValueEl = document.getElementById('session-timer').querySelector('.timer-value');
+                const timerEl = document.getElementById('session-timer');
+                timerValueEl.textContent = formatTime(sessionTimeRemaining);
+
+                timerEl.classList.remove('warning', 'danger', 'flashing');
+                if (sessionTimerEnabled && sessionTimeRemaining <= 0) {
+                    timerEl.classList.add('danger', 'flashing');
+                } else if (sessionTimerEnabled && sessionTimeRemaining <= 60) { // Last minute
+                    timerEl.classList.add('danger');
+                    if (sessionTimeRemaining <= 10) { // Last 10 seconds
+                        timerEl.classList.add('flashing');
+                    }
+                } else if (sessionTimerEnabled && sessionTimeRemaining <= 300) { // Last 5 minutes
+                    timerEl.classList.add('warning');
+                }
+            }
+            function startQuestionTimer() {
+                if (!questionTimerEnabled || !quizAreaElement.style.display || quizAreaElement.style.display === 'none') return;
+                clearInterval(questionTimerInterval);
+                questionTimeRemaining = questionTimeLimit; // Reset for each question
+                updateQuestionTimerDisplay(); // Initial display
+                questionTimerInterval = setInterval(() => {
+                    questionTimeRemaining--;
+                    updateQuestionTimerDisplay();
+                    if (questionTimeRemaining <= 0) {
+                        clearInterval(questionTimerInterval);
+                        handleQuestionTimeout();
+                    }
+                }, 1000);
+            }
+            function updateQuestionTimerDisplay() {
+                const timerValueEl = document.getElementById('question-timer').querySelector('.timer-value');
+                const timerEl = document.getElementById('question-timer');
+                timerValueEl.textContent = formatTime(questionTimeRemaining);
+
+                timerEl.classList.remove('warning', 'danger', 'flashing');
+                if (questionTimerEnabled && questionTimeRemaining <= 0) {
+                    timerEl.classList.add('danger', 'flashing');
+                } else if (questionTimerEnabled && questionTimeRemaining <= 10) { // Last 10 seconds
+                    timerEl.classList.add('danger');
+                    if (questionTimeRemaining <= 5) { // Flash in last 5 seconds
+                        timerEl.classList.add('flashing');
+                    }
+                } else if (questionTimerEnabled && questionTimeRemaining <= 30) { // Warning in last 30 seconds
+                    timerEl.classList.add('warning');
+                }
+            }
+            function startStopwatch() {
+                if (!stopwatchEnabled || !quizAreaElement.style.display || quizAreaElement.style.display === 'none') return;
+                clearInterval(stopwatchInterval);
+                // stopwatchTime is cumulative for the session, don't reset here unless specifically intended
+                updateStopwatchDisplay(); // Initial display
+                stopwatchInterval = setInterval(() => {
+                    stopwatchTime++;
+                    updateStopwatchDisplay();
+                }, 1000);
+            }
+            function updateStopwatchDisplay() {
+                const timerValueEl = document.getElementById('stopwatch').querySelector('.timer-value');
+                timerValueEl.textContent = formatTime(stopwatchTime);
+            }
+            function pauseQuestionTimer() {
+                clearInterval(questionTimerInterval);
+            }
+            function pauseSessionTimer() {
+                clearInterval(sessionTimerInterval);
+            }
+            function pauseStopwatch() {
+                clearInterval(stopwatchInterval);
+            }
+            function resetQuestionTimer() {
+                clearInterval(questionTimerInterval);
+                questionTimeRemaining = questionTimeLimit;
+                updateQuestionTimerDisplay();
+            }
+            function resetSessionTimer() {
+                clearInterval(sessionTimerInterval);
+                sessionTimeRemaining = sessionTimeLimit;
+                updateSessionTimerDisplay();
+            }
+            function resetStopwatch() {
+                clearInterval(stopwatchInterval);
+                stopwatchTime = 0;
+                updateStopwatchDisplay();
+            }
+            async function handleSessionTimeout() {
+                alert('Session time is up!');
+                pauseQuestionTimer(); // Stop question timer if running
+                pauseStopwatch();     // Stop stopwatch
+
+                // Attempt to submit current question if an answer is selected and not yet submitted
+                const selectedChoiceInput = choicesFormElement.querySelector('input[type="radio"]:checked');
+                if (currentQuestionObject && selectedChoiceInput && !submitAnswerButton.disabled) {
+                    await handleSubmitAnswer(); // This will save notes too
+                } else if (currentQuestionObject) {
+                    await saveNotesForCurrentAttempt(); // Save any pending notes for the current question
+                }
+
+                // Disable further interactions with the current question UI
+                submitAnswerButton.disabled = true;
+                choicesFormElement.querySelectorAll('input[type="radio"]').forEach(input => input.disabled = true);
+                nextQuestionButton.style.display = 'none'; // No more questions
+
+                // Display appropriate end message or review screen
+                if (hideAnswerMode) {
+                    displayFinalReviewScreen();
+                } else {
+                    quizAreaElement.style.display = 'none';
+                    endOfQuizMessageElement.innerHTML = `<h2>Session Ended</h2><p>Your session time limit of ${formatTime(sessionTimeLimit)} was reached.</p>`;
+                    endOfQuizMessageElement.style.display = 'block';
+                }
+            }
+            async function handleQuestionTimeout() {
+                alert('Time for this question is up!');
+                pauseQuestionTimer(); // Already stopped by interval, but good for clarity
+
+                const selectedChoiceInput = choicesFormElement.querySelector('input[type="radio"]:checked');
+                if (currentQuestionObject && !submitAnswerButton.disabled) { // Check if submission is still possible
+                    if (selectedChoiceInput) {
+                        await handleSubmitAnswer(); // Submit if an answer was selected
+                    } else {
+                        // If no answer selected, mark as "submitted with no choice" or just reveal answer
+                        // Forcing a submit-like state:
+                        await saveNotesForCurrentAttempt(); // Save any notes
+                        deactivateAnnotationMode();
+                        choicesFormElement.querySelectorAll('input[type="radio"]').forEach(input => input.disabled = true);
+                        submitAnswerButton.style.display = 'none';
+                        submitAnswerButton.disabled = true;
+                        nextQuestionButton.style.display = 'inline-block';
+
+                        if (hideAnswerMode) {
+                            feedbackAreaElement.style.display = 'none';
+                            showAnswerButton.style.display = 'inline-block';
+                            reviewSessionButton.style.display = 'inline-block';
+                            feedbackAreaElement.innerHTML = '<p>Time up! No answer selected. Click "Show Answer" or "Next Question".</p>';
+                            feedbackAreaElement.className = 'feedback-area incorrect'; // Or neutral
+                            // feedbackAreaElement.style.display = 'block'; // Keep hidden if showAnswerButton is primary
+                        } else {
+                            showCurrentAnswerFeedback(true); // Show feedback for "no answer"
+                            showAnswerButton.style.display = 'none';
+                            reviewSessionButton.style.display = 'none';
+                        }
+                        renderPastAttempts(currentQuestionObject); // Update past attempts if structure allows for "no choice"
+                        pastAttemptsContainer.style.display = 'block';
+                    }
+                }
+                // Ensure user can proceed
+                if (nextQuestionButton.style.display === 'none' && submitAnswerButton.disabled) {
+                    nextQuestionButton.style.display = 'inline-block';
+                }
+            }
+            function initializeTimerSettings() {
+                // Read initial values from HTML inputs
+                sessionTimerEnabled = document.getElementById('enable-session-timer').checked;
+                questionTimerEnabled = document.getElementById('enable-question-timer').checked;
+                stopwatchEnabled = document.getElementById('enable-stopwatch').checked;
+
+                sessionTimeLimit = Math.max(1, parseInt(document.getElementById('session-time-limit').value, 10) || 60) * 60; // Convert minutes to seconds
+                questionTimeLimit = Math.max(10, parseInt(document.getElementById('question-time-limit').value, 10) || 90); // Seconds
+                // questionLimit is read in applyFiltersAndStartQuiz
+
+                // Update UI visibility and reset timer displays
+                updateTimerVisibility();
+                resetSessionTimer(); // Sets sessionTimeRemaining and updates display
+                resetQuestionTimer(); // Sets questionTimeRemaining and updates display
+                resetStopwatch();     // Sets stopwatchTime to 0 and updates display
+            }
 
 
             // --- Core Quiz Logic (Modified for Dexie) ---
@@ -2093,9 +2330,152 @@
                 }
             }
 
-            function shuffleArray(array) { /* ... (unchanged) ... */ }
-            function renderQuestion(question) { /* ... (unchanged) ... */ }
-            function renderPastAttempts(question) { /* ... (unchanged) ... */ }
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]]; // ES6 destructuring swap
+                }
+                return array;
+            }
+            function renderQuestion(question) {
+                if (!question) {
+                    console.error("RenderQuestion called with null/undefined question object.");
+                    questionTextElement.textContent = "Error: Could not load question.";
+                    choicesFormElement.innerHTML = "";
+                    // Disable buttons or show error state
+                    submitAnswerButton.disabled = true;
+                    attemptNotesElement.disabled = true;
+                    return;
+                }
+
+                // Group Introduction
+                if (question.group_id && question.group_id !== lastDisplayedGroupId) {
+                    const group = quizData.groups.find(g => g.group_id === question.group_id);
+                    if (group && group.introduction) {
+                        groupIntroElement.innerHTML = `<h3>${escapeHtml(group.title || 'Question Group')}</h3><p>${escapeHtml(group.introduction).replace(/\n/g, '<br>')}</p>`;
+                        groupIntroElement.style.display = 'block';
+                    } else {
+                        groupIntroElement.style.display = 'none';
+                    }
+                    lastDisplayedGroupId = question.group_id;
+                } else if (!question.group_id && lastDisplayedGroupId !== null) { // Hide if previous was a group
+                    groupIntroElement.style.display = 'none';
+                    lastDisplayedGroupId = null;
+                }
+
+
+                // Question Meta Tooltip
+                let metaHtml = `<strong>ID:</strong> ${escapeHtml(question.question_id || 'N/A')}<br>`;
+                if (question.category) metaHtml += `<strong>Category:</strong> ${escapeHtml(question.category)}<br>`;
+                if (question.source) {
+                    if (question.source.provider) metaHtml += `<strong>Provider:</strong> ${escapeHtml(question.source.provider)}<br>`;
+                    if (question.source.year) metaHtml += `<strong>Year:</strong> ${escapeHtml(String(question.source.year))}<br>`; // Ensure year is string
+                    if (question.source.exam_name) metaHtml += `<strong>Exam:</strong> ${escapeHtml(question.source.exam_name)}<br>`;
+                    if (typeof question.source.question_number !== 'undefined') metaHtml += `<strong>Original #:</strong> ${escapeHtml(String(question.source.question_number))}<br>`;
+                }
+                if (question.answer?.ai_generated_explanation || question.ai_generated_explanation) { // Check both spots for legacy
+                    metaHtml += `<span class="ai-generated-flag" style="font-weight:bold; background-color: #6c757d; color: white; padding: 2px 4px; border-radius: 3px;">AI Generated Explanation</span><br>`;
+                }
+                metaTooltipContentElement.innerHTML = metaHtml || "No metadata available.";
+
+                // Question Text (handle potential drawing on canvas)
+                questionTextElement.textContent = question.text;
+                questionTextElement.classList.remove('drawn-on-canvas');
+                groupIntroElement.classList.remove('drawn-on-canvas');
+
+
+                // Choices
+                choicesFormElement.innerHTML = ''; // Clear previous choices
+                const choiceOrder = ['A', 'B', 'C', 'D', 'E', 'F']; // Extend if more choices are possible
+                if (question.choices) {
+                    choiceOrder.forEach(key => {
+                        if (question.choices[key]) {
+                            const choiceItemDiv = document.createElement('div');
+                            choiceItemDiv.className = 'choice-item';
+
+                            const choiceLabel = document.createElement('label');
+                            const choiceInput = document.createElement('input');
+                            choiceInput.type = 'radio';
+                            choiceInput.name = 'answer'; // Group radio buttons
+                            choiceInput.value = key;
+                            choiceInput.id = `choice-${key}`; // For label 'for' attribute if used
+
+                            const choiceTextSpan = document.createElement('span');
+                            // Use innerHTML carefully, assuming choice text is trusted or simple HTML
+                            choiceTextSpan.innerHTML = `<strong>${key}.</strong> ${escapeHtml(question.choices[key])}`;
+
+                            choiceLabel.appendChild(choiceInput);
+                            choiceLabel.appendChild(choiceTextSpan);
+                            choiceItemDiv.appendChild(choiceLabel);
+                            choicesFormElement.appendChild(choiceItemDiv);
+                        }
+                    });
+                }
+
+
+                feedbackAreaElement.style.display = 'none';
+                feedbackAreaElement.innerHTML = '';
+                attemptNotesElement.value = ''; // Clear notes for new question
+                attemptNotesElement.disabled = false;
+
+                submitAnswerButton.disabled = false;
+                submitAnswerButton.style.display = 'inline-block';
+                nextQuestionButton.style.display = 'none';
+                showAnswerButton.style.display = 'none';
+                reviewSessionButton.style.display = 'none'; // Controlled by hideAnswerMode after submit
+
+                renderPastAttempts(question); // Display past attempts for this question
+                // pastAttemptsContainer visibility is handled within renderPastAttempts
+
+                // Annotation: clear previous canvas drawings & resize for new content
+                // resizeCanvas will also handle drawing text if annotation is active
+                if (isAnnotationActive) {
+                    resizeCanvas();
+                } else {
+                    clearCanvas(); // Ensure canvas is clear if not active
+                }
+            }
+            function renderPastAttempts(question) {
+                pastAttemptsContainer.innerHTML = ''; // Clear previous attempts
+                if (!question || !question.user_attempts || question.user_attempts.length === 0) {
+                    pastAttemptsContainer.style.display = 'none';
+                    return;
+                }
+
+                const h4 = document.createElement('h4');
+                h4.textContent = 'Past Attempts for This Question:';
+                pastAttemptsContainer.appendChild(h4);
+
+                const ul = document.createElement('ul');
+                // Iterate in reverse to show the most recent attempt first
+                question.user_attempts.slice().reverse().forEach(attempt => {
+                    const li = document.createElement('li');
+                    const chosen = escapeHtml(attempt.chosen_answer);
+                    const correctAns = escapeHtml(question.answer?.correct_choice);
+                    const isCorrect = chosen === correctAns;
+                    const date = new Date(attempt.time_submitted).toLocaleString();
+                    const timeSpent = attempt.time_spent_seconds !== undefined ? `${attempt.time_spent_seconds.toFixed(1)}s` : 'N/A';
+
+                    let attemptClass = isCorrect ? 'attempt-correct' : 'attempt-incorrect';
+                    let resultText = isCorrect ? 'Correct' : 'Incorrect';
+                    if (!chosen && chosen !== "0") { // Handle unanswered attempts
+                        resultText = "Unanswered";
+                        attemptClass = 'attempt-unanswered'; // Add CSS for this if desired
+                    }
+
+
+                    li.innerHTML = `<span class="${attemptClass}"><strong>${resultText}</strong></span> ` +
+                        (chosen ? `(Chosen: ${chosen}) ` : '') +
+                        `on ${date}. Time: ${timeSpent}.`;
+
+                    if (attempt.notes && attempt.notes.trim() !== "") {
+                        li.innerHTML += `<br><em>Notes:</em> ${escapeHtml(attempt.notes).replace(/\n/g, '<br>')}`;
+                    }
+                    ul.appendChild(li);
+                });
+                pastAttemptsContainer.appendChild(ul);
+                pastAttemptsContainer.style.display = 'block';
+            }
 
             async function handleSubmitAnswer() {
                 pauseQuestionTimer();
@@ -2157,8 +2537,69 @@
                 if (!hideAnswerMode) feedbackAreaElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
 
-            function showCurrentAnswerFeedback(highlightChoices = true) { /* ... (unchanged) ... */ }
-            function showCurrentAnswer() { /* ... (unchanged) ... */ }
+            function showCurrentAnswerFeedback(highlightChoices = true) {
+                if (!currentQuestionObject || !currentQuestionObject.answer) {
+                    console.error("Cannot show feedback: currentQuestionObject or its answer is missing.");
+                    feedbackAreaElement.innerHTML = "<p>Error: Could not retrieve answer details for feedback.</p>";
+                    feedbackAreaElement.className = 'feedback-area incorrect';
+                    feedbackAreaElement.style.display = 'block';
+                    return;
+                }
+
+                const correctAnswer = currentQuestionObject.answer.correct_choice;
+                const explanation = currentQuestionObject.answer.explanation;
+                const selectedChoiceInput = choicesFormElement.querySelector('input[type="radio"]:checked');
+                const chosenAnswer = selectedChoiceInput ? selectedChoiceInput.value : null;
+
+                let feedbackHtml = '';
+                if (chosenAnswer === correctAnswer) {
+                    feedbackAreaElement.className = 'feedback-area correct';
+                    feedbackHtml += `<p><strong>Correct!</strong></p>`;
+                } else if (chosenAnswer) { // An incorrect answer was selected
+                    feedbackAreaElement.className = 'feedback-area incorrect';
+                    feedbackHtml += `<p><strong>Incorrect.</strong> Your answer: ${escapeHtml(chosenAnswer)}. Correct answer: ${escapeHtml(correctAnswer)}.</p>`;
+                } else { // No answer was selected (e.g., question timed out without selection)
+                    feedbackAreaElement.className = 'feedback-area incorrect'; // Or a neutral class
+                    feedbackHtml += `<p><strong>No answer selected.</strong> Correct answer: ${escapeHtml(correctAnswer)}.</p>`;
+                }
+
+                if (explanation) {
+                    feedbackHtml += `<div class="explanation"><strong>Explanation:</strong><br>${escapeHtml(explanation).replace(/\n/g, '<br>')}</div>`;
+                } else {
+                    feedbackHtml += `<div class="explanation"><strong>Explanation:</strong><br>No explanation provided for this question.</div>`;
+                }
+                feedbackAreaElement.innerHTML = feedbackHtml;
+                feedbackAreaElement.style.display = 'block';
+
+                // Highlight choices on the form
+                if (highlightChoices) {
+                    choicesFormElement.querySelectorAll('label').forEach(label => {
+                        const input = label.querySelector('input[type="radio"]');
+                        if (!input) return;
+
+                        label.classList.remove('correct-answer', 'selected-incorrect'); // Reset classes
+                        if (input.value === correctAnswer) {
+                            label.classList.add('correct-answer');
+                        } else if (input.checked && input.value !== correctAnswer) { // If it's checked and incorrect
+                            label.classList.add('selected-incorrect');
+                        }
+                    });
+                }
+            }
+            function showCurrentAnswer() {
+                if (!currentQuestionObject) {
+                    alert("No current question to show answer for.");
+                    return;
+                }
+                showCurrentAnswerFeedback(true); // This function handles displaying feedback and highlighting choices
+                showAnswerButton.style.display = 'none'; // Hide the "Show Answer" button as it's now shown
+                // If in hideAnswerMode, the reviewSessionButton might also be hidden here.
+                // Next question button should be visible.
+                if (nextQuestionButton.style.display === 'none') {
+                    nextQuestionButton.style.display = 'inline-block';
+                }
+                feedbackAreaElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
 
             async function saveNotesForCurrentAttempt() {
                 if (currentQuestionObject && currentQuestionObject.question_id) {
@@ -2281,19 +2722,261 @@
             }
 
             // --- Annotation Functions --- (all unchanged)
-            function resizeCanvas() { /* ... */ }
-            function activateAnnotationMode() { /* ... */ }
-            function deactivateAnnotationMode() { /* ... */ }
-            function toggleAnnotationMode() { /* ... */ }
-            function getCoords(e) { /* ... */ }
-            function startDrawing(e) { /* ... */ }
-            function draw(e) { /* ... */ }
-            function stopDrawing() { /* ... */ }
-            function setTool(toolName) { /* ... */ }
-            function clearCanvas() { /* ... */ }
+            function resizeCanvas() {
+                if (!annotationArea || !annotationCanvas) return;
+
+                const rect = annotationArea.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+
+                annotationCanvas.width = rect.width * dpr;
+                annotationCanvas.height = rect.height * dpr; // This includes the spacer
+
+                annotationCanvas.style.width = `${rect.width}px`;
+                annotationCanvas.style.height = `${rect.height}px`;
+
+                annotationCtx.scale(dpr, dpr);
+                annotationCtx.clearRect(0, 0, annotationCanvas.width / dpr, annotationCanvas.height / dpr);
+
+                // Redraw text content onto canvas if annotation is active
+                if (isAnnotationActive && currentQuestionObject) {
+                    annotationCtx.textBaseline = 'top';
+                    let yOffset = 10; // Starting Y padding in canvas coordinates
+
+                    const drawWrappedText = (text, x, y, maxWidth, lineHeight, fontStyle, color) => {
+                        annotationCtx.font = fontStyle;
+                        annotationCtx.fillStyle = color;
+                        const words = text.split(' ');
+                        let line = '';
+                        for (let n = 0; n < words.length; n++) {
+                            const testLine = line + words[n] + ' ';
+                            const metrics = annotationCtx.measureText(testLine);
+                            const testWidth = metrics.width;
+                            if (testWidth > maxWidth && n > 0) {
+                                annotationCtx.fillText(line, x, y);
+                                line = words[n] + ' ';
+                                y += lineHeight;
+                            } else {
+                                line = testLine;
+                            }
+                        }
+                        annotationCtx.fillText(line, x, y);
+                        return y + lineHeight; // Return new yOffset
+                    };
+
+                    const bodyStyles = getComputedStyle(document.body);
+                    const textColor = bodyStyles.getPropertyValue('--text-color') || '#333';
+                    const primaryColor = bodyStyles.getPropertyValue('--primary-color') || '#007bff';
+
+
+                    // Draw Group Intro if visible and part of canvas drawing
+                    const currentGroupIntroEl = document.getElementById('current-group-intro');
+                    if (currentGroupIntroEl.classList.contains('drawn-on-canvas')) {
+                        const groupTitleEl = currentGroupIntroEl.querySelector('h3');
+                        const groupTextEl = currentGroupIntroEl.querySelector('p');
+
+                        if (groupTitleEl) {
+                            const style = getComputedStyle(groupTitleEl);
+                            yOffset = drawWrappedText(
+                                groupTitleEl.textContent, 10, yOffset, (annotationCanvas.width / dpr) - 20,
+                                parseInt(style.lineHeight), `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`,
+                                primaryColor
+                            );
+                            yOffset += 5; // Small gap
+                        }
+                        if (groupTextEl) {
+                            const style = getComputedStyle(groupTextEl);
+                            yOffset = drawWrappedText(
+                                groupTextEl.textContent, 10, yOffset, (annotationCanvas.width / dpr) - 20,
+                                parseInt(style.lineHeight), `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`,
+                                textColor // Assuming group text is standard text color
+                            );
+                        }
+                        yOffset += 15; // Extra space after group intro
+                    }
+
+
+                    // Draw Question Text if part of canvas drawing
+                    const questionTextEl = document.getElementById('question-text');
+                    if (questionTextEl.classList.contains('drawn-on-canvas')) {
+                        const style = getComputedStyle(questionTextEl);
+                        yOffset = drawWrappedText(
+                            questionTextEl.textContent, 10, yOffset, (annotationCanvas.width / dpr) - 20,
+                            parseInt(style.lineHeight), `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`,
+                            textColor
+                        );
+                    }
+                    // Note: This basic text drawing won't handle complex HTML/CSS from original elements.
+                    // For rich text, you'd need a more sophisticated HTML-to-canvas renderer or SVG.
+                }
+                // Restore line styles that might be changed by drawing text
+                setTool(currentTool); // Re-apply current tool settings like lineCap, etc.
+            }
+            function activateAnnotationMode() {
+                isAnnotationActive = true;
+                annotationCanvas.style.display = 'block';
+                annotationControls.style.display = 'block'; // Or 'flex' if your CSS uses that
+                toggleAnnotationButton.classList.add('annotation-active');
+                toggleAnnotationButton.textContent = 'View Question Text'; // Or similar "active" state text
+
+                // Add class to HTML elements to hide them, so canvas can draw them
+                document.getElementById('current-group-intro').classList.add('drawn-on-canvas');
+                document.getElementById('question-text').classList.add('drawn-on-canvas');
+
+                // Send choices behind the canvas
+                choicesFormElement.style.position = 'relative'; // Ensure z-index works
+                choicesFormElement.style.zIndex = '-1';
+
+
+                resizeCanvas(); // This will perform the initial draw of text onto the canvas
+                setTool(currentTool); // Ensure tool styles are applied
+            }
+            function deactivateAnnotationMode() {
+                isAnnotationActive = false;
+                annotationCanvas.style.display = 'none';
+                annotationControls.style.display = 'none';
+                toggleAnnotationButton.classList.remove('annotation-active');
+                toggleAnnotationButton.textContent = 'Annotate Question';
+
+                // Remove class to make HTML elements visible again
+                document.getElementById('current-group-intro').classList.remove('drawn-on-canvas');
+                document.getElementById('question-text').classList.remove('drawn-on-canvas');
+
+                // Bring choices back to the front
+                choicesFormElement.style.zIndex = 'auto';
+
+                // Optionally save current drawing or clear it
+                // clearCanvas(); // If you don't want drawings to persist when toggling
+            }
+            function toggleAnnotationMode() {
+                if (isAnnotationActive) {
+                    deactivateAnnotationMode();
+                } else {
+                    activateAnnotationMode();
+                }
+            }
+            function getCoords(e) {
+                const rect = annotationCanvas.getBoundingClientRect();
+                let clientX, clientY;
+
+                if (e.touches && e.touches.length > 0) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+                // Adjust for canvas scaling if style.{width/height} is different from canvas.{width/height}
+                // This is simplified if canvas.style.width/height matches rect.width/height
+                const scaleX = annotationCanvas.width / (rect.width * (window.devicePixelRatio || 1));
+                const scaleY = annotationCanvas.height / (rect.height * (window.devicePixelRatio || 1));
+
+                // The coordinates should be relative to the canvas element, not scaled by DPR here
+                // as drawing operations will use the canvas's internal coordinate system.
+                // The DPR scaling is handled in resizeCanvas for the context itself.
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+            function startDrawing(e) {
+                if (!isAnnotationActive) return;
+                e.preventDefault(); // Important for touch events to prevent page scroll
+                isDrawing = true;
+                const coords = getCoords(e);
+                [lastX, lastY] = [coords.x, coords.y];
+
+                // Set drawing properties based on current tool (already done in setTool, but good for composite op)
+                if (currentTool === 'eraser') {
+                    annotationCtx.globalCompositeOperation = 'destination-out';
+                    // For eraser, you might want to draw a small circle on click even without mousemove
+                    annotationCtx.beginPath();
+                    annotationCtx.arc(lastX, lastY, eraserWidth / 2, 0, Math.PI * 2, false);
+                    annotationCtx.fill();
+                } else {
+                    annotationCtx.globalCompositeOperation = 'source-over';
+                }
+                annotationCtx.beginPath(); // Start a new path for the line
+                annotationCtx.moveTo(lastX, lastY);
+            }
+            function draw(e) {
+                if (!isDrawing || !isAnnotationActive) return;
+                e.preventDefault();
+                const coords = getCoords(e);
+
+                // annotationCtx.beginPath(); // Should not be here for continuous lines
+                // moveTo is set in startDrawing or at the end of previous draw segment
+                annotationCtx.lineTo(coords.x, coords.y);
+                annotationCtx.stroke(); // Draws the segment
+
+                // Update lastX, lastY for the next segment
+                [lastX, lastY] = [coords.x, coords.y];
+            }
+            function stopDrawing() {
+                if (!isAnnotationActive || !isDrawing) return;
+                isDrawing = false;
+                annotationCtx.closePath(); // End the current path
+            }
+            function setTool(toolName) {
+                currentTool = toolName;
+
+                // Update active button styling
+                document.querySelectorAll('#annotation-controls button[data-tool]').forEach(btn => {
+                    btn.classList.remove('active-tool');
+                });
+                const currentButton = document.querySelector(`#annotation-controls button[data-tool="${toolName}"]`);
+                if (currentButton) {
+                    currentButton.classList.add('active-tool');
+                }
+
+                // Set canvas cursor and drawing properties
+                switch (toolName) {
+                    case 'pen':
+                        annotationCanvas.style.cursor = 'crosshair'; // Or a custom pen cursor
+                        annotationCtx.strokeStyle = penColor;
+                        annotationCtx.lineWidth = penWidth;
+                        annotationCtx.lineCap = 'round';
+                        annotationCtx.lineJoin = 'round';
+                        annotationCtx.globalCompositeOperation = 'source-over';
+                        break;
+                    case 'highlighter':
+                        annotationCanvas.style.cursor = 'crosshair'; // Or a custom highlighter cursor
+                        annotationCtx.strokeStyle = highlighterColor;
+                        annotationCtx.lineWidth = highlighterWidth;
+                        annotationCtx.lineCap = 'round'; // 'butt' can also work well for highlighters
+                        annotationCtx.lineJoin = 'round';
+                        annotationCtx.globalCompositeOperation = 'source-over'; // Or 'multiply' for blending
+                        break;
+                    case 'eraser':
+                        annotationCanvas.style.cursor = 'grab'; // Or a custom eraser cursor
+                        // lineWidth for eraser is effectively its "size"
+                        annotationCtx.lineWidth = eraserWidth;
+                        annotationCtx.lineCap = 'round';
+                        annotationCtx.lineJoin = 'round';
+                        annotationCtx.globalCompositeOperation = 'destination-out';
+                        break;
+                }
+            }
+            function clearCanvas() {
+                annotationCtx.clearRect(0, 0, annotationCanvas.width / (window.devicePixelRatio || 1), annotationCanvas.height / (window.devicePixelRatio || 1));
+                // If annotation mode is active, we need to redraw the base text content
+                if (isAnnotationActive) {
+                    resizeCanvas(); // This function also handles redrawing the text
+                }
+            }
 
             // --- Utility Functions --- (unchanged)
-            function escapeHtml(unsafe) { /* ... */ }
+            function escapeHtml(unsafe) {
+                if (typeof unsafe !== 'string') {
+                    // console.warn("escapeHtml called with non-string value:", unsafe);
+                    return String(unsafe); // Convert to string to prevent errors, or handle as error
+                }
+                return unsafe
+                    .replace(/&/g, "&")
+                    .replace(/</g, "<")
+                    .replace(/>/g, ">")
+                    .replace(/"/g, """)
+                        .replace(/'/g, "'");
+            }
 
             // --- Performance Modal Functions ---
             async function showPerformanceModal() {
@@ -2308,13 +2991,211 @@
                     displayPerformanceStats(stats);
                 }, 10);
             }
-            function calculatePerformanceStats(data) { /* ... (unchanged) ... */ }
-            function displayPerformanceStats(stats) { /* ... (unchanged) ... */ }
-            function closePerformanceModal() { /* ... (unchanged) ... */ }
+            function calculatePerformanceStats(data) {
+                if (!data || !data.questions || data.questions.length === 0) {
+                    return { /* Return a default empty stats object */
+                        totalQuestions: 0, uniqueQuestionsAttempted: 0, correctAttempts: 0,
+                        incorrectAttempts: 0, accuracy: 0, averageTimePerAttempted: 0,
+                        questionsWithNotes: 0, byCategory: {}, byProvider: {}, byYear: {}
+                    };
+                }
+
+                let totalQuestionsInDB = data.questions.length;
+                let attemptedQuestions = new Set(); // To count unique questions attempted
+                let correctLastAttemptCount = 0;
+                let incorrectLastAttemptCount = 0;
+                let totalTimeSpentOnAllAttempts = 0;
+                let totalIndividualAttempts = 0; // Count every single attempt click
+                let questionsWithAnyNotes = new Set();
+
+                const categoryStats = {}; // { categoryName: { total: 0, correct: 0, sumTime: 0, numAttempts: 0 } }
+                const providerStats = {}; // Similar structure
+                const yearStats = {};     // Similar structure
+
+                data.questions.forEach(q => {
+                    if (q.user_attempts && q.user_attempts.length > 0) {
+                        attemptedQuestions.add(q.question_id);
+                        const lastAttempt = q.user_attempts[q.user_attempts.length - 1];
+
+                        if (lastAttempt.chosen_answer === q.answer?.correct_choice) {
+                            correctLastAttemptCount++;
+                        } else if (lastAttempt.chosen_answer) { // Count as incorrect only if an answer was chosen
+                            incorrectLastAttemptCount++;
+                        }
+
+                        q.user_attempts.forEach(attempt => {
+                            totalTimeSpentOnAllAttempts += (attempt.time_spent_seconds || 0);
+                            totalIndividualAttempts++;
+                            if (attempt.notes && attempt.notes.trim() !== '') {
+                                questionsWithAnyNotes.add(q.question_id);
+                            }
+
+                            // For detailed stats, update category, provider, year based on each attempt or last attempt
+                            // Using last attempt for simplicity in aggregated view:
+                        });
+
+
+                        // Stats by category (based on last attempt of this question)
+                        if (q.category) {
+                            if (!categoryStats[q.category]) categoryStats[q.category] = { totalLastAttempts: 0, correctLastAttempts: 0, sumTimeAllAttempts: 0, numAllAttempts: 0 };
+                            categoryStats[q.category].totalLastAttempts++;
+                            if (lastAttempt.chosen_answer === q.answer?.correct_choice) categoryStats[q.category].correctLastAttempts++;
+                            q.user_attempts.forEach(att => { // Sum time and count from all attempts for this category
+                                categoryStats[q.category].sumTimeAllAttempts += (att.time_spent_seconds || 0);
+                                categoryStats[q.category].numAllAttempts++;
+                            });
+                        }
+                        // Stats by provider
+                        if (q.source?.provider) {
+                            if (!providerStats[q.source.provider]) providerStats[q.source.provider] = { totalLastAttempts: 0, correctLastAttempts: 0, sumTimeAllAttempts: 0, numAllAttempts: 0 };
+                            providerStats[q.source.provider].totalLastAttempts++;
+                            if (lastAttempt.chosen_answer === q.answer?.correct_choice) providerStats[q.source.provider].correctLastAttempts++;
+                            q.user_attempts.forEach(att => {
+                                providerStats[q.source.provider].sumTimeAllAttempts += (att.time_spent_seconds || 0);
+                                providerStats[q.source.provider].numAllAttempts++;
+                            });
+                        }
+                        // Stats by year
+                        if (q.source?.year) {
+                            const yearStr = String(q.source.year);
+                            if (!yearStats[yearStr]) yearStats[yearStr] = { totalLastAttempts: 0, correctLastAttempts: 0, sumTimeAllAttempts: 0, numAllAttempts: 0 };
+                            yearStats[yearStr].totalLastAttempts++;
+                            if (lastAttempt.chosen_answer === q.answer?.correct_choice) yearStats[yearStr].correctLastAttempts++;
+                            q.user_attempts.forEach(att => {
+                                yearStats[yearStr].sumTimeAllAttempts += (att.time_spent_seconds || 0);
+                                yearStats[yearStr].numAllAttempts++;
+                            });
+                        }
+                    }
+                });
+
+                const uniqueQuestionsAttemptedCount = attemptedQuestions.size;
+                const accuracy = uniqueQuestionsAttemptedCount > 0 ? (correctLastAttemptCount / uniqueQuestionsAttemptedCount) * 100 : 0;
+                const averageTimePerSingleAttempt = totalIndividualAttempts > 0 ? totalTimeSpentOnAllAttempts / totalIndividualAttempts : 0;
+
+                return {
+                    totalQuestions: totalQuestionsInDB,
+                    uniqueQuestionsAttempted: uniqueQuestionsAttemptedCount,
+                    correctAttempts: correctLastAttemptCount, // Based on last attempt for each question
+                    incorrectAttempts: incorrectLastAttemptCount, // Based on last attempt
+                    accuracy: parseFloat(accuracy.toFixed(1)), // Accuracy on last attempts of unique questions
+                    averageTimePerAttempted: parseFloat(averageTimePerSingleAttempt.toFixed(1)), // Avg time per *any* attempt
+                    questionsWithNotes: questionsWithAnyNotes.size,
+                    byCategory: categoryStats,
+                    byProvider: providerStats,
+                    byYear: yearStats
+                };
+            }
+            function displayPerformanceStats(stats) {
+                if (!stats) {
+                    performanceStatsContent.innerHTML = "<p>Error: Statistics could not be calculated or are unavailable.</p>";
+                    return;
+                }
+
+                let html = '<ul>';
+                html += `<li><strong>Total Questions in Database:</strong> ${stats.totalQuestions}</li>`;
+                html += `<li><strong>Unique Questions Attempted:</strong> ${stats.uniqueQuestionsAttempted}</li>`;
+                html += `<li><strong>Correct (on Last Attempt):</strong> ${stats.correctAttempts}</li>`;
+                html += `<li><strong>Incorrect (on Last Attempt):</strong> ${stats.incorrectAttempts}</li>`;
+                html += `<li><strong>Overall Accuracy (Last Attempt):</strong> ${stats.accuracy}%</li>`;
+                html += `<li><strong>Avg. Time per Single Attempt:</strong> ${stats.averageTimePerAttempted} seconds</li>`;
+                html += `<li><strong>Questions with Notes:</strong> ${stats.questionsWithNotes}</li>`;
+                html += '</ul>';
+
+                const generateDetailedStatsHtml = (title, detailedStats) => {
+                    let sectionHtml = '';
+                    if (Object.keys(detailedStats).length > 0) {
+                        sectionHtml += `<div class="category-stats"><h3>${title}</h3><ul>`;
+                        for (const key in detailedStats) {
+                            const item = detailedStats[key];
+                            const itemAccuracy = item.totalLastAttempts > 0 ? (item.correctLastAttempts / item.totalLastAttempts * 100).toFixed(1) : 0;
+                            const itemAvgTime = item.numAllAttempts > 0 ? (item.sumTimeAllAttempts / item.numAllAttempts).toFixed(1) : 0;
+                            sectionHtml += `<li><strong>${escapeHtml(key)}:</strong> ` +
+                                `${item.correctLastAttempts}/${item.totalLastAttempts} attempted questions correct on last try (${itemAccuracy}%) - ` +
+                                `Avg Time (all attempts for this ${title.split(' ')[2].toLowerCase()}): ${itemAvgTime}s</li>`;
+                        }
+                        sectionHtml += '</ul></div>';
+                    }
+                    return sectionHtml;
+                };
+
+                html += generateDetailedStatsHtml('Performance by Category', stats.byCategory);
+                html += generateDetailedStatsHtml('Performance by Provider', stats.byProvider);
+                html += generateDetailedStatsHtml('Performance by Year', stats.byYear);
+
+                performanceStatsContent.innerHTML = html;
+            }
+            function closePerformanceModal() {
+                performanceModal.style.display = 'none';
+            }
 
 
             // --- Review Functions ---
-            function generateReviewHtml() { /* ... (unchanged) ... */ }
+            function generateReviewHtml() {
+                if (sessionAttempts.size === 0 && masterQuestionList.length === 0) {
+                    return "<p>No questions were attempted or included in this session.</p>";
+                }
+
+                let html = '<h3>Session Summary</h3>';
+                let sessionCorrectCount = 0;
+                let sessionTotalAttempted = 0; // Questions attempted *in this session*
+
+                // Calculate session-specific summary
+                sessionAttempts.forEach(attemptData => {
+                    sessionTotalAttempted++;
+                    if (attemptData.attempt.chosen_answer === attemptData.question.answer?.correct_choice) {
+                        sessionCorrectCount++;
+                    }
+                });
+
+                if (sessionTotalAttempted > 0) {
+                    html += `<p>You answered ${sessionCorrectCount} out of ${sessionTotalAttempted} questions correctly in this session. (${((sessionCorrectCount / sessionTotalAttempted) * 100).toFixed(1)}%)</p>`;
+                } else if (masterQuestionList.length > 0 && hideAnswerMode) {
+                    // This case is for when hideAnswerMode is on, and the user might have gone through questions without "submitting" each one via the button
+                    html += `<p>You reviewed ${masterQuestionList.length} questions. See details below.</p>`;
+                }
+
+
+                html += '<h4>Detailed Review:</h4><ul style="list-style: none; padding: 0;">';
+
+                masterQuestionList.forEach((q_from_master, index) => {
+                    // q_from_master might be a partial object if masterQuestionList was filtered.
+                    // Get the full, definitive question object from quizData using its ID.
+                    const question = quizData.questions.find(dbQ => dbQ.question_id === q_from_master.question_id);
+                    if (!question) {
+                        console.warn(`Could not find full question data for ID: ${q_from_master.question_id} during review.`);
+                        return; // Skip if full data not found
+                    }
+
+                    const sessionAttemptData = sessionAttempts.get(question.question_id);
+
+                    html += `<li style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px;">`;
+                    html += `<p><strong>Q${index + 1} (ID: ${escapeHtml(question.question_id)}):</strong> ${escapeHtml(question.text.substring(0, 150))}...</p>`;
+
+                    if (sessionAttemptData) { // If the question was attempted in *this* session
+                        const { attempt } = sessionAttemptData;
+                        const isCorrect = attempt.chosen_answer === question.answer?.correct_choice;
+                        html += `<p>Your Answer: ${escapeHtml(attempt.chosen_answer) || "<em>Not Answered</em>"} (${isCorrect ? '<span style="color:var(--success-color);">Correct</span>' : '<span style="color:var(--danger-color);">Incorrect</span>'})</p>`;
+                        if (!isCorrect) {
+                            html += `<p>Correct Answer: ${escapeHtml(question.answer?.correct_choice)}</p>`;
+                        }
+                        if (attempt.notes && attempt.notes.trim() !== '') {
+                            html += `<p><em>Your Notes for this attempt:</em> ${escapeHtml(attempt.notes).replace(/\n/g, '<br>')}</p>`;
+                        }
+                    } else if (hideAnswerMode) { // Question was in list (masterQuestionList) but not formally "attempted" in this session
+                        html += `<p><em>Not formally answered in this session.</em></p>`;
+                        html += `<p>Correct Answer: ${escapeHtml(question.answer?.correct_choice)}</p>`;
+                    } else {
+                        html += `<p><em>This question was not attempted in the current session.</em></p>`;
+                        html += `<p>Correct Answer: ${escapeHtml(question.answer?.correct_choice)}</p>`;
+                    }
+                    html += `<p><em>Explanation:</em> ${escapeHtml(question.answer?.explanation || 'N/A').replace(/\n/g, '<br>')}</p>`;
+                    html += `</li>`;
+                });
+
+                html += '</ul>';
+                return html;
+            }
             async function displayFinalReviewScreen() {
                 console.log("Displaying final review screen.");
                 await saveNotesForCurrentAttempt();
@@ -2326,10 +3207,34 @@
                 finalReviewContent.innerHTML = generateReviewHtml();
                 finalReviewArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-            function showReviewModal() { /* ... (unchanged) ... */ }
-            function closeReviewModal() { /* ... (unchanged) ... */ }
-            function handleRestartQuiz() { /* ... (unchanged) ... */ }
-            function handleBackToSettings() { /* ... (unchanged) ... */ }
+            function showReviewModal() {
+                reviewModalContent.innerHTML = "<p>Loading review...</p>"; // Placeholder
+                reviewModal.style.display = 'block';
+                // Generate HTML asynchronously if it's complex, or directly
+                setTimeout(() => { // Simulate async or just defer to next tick
+                    reviewModalContent.innerHTML = generateReviewHtml();
+                }, 10);
+            }
+            function closeReviewModal() {
+                reviewModal.style.display = 'none';
+            }
+            function handleRestartQuiz() {
+                console.log("Restarting quiz with current filter settings.");
+                finalReviewArea.style.display = 'none'; // Hide the final review area
+                // applyFiltersAndStartQuiz will reset necessary states like currentQuestionIndex,
+                // timers, and repopulate masterQuestionList based on current sidebar filters.
+                // It also handles displaying the quiz area.
+                applyFiltersAndStartQuiz();
+            }
+            function handleBackToSettings() {
+                console.log("Returning to settings.");
+                finalReviewArea.style.display = 'none';
+                quizAreaElement.style.display = 'none';
+                endOfQuizMessageElement.style.display = 'none';
+                // Timers should have been paused already.
+                // resetQuizState(true); // Optional: reset more UI elements but keep data.
+                openSidebar(); // Show the sidebar for new settings.
+            }
 
             const newPerfButtonElement = document.createElement('button');
             newPerfButtonElement.id = 'show-performance-button';
@@ -2373,7 +3278,19 @@
                 updateTimerVisibility();
             }
 
-            function registerServiceWorker() { /* ... (unchanged) ... */ }
+            function registerServiceWorker() {
+                if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', () => {
+                        navigator.serviceWorker.register('sservice-worker.js') // Ensure sw.js is in the root directory
+                            .then(registration => {
+                                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                            })
+                            .catch(error => {
+                                console.log('ServiceWorker registration failed: ', error);
+                            });
+                    });
+                }
+            }
 
             // Start the application initialization
             initializeApp();
