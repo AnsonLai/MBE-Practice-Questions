@@ -1513,7 +1513,8 @@
 
         <!-- Modified File Controls Section -->
         <div class="file-controls">
-            <p class="auto-save-info">💾 Your progress is automatically saved to the local browser database. You can load a backup from another device.</p>
+            <p class="auto-save-info">💾 Your progress is automatically saved to the local browser database. You can
+                load a backup from another device.</p>
             <div class="control-group">
                 <label for="jsonFile">Load <u>New</u> Quiz Data (JSON):</label>
                 <input type="file" id="jsonFile" accept=".json">
@@ -1587,6 +1588,7 @@
 
             // --- State Vars ---
             let quizData = { questions: [], groups: [], fileName: null }; // Holds the in-memory quiz data, populated from Dexie
+            let performanceButton = null;
             let masterQuestionList = [];
             let currentQuestionIndex = -1;
             let currentQuestionObject = null;
@@ -1768,7 +1770,9 @@
                     filterProvidersList.innerHTML = '<p>Load data to see providers.</p>';
                     filterYearsList.innerHTML = '<p>Load data to see years.</p>';
                     applyFiltersButton.disabled = true;
-                    if (performanceButton) performanceButton.disabled = true;
+                    if (performanceButton) {
+                        performanceButton.disabled = true;
+                    }
                     return;
                 }
 
@@ -1787,7 +1791,9 @@
                 populateCheckboxList(filterYearsList, [...years].sort((a, b) => b - a));
 
                 applyFiltersButton.disabled = false;
-                if (performanceButton) performanceButton.disabled = false;
+                if (performanceButton) {
+                    performanceButton.disabled = false;
+                }
             }
 
             function populateCheckboxList(container, items) { /* ... (unchanged) ... */ }
@@ -1879,7 +1885,9 @@
                         populateFilterOptions();
                         applyFiltersAndStartQuiz();
                         saveJsonButton.disabled = false;
-                        if (performanceButton) performanceButton.disabled = !(quizData.questions.length === 0);
+                        if (performanceButton) {
+                            performanceButton.disabled = !(quizData.questions.length === 0);
+                        }
                         closeSidebar();
                         alert(`Successfully loaded and stored data from ${escapeHtml(sourceDescription)}. Previous data has been replaced.`);
                         jsonFileElement.value = '';
@@ -1977,7 +1985,7 @@
 
                     return true;
                 });
-                 // ... (rest of the filtering and shuffling logic unchanged from your original)
+                // ... (rest of the filtering and shuffling logic unchanged from your original)
                 const filteredQuestionsMap = new Map(filteredQuestions.map(q => [q.question_id, q]));
                 let quizUnits = [];
                 const processedQuestionIds = new Set();
@@ -2080,8 +2088,8 @@
 
                 // If currentQuestionObject is a distinct copy (it shouldn't be, but for safety):
                 if (currentQuestionObject.question_id === questionToUpdate.question_id && currentQuestionObject !== questionToUpdate) {
-                     if (!currentQuestionObject.user_attempts) currentQuestionObject.user_attempts = [];
-                     currentQuestionObject.user_attempts.push({...newAttempt}); // push a copy if it's not a reference
+                    if (!currentQuestionObject.user_attempts) currentQuestionObject.user_attempts = [];
+                    currentQuestionObject.user_attempts.push({ ...newAttempt }); // push a copy if it's not a reference
                 }
 
 
@@ -2120,12 +2128,12 @@
                         const notesValue = attemptNotesElement.value.trim();
                         if (lastAttempt.notes !== notesValue) {
                             lastAttempt.notes = notesValue;
-                             // Update currentQuestionObject's attempt too if it's being directly used by render functions
+                            // Update currentQuestionObject's attempt too if it's being directly used by render functions
                             if (currentQuestionObject.user_attempts && currentQuestionObject.user_attempts.length > 0) {
-                               const currentLastAttempt = currentQuestionObject.user_attempts[currentQuestionObject.user_attempts.length -1];
-                               if(currentLastAttempt.attempt_id === lastAttempt.attempt_id) {
-                                 currentLastAttempt.notes = notesValue;
-                               }
+                                const currentLastAttempt = currentQuestionObject.user_attempts[currentQuestionObject.user_attempts.length - 1];
+                                if (currentLastAttempt.attempt_id === lastAttempt.attempt_id) {
+                                    currentLastAttempt.notes = notesValue;
+                                }
                             }
                             await saveQuestionToDB(questionInQuizData);
                             // console.log(`Notes updated and saved to DB for question ${questionInQuizData.question_id}`);
@@ -2283,6 +2291,24 @@
             function handleRestartQuiz() { /* ... (unchanged) ... */ }
             function handleBackToSettings() { /* ... (unchanged) ... */ }
 
+            const newPerfButtonElement = document.createElement('button');
+            newPerfButtonElement.id = 'show-performance-button';
+            newPerfButtonElement.textContent = 'Performance Dashboard';
+            newPerfButtonElement.disabled = true; // Initial state
+
+            if (applyFiltersButton && applyFiltersButton.parentNode) {
+                applyFiltersButton.parentNode.insertBefore(newPerfButtonElement, applyFiltersButton.nextSibling);
+                performanceButton = newPerfButtonElement; // Assign to the higher-scoped `let` variable
+
+                // Now that performanceButton is assigned (if successful), add styles and listeners
+                performanceButton.style.marginTop = "1rem";
+                // applyFiltersButton.style.marginBottom = "0"; // This was styling applyFiltersButton, keep if intended
+                performanceButton.addEventListener('click', showPerformanceModal);
+            } else {
+                console.error("Could not find 'apply-filters-button' or its parent. Performance button not added.");
+                // performanceButton will remain null if the above fails.
+            }
+
 
             // --- Initial Page Load Sequence ---
             async function initializeApp() {
@@ -2293,7 +2319,9 @@
                     resetQuizState(true); // Resets UI, keeps quizData loaded from DB
                     populateFilterOptions(); // Populates filters from quizData
                     saveJsonButton.disabled = false;
-                    if (performanceButton) performanceButton.disabled = !(quizData.questions.length > 0);
+                    if (performanceButton) {
+                        performanceButton.disabled = !(quizData.questions && quizData.questions.length > 0);
+                    }
                     alert("Loaded previous quiz progress from the browser database. Adjust settings and click 'Apply Filters & Start Quiz' to begin.");
                 } else {
                     resetQuizState(false); // Full reset, quizData will be empty
@@ -2313,4 +2341,5 @@
     </script>
 
 </body>
+
 </html>
