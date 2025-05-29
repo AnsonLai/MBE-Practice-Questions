@@ -848,6 +848,7 @@
             touch-action: none;
             border-radius: var(--border-radius);
             /* Match card */
+            pointer-events: none; /* Add this line */
         }
 
         #annotation-controls {
@@ -3082,90 +3083,30 @@
             function resizeCanvas() {
                 if (!annotationArea || !annotationCanvas) return;
 
-                const rect = annotationArea.getBoundingClientRect();
                 const dpr = window.devicePixelRatio || 1;
+                const areaWidth = annotationArea.clientWidth;
+                const areaHeight = annotationArea.clientHeight;
 
-                annotationCanvas.width = rect.width * dpr;
-                annotationCanvas.height = rect.height * dpr; // This includes the spacer
+                // Set canvas internal drawing surface size
+                annotationCanvas.width = areaWidth * dpr;
+                annotationCanvas.height = areaHeight * dpr;
 
-                annotationCanvas.style.width = `${rect.width}px`;
-                annotationCanvas.style.height = `${rect.height}px`;
+                // Set canvas CSS size to match the annotation area
+                annotationCanvas.style.width = `${areaWidth}px`;
+                annotationCanvas.style.height = `${areaHeight}px`;
+                
+                // Set canvas position
+                annotationCanvas.style.position = 'absolute';
+                annotationCanvas.style.top = '0px';
+                annotationCanvas.style.left = '0px';
 
+                // Scale context for DPR
                 annotationCtx.scale(dpr, dpr);
-                annotationCtx.clearRect(0, 0, annotationCanvas.width / dpr, annotationCanvas.height / dpr);
+                
+                // Clear the canvas
+                annotationCtx.clearRect(0, 0, areaWidth, areaHeight); // Use areaWidth/Height for clearing post-scale
 
-                // Redraw text content onto canvas if annotation is active
-                if (isAnnotationActive && currentQuestionObject) {
-                    annotationCtx.textBaseline = 'top';
-                    let yOffset = 10; // Starting Y padding in canvas coordinates
-
-                    const drawWrappedText = (text, x, y, maxWidth, lineHeight, fontStyle, color) => {
-                        annotationCtx.font = fontStyle;
-                        annotationCtx.fillStyle = color;
-                        const words = text.split(' ');
-                        let line = '';
-                        for (let n = 0; n < words.length; n++) {
-                            const testLine = line + words[n] + ' ';
-                            const metrics = annotationCtx.measureText(testLine);
-                            const testWidth = metrics.width;
-                            if (testWidth > maxWidth && n > 0) {
-                                annotationCtx.fillText(line, x, y);
-                                line = words[n] + ' ';
-                                y += lineHeight;
-                            } else {
-                                line = testLine;
-                            }
-                        }
-                        annotationCtx.fillText(line, x, y);
-                        return y + lineHeight; // Return new yOffset
-                    };
-
-                    const bodyStyles = getComputedStyle(document.body);
-                    const textColor = bodyStyles.getPropertyValue('--text-color') || '#333';
-                    const primaryColor = bodyStyles.getPropertyValue('--primary-color') || '#007bff';
-
-
-                    // Draw Group Intro if visible and part of canvas drawing
-                    const currentGroupIntroEl = document.getElementById('current-group-intro');
-                    if (currentGroupIntroEl.classList.contains('drawn-on-canvas')) {
-                        const groupTitleEl = currentGroupIntroEl.querySelector('h3');
-                        const groupTextEl = currentGroupIntroEl.querySelector('p');
-
-                        if (groupTitleEl) {
-                            const style = getComputedStyle(groupTitleEl);
-                            yOffset = drawWrappedText(
-                                groupTitleEl.textContent, 10, yOffset, (annotationCanvas.width / dpr) - 20,
-                                parseInt(style.lineHeight), `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`,
-                                primaryColor
-                            );
-                            yOffset += 5; // Small gap
-                        }
-                        if (groupTextEl) {
-                            const style = getComputedStyle(groupTextEl);
-                            yOffset = drawWrappedText(
-                                groupTextEl.textContent, 10, yOffset, (annotationCanvas.width / dpr) - 20,
-                                parseInt(style.lineHeight), `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`,
-                                textColor // Assuming group text is standard text color
-                            );
-                        }
-                        yOffset += 15; // Extra space after group intro
-                    }
-
-
-                    // Draw Question Text if part of canvas drawing
-                    const questionTextEl = document.getElementById('question-text');
-                    if (questionTextEl.classList.contains('drawn-on-canvas')) {
-                        const style = getComputedStyle(questionTextEl);
-                        yOffset = drawWrappedText(
-                            questionTextEl.textContent, 10, yOffset, (annotationCanvas.width / dpr) - 20,
-                            parseInt(style.lineHeight), `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`,
-                            textColor
-                        );
-                    }
-                    // Note: This basic text drawing won't handle complex HTML/CSS from original elements.
-                    // For rich text, you'd need a more sophisticated HTML-to-canvas renderer or SVG.
-                }
-                // Restore line styles that might be changed by drawing text
+                // Restore line styles that might be changed by drawing text or scaling
                 setTool(currentTool); // Re-apply current tool settings like lineCap, etc.
             }
             function activateAnnotationMode() {
@@ -3174,14 +3115,6 @@
                 annotationControls.style.display = 'block'; // Or 'flex' if your CSS uses that
                 toggleAnnotationButton.classList.add('annotation-active');
                 toggleAnnotationButton.textContent = 'View Question Text'; // Or similar "active" state text
-
-                // Add class to HTML elements to hide them, so canvas can draw them
-                document.getElementById('current-group-intro').classList.add('drawn-on-canvas');
-                document.getElementById('question-text').classList.add('drawn-on-canvas');
-
-                // Send choices behind the canvas
-                choicesFormElement.style.position = 'relative'; // Ensure z-index works
-                choicesFormElement.style.zIndex = '-1';
 
 
                 resizeCanvas(); // This will perform the initial draw of text onto the canvas
@@ -3193,13 +3126,6 @@
                 annotationControls.style.display = 'none';
                 toggleAnnotationButton.classList.remove('annotation-active');
                 toggleAnnotationButton.textContent = 'Annotate Question';
-
-                // Remove class to make HTML elements visible again
-                document.getElementById('current-group-intro').classList.remove('drawn-on-canvas');
-                document.getElementById('question-text').classList.remove('drawn-on-canvas');
-
-                // Bring choices back to the front
-                choicesFormElement.style.zIndex = 'auto';
 
                 // Optionally save current drawing or clear it
                 // clearCanvas(); // If you don't want drawings to persist when toggling
@@ -3237,6 +3163,7 @@
             }
             function startDrawing(e) {
                 if (!isAnnotationActive) return;
+                annotationCanvas.style.pointerEvents = 'auto';
                 e.preventDefault(); // Important for touch events to prevent page scroll
                 isDrawing = true;
                 const coords = getCoords(e);
@@ -3271,6 +3198,7 @@
             function stopDrawing() {
                 if (!isAnnotationActive || !isDrawing) return;
                 isDrawing = false;
+                annotationCanvas.style.pointerEvents = 'none';
                 annotationCtx.closePath(); // End the current path
             }
             function setTool(toolName) {
@@ -3618,6 +3546,7 @@
                         currentQuestionIndex = savedIndex - 1; // displayNextQuestionInternal will increment it
                         hideAnswerMode = savedHideAnswerMode !== null ? savedHideAnswerMode : settingHideAnswerCheckbox.checked;
                         questionLimit = savedQuestionLimit !== null ? savedQuestionLimit : parseInt(document.getElementById('question-limit').value, 10) || 50;
+                        document.getElementById('question-limit').value = questionLimit;
                         
                         // Restore filter UI before initializing timers
                         if (savedFilters) {
