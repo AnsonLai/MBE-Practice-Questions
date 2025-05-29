@@ -2782,7 +2782,7 @@
                 }
                 renderPastAttempts(questionToUpdate); // Use the object that was updated
                 pastAttemptsContainer.style.display = 'block';
-                attemptNotesElement.focus();
+                // attemptNotesElement.focus();
                 if (!hideAnswerMode) feedbackAreaElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
 
@@ -2928,7 +2928,12 @@
                         pastAttemptsAccordionContent.style.display = 'none'; // Explicitly hide content
                     }
 
-                    document.getElementById('current-question-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const groupIntro = document.getElementById('current-group-intro');
+                    if (groupIntro?.textContent?.trim()) {
+                        groupIntro.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        document.getElementById('current-question-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
                 } else {
                     quizAreaElement.style.display = 'none';
                     endOfQuizMessageElement.innerHTML = `<h2>Quiz Complete!</h2><p>You answered all ${masterQuestionList.length} questions in this filtered set.</p>`;
@@ -3542,6 +3547,13 @@
                     const savedStopwatchTime = await loadAppState('activeStopwatchTime');
                     const savedSerializableSessionAttempts = await loadAppState('activeSessionAttempts');
 
+                    // Load timer settings from previous session
+                    const savedSessionTimerEnabled = await loadAppState('activeSessionTimerEnabled');
+                    const savedQuestionTimerEnabled = await loadAppState('activeQuestionTimerEnabled');
+                    const savedStopwatchEnabled = await loadAppState('activeStopwatchEnabled');
+                    const savedSessionTimeLimit = await loadAppState('activeSessionTimeLimit');
+                    const savedQuestionTimeLimit = await loadAppState('activeQuestionTimeLimit');
+
                     if (savedSerializableSessionAttempts && Array.isArray(savedSerializableSessionAttempts)) {
                         sessionAttempts = new Map(savedSerializableSessionAttempts);
                         console.log("initializeApp: sessionAttempts restored from saved state.", sessionAttempts);
@@ -3556,14 +3568,21 @@
                         currentQuestionIndex = savedIndex - 1; // displayNextQuestionInternal will increment it
                         hideAnswerMode = savedHideAnswerMode !== null ? savedHideAnswerMode : settingHideAnswerCheckbox.checked;
                         questionLimit = savedQuestionLimit !== null ? savedQuestionLimit : parseInt(document.getElementById('question-limit').value, 10) || 50;
+                        
+                        // Restore all timer settings
                         document.getElementById('question-limit').value = questionLimit;
+                        document.getElementById('enable-session-timer').checked = savedSessionTimerEnabled || false;
+                        document.getElementById('enable-question-timer').checked = savedQuestionTimerEnabled || false;
+                        document.getElementById('enable-stopwatch').checked = savedStopwatchEnabled || false;
+                        document.getElementById('session-time-limit').value = savedSessionTimeLimit ? Math.floor(savedSessionTimeLimit / 60) : 60;
+                        document.getElementById('question-time-limit').value = savedQuestionTimeLimit || 90;
                         
                         // Restore filter UI before initializing timers
                         if (savedFilters) {
                             restoreFilterUI(savedFilters);
                         }
                         
-                        initializeTimerSettings(); // This will set up timer limits based on (potentially restored) UI
+                        initializeTimerSettings(); // This will set up timer limits based on restored UI values
 
                         // Now, apply the saved remaining times
                         sessionTimeRemaining = savedSessionTimeRemaining !== null ? savedSessionTimeRemaining : sessionTimeLimit;
@@ -3571,19 +3590,16 @@
                         updateSessionTimerDisplay(); // Update display with restored time
                         updateStopwatchDisplay();   // Update display with restored time
 
-
                         quizAreaElement.style.display = 'block';
                         endOfQuizMessageElement.style.display = 'none';
                         finalReviewArea.style.display = 'none';
                         toggleAnnotationButton.style.display = 'inline-block';
                         
                         populateFilterOptions(); // Ensure filter options are populated based on full quizData
-                                                 // *then* restore the specific selections for this session.
                         if (savedFilters) restoreFilterUI(savedFilters); // Re-apply to ensure dynamic content is handled
 
-
                         await displayNextQuestionInternal(); // This will load currentQuestionObject, render, etc.
-                                                       // and also increments currentQuestionIndex to the correct value.
+                                                           // and also increments currentQuestionIndex to the correct value.
 
                         startSessionTimer();
                         startStopwatch();
@@ -3597,7 +3613,7 @@
                         resetQuizState(true); // Resets UI, keeps quizData loaded from DB
                         populateFilterOptions();
                         saveJsonButton.disabled = false;
-                         if (performanceButton) {
+                        if (performanceButton) {
                             performanceButton.disabled = !(quizData.questions && quizData.questions.length > 0);
                         }
                         alert("Loaded previous quiz progress from the browser database. Adjust settings and click 'Apply Filters & Start Quiz' to begin.");
