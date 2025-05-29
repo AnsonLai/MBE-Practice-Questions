@@ -393,7 +393,7 @@
             margin-top: 0;
             margin-bottom: 0.5rem;
             font-size: 1.1rem;
-            font-weight: 600;
+            font-weight: 400;
         }
 
         .question-group-intro p {
@@ -3370,21 +3370,19 @@
                     return { /* Return a default empty stats object */
                         totalQuestions: 0, uniqueQuestionsAttempted: 0, correctAttempts: 0,
                         incorrectAttempts: 0, accuracy: 0, averageTimePerAttempted: 0,
-                        questionsWithNotes: 0, byCategory: {}, byProvider: {}, byYear: {}
+                        questionsWithNotes: 0, byCategory: {}
                     };
                 }
 
                 let totalQuestionsInDB = data.questions.length;
                 let attemptedQuestions = new Set(); // To count unique questions attempted
-                let correctLastAttemptCount = 0;
-                let incorrectLastAttemptCount = 0;
+                let correctCount = 0;
+                let incorrectCount = 0;
                 let totalTimeSpentOnAllAttempts = 0;
                 let totalIndividualAttempts = 0; // Count every single attempt click
                 let questionsWithAnyNotes = new Set();
 
                 const categoryStats = {}; // { categoryName: { total: 0, correct: 0, sumTime: 0, numAttempts: 0 } }
-                const providerStats = {}; // Similar structure
-                const yearStats = {};     // Similar structure
 
                 data.questions.forEach(q => {
                     if (q.user_attempts && q.user_attempts.length > 0) {
@@ -3392,9 +3390,9 @@
                         const lastAttempt = q.user_attempts[q.user_attempts.length - 1];
 
                         if (lastAttempt.chosen_answer === q.answer?.correct_choice) {
-                            correctLastAttemptCount++;
+                            correctCount++;
                         } else if (lastAttempt.chosen_answer) { // Count as incorrect only if an answer was chosen
-                            incorrectLastAttemptCount++;
+                            incorrectCount++;
                         }
 
                         q.user_attempts.forEach(attempt => {
@@ -3403,11 +3401,7 @@
                             if (attempt.notes && attempt.notes.trim() !== '') {
                                 questionsWithAnyNotes.add(q.question_id);
                             }
-
-                            // For detailed stats, update category, provider, year based on each attempt or last attempt
-                            // Using last attempt for simplicity in aggregated view:
                         });
-
 
                         // Stats by category (based on last attempt of this question)
                         if (q.category) {
@@ -3419,45 +3413,22 @@
                                 categoryStats[q.category].numAllAttempts++;
                             });
                         }
-                        // Stats by provider
-                        if (q.source?.provider) {
-                            if (!providerStats[q.source.provider]) providerStats[q.source.provider] = { totalLastAttempts: 0, correctLastAttempts: 0, sumTimeAllAttempts: 0, numAllAttempts: 0 };
-                            providerStats[q.source.provider].totalLastAttempts++;
-                            if (lastAttempt.chosen_answer === q.answer?.correct_choice) providerStats[q.source.provider].correctLastAttempts++;
-                            q.user_attempts.forEach(att => {
-                                providerStats[q.source.provider].sumTimeAllAttempts += (att.time_spent_seconds || 0);
-                                providerStats[q.source.provider].numAllAttempts++;
-                            });
-                        }
-                        // Stats by year
-                        if (q.source?.year) {
-                            const yearStr = String(q.source.year);
-                            if (!yearStats[yearStr]) yearStats[yearStr] = { totalLastAttempts: 0, correctLastAttempts: 0, sumTimeAllAttempts: 0, numAllAttempts: 0 };
-                            yearStats[yearStr].totalLastAttempts++;
-                            if (lastAttempt.chosen_answer === q.answer?.correct_choice) yearStats[yearStr].correctLastAttempts++;
-                            q.user_attempts.forEach(att => {
-                                yearStats[yearStr].sumTimeAllAttempts += (att.time_spent_seconds || 0);
-                                yearStats[yearStr].numAllAttempts++;
-                            });
-                        }
                     }
                 });
 
                 const uniqueQuestionsAttemptedCount = attemptedQuestions.size;
-                const accuracy = uniqueQuestionsAttemptedCount > 0 ? (correctLastAttemptCount / uniqueQuestionsAttemptedCount) * 100 : 0;
+                const accuracy = uniqueQuestionsAttemptedCount > 0 ? (correctCount / uniqueQuestionsAttemptedCount) * 100 : 0;
                 const averageTimePerSingleAttempt = totalIndividualAttempts > 0 ? totalTimeSpentOnAllAttempts / totalIndividualAttempts : 0;
 
                 return {
                     totalQuestions: totalQuestionsInDB,
                     uniqueQuestionsAttempted: uniqueQuestionsAttemptedCount,
-                    correctAttempts: correctLastAttemptCount, // Based on last attempt for each question
-                    incorrectAttempts: incorrectLastAttemptCount, // Based on last attempt
-                    accuracy: parseFloat(accuracy.toFixed(1)), // Accuracy on last attempts of unique questions
-                    averageTimePerAttempted: parseFloat(averageTimePerSingleAttempt.toFixed(1)), // Avg time per *any* attempt
+                    correctAttempts: correctCount,
+                    incorrectAttempts: incorrectCount,
+                    accuracy: parseFloat(accuracy.toFixed(1)),
+                    averageTimePerAttempted: parseFloat(averageTimePerSingleAttempt.toFixed(1)),
                     questionsWithNotes: questionsWithAnyNotes.size,
-                    byCategory: categoryStats,
-                    byProvider: providerStats,
-                    byYear: yearStats
+                    byCategory: categoryStats
                 };
             }
             function displayPerformanceStats(stats) {
@@ -3469,33 +3440,32 @@
                 let html = '<ul>';
                 html += `<li><strong>Total Questions in Database:</strong> ${stats.totalQuestions}</li>`;
                 html += `<li><strong>Unique Questions Attempted:</strong> ${stats.uniqueQuestionsAttempted}</li>`;
-                html += `<li><strong>Correct (on Last Attempt):</strong> ${stats.correctAttempts}</li>`;
-                html += `<li><strong>Incorrect (on Last Attempt):</strong> ${stats.incorrectAttempts}</li>`;
-                html += `<li><strong>Overall Accuracy (Last Attempt):</strong> ${stats.accuracy}%</li>`;
-                html += `<li><strong>Avg. Time per Single Attempt:</strong> ${stats.averageTimePerAttempted} seconds</li>`;
+                html += `<li><strong>Correct:</strong> ${stats.correctAttempts}</li>`;
+                html += `<li><strong>Incorrect:</strong> ${stats.incorrectAttempts}</li>`;
+                html += `<li><strong>Overall Accuracy:</strong> ${stats.accuracy}%</li>`;
+                html += `<li><strong>Avg. Time per Attempt:</strong> ${stats.averageTimePerAttempted} seconds</li>`;
                 html += `<li><strong>Questions with Notes:</strong> ${stats.questionsWithNotes}</li>`;
                 html += '</ul>';
 
-                const generateDetailedStatsHtml = (title, detailedStats) => {
-                    let sectionHtml = '';
-                    if (Object.keys(detailedStats).length > 0) {
-                        sectionHtml += `<div class="category-stats"><h3>${title}</h3><ul>`;
-                        for (const key in detailedStats) {
-                            const item = detailedStats[key];
-                            const itemAccuracy = item.totalLastAttempts > 0 ? (item.correctLastAttempts / item.totalLastAttempts * 100).toFixed(1) : 0;
-                            const itemAvgTime = item.numAllAttempts > 0 ? (item.sumTimeAllAttempts / item.numAllAttempts).toFixed(1) : 0;
-                            sectionHtml += `<li><strong>${escapeHtml(key)}:</strong> ` +
-                                `${item.correctLastAttempts}/${item.totalLastAttempts} attempted questions correct on last try (${itemAccuracy}%) - ` +
-                                `Avg Time (all attempts for this ${title.split(' ')[2].toLowerCase()}): ${itemAvgTime}s</li>`;
-                        }
-                        sectionHtml += '</ul></div>';
-                    }
-                    return sectionHtml;
-                };
+                // Sort categories by accuracy
+                const sortedCategories = Object.entries(stats.byCategory)
+                    .map(([category, data]) => ({
+                        category,
+                        accuracy: data.totalLastAttempts > 0 ? (data.correctLastAttempts / data.totalLastAttempts * 100) : 0,
+                        ...data
+                    }))
+                    .sort((a, b) => b.accuracy - a.accuracy);
 
-                html += generateDetailedStatsHtml('Performance by Category', stats.byCategory);
-                html += generateDetailedStatsHtml('Performance by Provider', stats.byProvider);
-                html += generateDetailedStatsHtml('Performance by Year', stats.byYear);
+                if (sortedCategories.length > 0) {
+                    html += `<div class="category-stats"><h3>Performance by Category</h3><ul>`;
+                    sortedCategories.forEach(({category, accuracy, correctLastAttempts, totalLastAttempts, sumTimeAllAttempts, numAllAttempts}) => {
+                        const avgTime = numAllAttempts > 0 ? (sumTimeAllAttempts / numAllAttempts).toFixed(1) : 0;
+                        html += `<li><strong>${escapeHtml(category)}:</strong> ` +
+                            `${correctLastAttempts}/${totalLastAttempts} correct (${accuracy.toFixed(1)}%) - ` +
+                            `Avg Time: ${avgTime}s</li>`;
+                    });
+                    html += '</ul></div>';
+                }
 
                 performanceStatsContent.innerHTML = html;
             }
