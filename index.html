@@ -848,6 +848,12 @@
             display: none;
             touch-action: none;
             border-radius: var(--border-radius);
+            background: transparent;
+            pointer-events: none;
+        }
+
+        #annotationCanvas.annotation-active {
+            pointer-events: auto;
         }
 
         #annotation-controls {
@@ -1093,22 +1099,30 @@
 
         #current-group-intro.drawn-on-canvas,
         #question-text.drawn-on-canvas {
-            /* Text should remain visible behind canvas for annotation */
+            /* Text remains visible behind transparent canvas for annotation */
         }
 
-        /* Text remains visible when annotation mode is active */
+        /* When annotation mode is active, text should remain visible behind canvas */
         #question-text.drawn-on-canvas {
-            /* Text should remain visible behind canvas for annotation */
+            /* Text remains visible for annotation */
         }
 
         /* When annotation mode is active, hide the original text */
         #question-text.drawn-on-canvas {
-            visibility: hidden;
+            /* Text should remain visible behind transparent canvas */
         }
 
         /* Ensure the canvas is interactive when annotation mode is active */
         #annotationCanvas.annotation-active {
             pointer-events: auto;
+        }
+
+        /* Force text visibility in annotation mode */
+        #current-group-intro.drawn-on-canvas,
+        #question-text.drawn-on-canvas {
+            visibility: visible !important;
+            display: block !important;
+            opacity: 1 !important;
         }
 
         /* Timer Container Styles */
