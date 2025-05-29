@@ -2519,17 +2519,20 @@
                 // Group Introduction
                 if (question.group_id && question.group_id !== lastDisplayedGroupId) {
                     const group = quizData.groups.find(g => g.group_id === question.group_id);
-                    if (group && group.introduction) {
-                        groupIntroElement.innerHTML = `<h3>${escapeHtml(group.title || 'Question Group')}</h3><p>${escapeHtml(group.introduction).replace(/\n/g, '<br>')}</p>`;
+                    if (group) {
+                        groupIntroElement.innerHTML = `<h3>${escapeHtml(group.text || 'Question Group')}</h3><p>${escapeHtml(group.intro_text || '').replace(/\n/g, '<br>')}</p>`;
                         groupIntroElement.style.display = 'block';
                     } else {
+                        // Group not found, though group_id was present. Hide intro.
                         groupIntroElement.style.display = 'none';
                     }
                     lastDisplayedGroupId = question.group_id;
-                } else if (!question.group_id && lastDisplayedGroupId !== null) { // Hide if previous was a group
+                } else if (!question.group_id && lastDisplayedGroupId !== null) { 
+                    // Current question has no group, and a group intro was previously displayed
                     groupIntroElement.style.display = 'none';
                     lastDisplayedGroupId = null;
                 }
+                // If question.group_id is the same as lastDisplayedGroupId, do nothing.
 
 
                 // Question Meta Tooltip
