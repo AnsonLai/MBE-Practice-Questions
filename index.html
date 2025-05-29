@@ -3021,7 +3021,6 @@
                 console.log("Filter UI restored from saved state.");
             }
 
-
             function resetQuizState(keepLoadedData = false) {
                 if (!keepLoadedData) {
                     quizData = { questions: [], groups: [], fileName: null };
@@ -3110,6 +3109,7 @@
             function activateAnnotationMode() {
                 isAnnotationActive = true;
                 annotationCanvas.style.display = 'block';
+                annotationCanvas.style.pointerEvents = 'auto';
                 annotationCanvas.classList.add('annotation-active');
                 annotationControls.style.display = 'block';
                 toggleAnnotationButton.classList.add('annotation-active');
@@ -3195,7 +3195,6 @@
             function stopDrawing() {
                 if (!isAnnotationActive || !isDrawing) return;
                 isDrawing = false;
-                annotationCanvas.style.pointerEvents = 'none';
                 annotationCtx.closePath(); // End the current path
             }
             function setTool(toolName) {
