@@ -848,6 +848,7 @@
             touch-action: none;
             border-radius: var(--border-radius);
             /* Match card */
+            pointer-events: none; /* Add this line */
         }
 
         #annotation-controls {
@@ -936,6 +937,13 @@
 
             #question-text {
                 font-size: 1.1rem;
+            }
+
+            /* Ensure container aligns correctly with open sidebar on tablets */
+            body.sidebar-open .container {
+                margin-left: 0; /* Align to the new "left edge" created by body's padding-left */
+                                /* The 'width: 95%' from this media query will apply. */
+                                /* The 'margin-right: auto' from the default 'margin: 2rem auto' will handle the right side. */
             }
         }
 
@@ -1407,18 +1415,10 @@
             <button id="clear-providers-filter" class="clear-filter-button">Clear Providers</button>
         </div>
         <div class="sidebar-section">
-            <h3>Years</h3>
-            <div id="filter-years-list" class="filter-options-list">
-                <p>Load data to see years.</p>
-            </div>
-            <button id="clear-years-filter" class="clear-filter-button">Clear Years</button>
-        </div>
-        <div class="sidebar-section">
             <h3>Attempts</h3>
             <label><input type="radio" name="filter-attempts" value="all" checked> Show All Questions</label>
             <label><input type="radio" name="filter-attempts" value="attempted"> Questions with Attempts</label>
             <label><input type="radio" name="filter-attempts" value="unattempted"> Questions without Attempts</label>
-            <label><input type="radio" name="filter-attempts" value="correct"> Questions with Correct Attempts</label>
             <label><input type="radio" name="filter-attempts" value="incorrect"> Questions with Incorrect Attempts (Any)</label>
             <label><input type="radio" name="filter-attempts" value="incorrect_only"> Show Incorrectly Answered Only (Last Attempt)</label>
             <button id="clear-attempts-filter" class="clear-filter-button">Reset Attempts Filter</button>
@@ -1647,11 +1647,9 @@
             const applyFiltersButton = document.getElementById('apply-filters-button');
             const filterCategoriesList = document.getElementById('filter-categories-list');
             const filterProvidersList = document.getElementById('filter-providers-list');
-            const filterYearsList = document.getElementById('filter-years-list');
             const filterScrambleCheckbox = document.getElementById('filter-scramble');
             const clearCategoriesButton = document.getElementById('clear-categories-filter');
             const clearProvidersButton = document.getElementById('clear-providers-filter');
-            const clearYearsButton = document.getElementById('clear-years-filter');
 
             const performanceModal = document.getElementById('performance-modal');
             const closePerformanceModalButton = document.getElementById('close-performance-modal');
@@ -1805,7 +1803,6 @@
             applyFiltersButton.addEventListener('click', applyFiltersAndStartQuiz);
             clearCategoriesButton.addEventListener('click', () => clearCheckboxes(filterCategoriesList));
             clearProvidersButton.addEventListener('click', () => clearCheckboxes(filterProvidersList));
-            clearYearsButton.addEventListener('click', () => clearCheckboxes(filterYearsList));
             loadSampleButton.addEventListener('click', handleLoadSampleData);
             showAnswerButton.addEventListener('click', showCurrentAnswer);
             reviewSessionButton.addEventListener('click', showReviewModal);
@@ -1930,7 +1927,6 @@
                 if (!quizData || !quizData.questions || quizData.questions.length === 0) {
                     filterCategoriesList.innerHTML = '<p>Load data to see categories.</p>';
                     filterProvidersList.innerHTML = '<p>Load data to see providers.</p>';
-                    filterYearsList.innerHTML = '<p>Load data to see years.</p>';
                     applyFiltersButton.disabled = true;
                     if (performanceButton) {
                         performanceButton.disabled = true;
@@ -1940,17 +1936,14 @@
 
                 const categories = new Set();
                 const providers = new Set();
-                const years = new Set();
 
                 quizData.questions.forEach(q => {
                     if (q.category) categories.add(q.category);
                     if (q.source?.provider) providers.add(q.source.provider);
-                    if (q.source?.year) years.add(q.source.year);
                 });
 
                 populateCheckboxList(filterCategoriesList, [...categories].sort());
                 populateCheckboxList(filterProvidersList, [...providers].sort());
-                populateCheckboxList(filterYearsList, [...years].sort((a, b) => b - a));
 
                 applyFiltersButton.disabled = false;
                 if (performanceButton) {
@@ -1999,15 +1992,12 @@
                     .map(cb => cb.value);
                 const selectedProviders = Array.from(filterProvidersList.querySelectorAll('input[type="checkbox"]:checked'))
                     .map(cb => cb.value);
-                const selectedYears = Array.from(filterYearsList.querySelectorAll('input[type="checkbox"]:checked'))
-                    .map(cb => cb.value); // Consider if these years should be numbers or strings
 
                 return {
                     attempts: attemptsFilter,
                     notes: notesFilter,
                     categories: selectedCategories,
                     providers: selectedProviders,
-                    years: selectedYears,
                     scramble: scramble
                 };
             }
@@ -2152,13 +2142,10 @@
                 nextQuestionButton.style.display = 'none'; // No more questions
 
                 // Display appropriate end message or review screen
-                if (hideAnswerMode) {
-                    displayFinalReviewScreen();
-                } else {
-                    quizAreaElement.style.display = 'none';
-                    endOfQuizMessageElement.innerHTML = `<h2>Session Ended</h2><p>Your session time limit of ${formatTime(sessionTimeLimit)} was reached.</p>`;
-                    endOfQuizMessageElement.style.display = 'block';
-                }
+                displayFinalReviewScreen();
+                // Optionally, you might want to pass a specific message to the review screen indicating it was due to timeout.
+                // For now, just calling it directly will show the standard review.
+                // The endOfQuizMessageElement logic is removed as the review screen will now always show.
             }
             async function handleQuestionTimeout() {
                 alert('Time for this question is up!');
@@ -2399,12 +2386,11 @@
                     // Attempts filter
                     if (filters.attempts === 'attempted' && !hasAttempts) return false;
                     if (filters.attempts === 'unattempted' && hasAttempts) return false;
-                    if (filters.attempts === 'correct' || filters.attempts === 'incorrect') {
+                    if (filters.attempts === 'incorrect') {
                         if (!hasAttempts) return false;
-                        const hasCorrectAttempt = q.user_attempts.some(attempt => attempt.chosen_answer === q.answer?.correct_choice);
-                        if (filters.attempts === 'correct' && !hasCorrectAttempt) return false;
-                    if (filters.attempts === 'incorrect' && q.user_attempts.every(attempt => attempt.chosen_answer === q.answer?.correct_choice)) return false; // Need at least one incorrect (any attempt)
-                }
+                        // If every attempt is correct, then this question does not have any incorrect attempts.
+                        if (q.user_attempts.every(attempt => attempt.chosen_answer === q.answer?.correct_choice)) return false;
+                    }
                 if (filters.attempts === 'incorrect_only') {
                     if (!hasAttempts) return false; // Must have attempts
                     const lastAttempt = q.user_attempts[q.user_attempts.length - 1];
@@ -2424,7 +2410,6 @@
 
                     if (filters.categories.length > 0 && (!q.category || !filters.categories.includes(q.category))) return false;
                     if (filters.providers.length > 0 && (!q.source?.provider || !filters.providers.includes(q.source.provider))) return false;
-                    if (filters.years.length > 0 && (!q.source?.year || !filters.years.includes(q.source.year))) return false;
 
                     return true;
                 });
@@ -2909,7 +2894,7 @@
                     deactivateAnnotationMode();
                     pauseQuestionTimer(); pauseSessionTimer(); pauseStopwatch();
                     // Removed saveToLocalStorage()
-                    if (hideAnswerMode) displayFinalReviewScreen();
+                    displayFinalReviewScreen(); // Call unconditionally
                     await clearActiveSessionState(); // Quiz ended
                     return;
                 }
@@ -2953,7 +2938,7 @@
                     deactivateAnnotationMode();
                     pauseQuestionTimer(); pauseSessionTimer(); pauseStopwatch();
                     // Removed saveToLocalStorage()
-                    if (hideAnswerMode) displayFinalReviewScreen();
+                    displayFinalReviewScreen(); // Call unconditionally
                     await clearActiveSessionState(); // Quiz ended
                 }
             }
@@ -3026,7 +3011,6 @@
 
                 restoreCheckboxList(filterCategoriesList, filters.categories);
                 restoreCheckboxList(filterProvidersList, filters.providers);
-                restoreCheckboxList(filterYearsList, filters.years);
 
                 // Restore Timer and Exam Mode settings from sidebar inputs if they were part of 'activeFilters'
                 // For this implementation, getFilterSettings() does not include these.
@@ -3099,90 +3083,30 @@
             function resizeCanvas() {
                 if (!annotationArea || !annotationCanvas) return;
 
-                const rect = annotationArea.getBoundingClientRect();
                 const dpr = window.devicePixelRatio || 1;
+                const areaWidth = annotationArea.clientWidth;
+                const areaHeight = annotationArea.clientHeight;
 
-                annotationCanvas.width = rect.width * dpr;
-                annotationCanvas.height = rect.height * dpr; // This includes the spacer
+                // Set canvas internal drawing surface size
+                annotationCanvas.width = areaWidth * dpr;
+                annotationCanvas.height = areaHeight * dpr;
 
-                annotationCanvas.style.width = `${rect.width}px`;
-                annotationCanvas.style.height = `${rect.height}px`;
+                // Set canvas CSS size to match the annotation area
+                annotationCanvas.style.width = `${areaWidth}px`;
+                annotationCanvas.style.height = `${areaHeight}px`;
+                
+                // Set canvas position
+                annotationCanvas.style.position = 'absolute';
+                annotationCanvas.style.top = '0px';
+                annotationCanvas.style.left = '0px';
 
+                // Scale context for DPR
                 annotationCtx.scale(dpr, dpr);
-                annotationCtx.clearRect(0, 0, annotationCanvas.width / dpr, annotationCanvas.height / dpr);
+                
+                // Clear the canvas
+                annotationCtx.clearRect(0, 0, areaWidth, areaHeight); // Use areaWidth/Height for clearing post-scale
 
-                // Redraw text content onto canvas if annotation is active
-                if (isAnnotationActive && currentQuestionObject) {
-                    annotationCtx.textBaseline = 'top';
-                    let yOffset = 10; // Starting Y padding in canvas coordinates
-
-                    const drawWrappedText = (text, x, y, maxWidth, lineHeight, fontStyle, color) => {
-                        annotationCtx.font = fontStyle;
-                        annotationCtx.fillStyle = color;
-                        const words = text.split(' ');
-                        let line = '';
-                        for (let n = 0; n < words.length; n++) {
-                            const testLine = line + words[n] + ' ';
-                            const metrics = annotationCtx.measureText(testLine);
-                            const testWidth = metrics.width;
-                            if (testWidth > maxWidth && n > 0) {
-                                annotationCtx.fillText(line, x, y);
-                                line = words[n] + ' ';
-                                y += lineHeight;
-                            } else {
-                                line = testLine;
-                            }
-                        }
-                        annotationCtx.fillText(line, x, y);
-                        return y + lineHeight; // Return new yOffset
-                    };
-
-                    const bodyStyles = getComputedStyle(document.body);
-                    const textColor = bodyStyles.getPropertyValue('--text-color') || '#333';
-                    const primaryColor = bodyStyles.getPropertyValue('--primary-color') || '#007bff';
-
-
-                    // Draw Group Intro if visible and part of canvas drawing
-                    const currentGroupIntroEl = document.getElementById('current-group-intro');
-                    if (currentGroupIntroEl.classList.contains('drawn-on-canvas')) {
-                        const groupTitleEl = currentGroupIntroEl.querySelector('h3');
-                        const groupTextEl = currentGroupIntroEl.querySelector('p');
-
-                        if (groupTitleEl) {
-                            const style = getComputedStyle(groupTitleEl);
-                            yOffset = drawWrappedText(
-                                groupTitleEl.textContent, 10, yOffset, (annotationCanvas.width / dpr) - 20,
-                                parseInt(style.lineHeight), `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`,
-                                primaryColor
-                            );
-                            yOffset += 5; // Small gap
-                        }
-                        if (groupTextEl) {
-                            const style = getComputedStyle(groupTextEl);
-                            yOffset = drawWrappedText(
-                                groupTextEl.textContent, 10, yOffset, (annotationCanvas.width / dpr) - 20,
-                                parseInt(style.lineHeight), `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`,
-                                textColor // Assuming group text is standard text color
-                            );
-                        }
-                        yOffset += 15; // Extra space after group intro
-                    }
-
-
-                    // Draw Question Text if part of canvas drawing
-                    const questionTextEl = document.getElementById('question-text');
-                    if (questionTextEl.classList.contains('drawn-on-canvas')) {
-                        const style = getComputedStyle(questionTextEl);
-                        yOffset = drawWrappedText(
-                            questionTextEl.textContent, 10, yOffset, (annotationCanvas.width / dpr) - 20,
-                            parseInt(style.lineHeight), `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`,
-                            textColor
-                        );
-                    }
-                    // Note: This basic text drawing won't handle complex HTML/CSS from original elements.
-                    // For rich text, you'd need a more sophisticated HTML-to-canvas renderer or SVG.
-                }
-                // Restore line styles that might be changed by drawing text
+                // Restore line styles that might be changed by drawing text or scaling
                 setTool(currentTool); // Re-apply current tool settings like lineCap, etc.
             }
             function activateAnnotationMode() {
@@ -3191,14 +3115,6 @@
                 annotationControls.style.display = 'block'; // Or 'flex' if your CSS uses that
                 toggleAnnotationButton.classList.add('annotation-active');
                 toggleAnnotationButton.textContent = 'View Question Text'; // Or similar "active" state text
-
-                // Add class to HTML elements to hide them, so canvas can draw them
-                document.getElementById('current-group-intro').classList.add('drawn-on-canvas');
-                document.getElementById('question-text').classList.add('drawn-on-canvas');
-
-                // Send choices behind the canvas
-                choicesFormElement.style.position = 'relative'; // Ensure z-index works
-                choicesFormElement.style.zIndex = '-1';
 
 
                 resizeCanvas(); // This will perform the initial draw of text onto the canvas
@@ -3210,13 +3126,6 @@
                 annotationControls.style.display = 'none';
                 toggleAnnotationButton.classList.remove('annotation-active');
                 toggleAnnotationButton.textContent = 'Annotate Question';
-
-                // Remove class to make HTML elements visible again
-                document.getElementById('current-group-intro').classList.remove('drawn-on-canvas');
-                document.getElementById('question-text').classList.remove('drawn-on-canvas');
-
-                // Bring choices back to the front
-                choicesFormElement.style.zIndex = 'auto';
 
                 // Optionally save current drawing or clear it
                 // clearCanvas(); // If you don't want drawings to persist when toggling
@@ -3254,6 +3163,7 @@
             }
             function startDrawing(e) {
                 if (!isAnnotationActive) return;
+                annotationCanvas.style.pointerEvents = 'auto';
                 e.preventDefault(); // Important for touch events to prevent page scroll
                 isDrawing = true;
                 const coords = getCoords(e);
@@ -3288,6 +3198,7 @@
             function stopDrawing() {
                 if (!isAnnotationActive || !isDrawing) return;
                 isDrawing = false;
+                annotationCanvas.style.pointerEvents = 'none';
                 annotationCtx.closePath(); // End the current path
             }
             function setTool(toolName) {
@@ -3370,7 +3281,7 @@
                     return { /* Return a default empty stats object */
                         totalQuestions: 0, uniqueQuestionsAttempted: 0, correctAttempts: 0,
                         incorrectAttempts: 0, accuracy: 0, averageTimePerAttempted: 0,
-                        questionsWithNotes: 0, byCategory: {}
+                        questionsWithNotes: 0, byCategory: {}, byProvider: {}, byYear: {}
                     };
                 }
 
@@ -3383,6 +3294,8 @@
                 let questionsWithAnyNotes = new Set();
 
                 const categoryStats = {}; // { categoryName: { total: 0, correct: 0, sumTime: 0, numAttempts: 0 } }
+                const providerStats = {}; // Similar structure
+                const yearStats = {};     // Similar structure
 
                 data.questions.forEach(q => {
                     if (q.user_attempts && q.user_attempts.length > 0) {
@@ -3413,6 +3326,27 @@
                                 categoryStats[q.category].numAllAttempts++;
                             });
                         }
+                        // Stats by provider
+                        if (q.source?.provider) {
+                            if (!providerStats[q.source.provider]) providerStats[q.source.provider] = { totalLastAttempts: 0, correctLastAttempts: 0, sumTimeAllAttempts: 0, numAllAttempts: 0 };
+                            providerStats[q.source.provider].totalLastAttempts++;
+                            if (lastAttempt.chosen_answer === q.answer?.correct_choice) providerStats[q.source.provider].correctLastAttempts++;
+                            q.user_attempts.forEach(att => {
+                                providerStats[q.source.provider].sumTimeAllAttempts += (att.time_spent_seconds || 0);
+                                providerStats[q.source.provider].numAllAttempts++;
+                            });
+                        }
+                        // Stats by year
+                        if (q.source?.year) {
+                            const yearStr = String(q.source.year);
+                            if (!yearStats[yearStr]) yearStats[yearStr] = { totalLastAttempts: 0, correctLastAttempts: 0, sumTimeAllAttempts: 0, numAllAttempts: 0 };
+                            yearStats[yearStr].totalLastAttempts++;
+                            if (lastAttempt.chosen_answer === q.answer?.correct_choice) yearStats[yearStr].correctLastAttempts++;
+                            q.user_attempts.forEach(att => {
+                                yearStats[yearStr].sumTimeAllAttempts += (att.time_spent_seconds || 0);
+                                yearStats[yearStr].numAllAttempts++;
+                            });
+                        }
                     }
                 });
 
@@ -3428,7 +3362,9 @@
                     accuracy: parseFloat(accuracy.toFixed(1)),
                     averageTimePerAttempted: parseFloat(averageTimePerSingleAttempt.toFixed(1)),
                     questionsWithNotes: questionsWithAnyNotes.size,
-                    byCategory: categoryStats
+                    byCategory: categoryStats,
+                    byProvider: providerStats,
+                    byYear: yearStats
                 };
             }
             function displayPerformanceStats(stats) {
@@ -3447,25 +3383,26 @@
                 html += `<li><strong>Questions with Notes:</strong> ${stats.questionsWithNotes}</li>`;
                 html += '</ul>';
 
-                // Sort categories by accuracy
-                const sortedCategories = Object.entries(stats.byCategory)
-                    .map(([category, data]) => ({
-                        category,
-                        accuracy: data.totalLastAttempts > 0 ? (data.correctLastAttempts / data.totalLastAttempts * 100) : 0,
-                        ...data
-                    }))
-                    .sort((a, b) => b.accuracy - a.accuracy);
+                const generateDetailedStatsHtml = (title, detailedStats) => {
+                    let sectionHtml = '';
+                    if (Object.keys(detailedStats).length > 0) {
+                        sectionHtml += `<div class="category-stats"><h3>${title}</h3><ul>`;
+                        for (const key in detailedStats) {
+                            const item = detailedStats[key];
+                            const itemAccuracy = item.totalLastAttempts > 0 ? (item.correctLastAttempts / item.totalLastAttempts * 100).toFixed(1) : 0;
+                            const itemAvgTime = item.numAllAttempts > 0 ? (item.sumTimeAllAttempts / item.numAllAttempts).toFixed(1) : 0;
+                            sectionHtml += `<li><strong>${escapeHtml(key)}:</strong> ` +
+                                `${item.correctLastAttempts}/${item.totalLastAttempts} attempted questions correct on last try (${itemAccuracy}%) - ` +
+                                `Avg Time (all attempts for this ${title.split(' ')[2].toLowerCase()}): ${itemAvgTime}s</li>`;
+                        }
+                        sectionHtml += '</ul></div>';
+                    }
+                    return sectionHtml;
+                };
 
-                if (sortedCategories.length > 0) {
-                    html += `<div class="category-stats"><h3>Performance by Category</h3><ul>`;
-                    sortedCategories.forEach(({category, accuracy, correctLastAttempts, totalLastAttempts, sumTimeAllAttempts, numAllAttempts}) => {
-                        const avgTime = numAllAttempts > 0 ? (sumTimeAllAttempts / numAllAttempts).toFixed(1) : 0;
-                        html += `<li><strong>${escapeHtml(category)}:</strong> ` +
-                            `${correctLastAttempts}/${totalLastAttempts} correct (${accuracy.toFixed(1)}%) - ` +
-                            `Avg Time: ${avgTime}s</li>`;
-                    });
-                    html += '</ul></div>';
-                }
+                html += generateDetailedStatsHtml('Performance by Category', stats.byCategory);
+                html += generateDetailedStatsHtml('Performance by Provider', stats.byProvider);
+                html += generateDetailedStatsHtml('Performance by Year', stats.byYear);
 
                 performanceStatsContent.innerHTML = html;
             }
@@ -3514,7 +3451,13 @@
                     const sessionAttemptData = sessionAttempts.get(question.question_id);
 
                     html += `<li style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px;">`;
-                    html += `<p><strong>Q${index + 1} (ID: ${escapeHtml(question.question_id)}):</strong> ${escapeHtml(question.text.substring(0, 150))}...</p>`;
+                    let questionTextPreview = "[Question text not available]";
+                    if (question && typeof question.text === 'string') {
+                        questionTextPreview = escapeHtml(question.text.substring(0, 150)) + (question.text.length > 150 ? "..." : "");
+                    } else if (question && question.text) { // Handle cases where question.text might exist but not be a string
+                        questionTextPreview = escapeHtml(String(question.text).substring(0, 150)) + (String(question.text).length > 150 ? "..." : "");
+                    }
+                    html += `<p><strong>Q${index + 1} (ID: ${escapeHtml(question.question_id)}):</strong> ${questionTextPreview}</p>`;
 
                     if (sessionAttemptData) { // If the question was attempted in *this* session
                         const { attempt } = sessionAttemptData;
@@ -3581,24 +3524,6 @@
                 openSidebar(); // Show the sidebar for new settings.
             }
 
-            const newPerfButtonElement = document.createElement('button');
-            newPerfButtonElement.id = 'show-performance-button';
-            newPerfButtonElement.textContent = 'Performance Dashboard';
-            newPerfButtonElement.disabled = true; // Initial state
-
-            if (applyFiltersButton && applyFiltersButton.parentNode) {
-                applyFiltersButton.parentNode.insertBefore(newPerfButtonElement, applyFiltersButton.nextSibling);
-                performanceButton = newPerfButtonElement; // Assign to the higher-scoped `let` variable
-
-                // Now that performanceButton is assigned (if successful), add styles and listeners
-                performanceButton.style.marginTop = "1rem";
-                // applyFiltersButton.style.marginBottom = "0"; // This was styling applyFiltersButton, keep if intended
-                performanceButton.addEventListener('click', showPerformanceModal);
-            } else {
-                console.error("Could not find 'apply-filters-button' or its parent. Performance button not added.");
-                // performanceButton will remain null if the above fails.
-            }
-
 
             // --- Initial Page Load Sequence ---
             async function initializeApp() {
@@ -3631,6 +3556,7 @@
                         currentQuestionIndex = savedIndex - 1; // displayNextQuestionInternal will increment it
                         hideAnswerMode = savedHideAnswerMode !== null ? savedHideAnswerMode : settingHideAnswerCheckbox.checked;
                         questionLimit = savedQuestionLimit !== null ? savedQuestionLimit : parseInt(document.getElementById('question-limit').value, 10) || 50;
+                        document.getElementById('question-limit').value = questionLimit;
                         
                         // Restore filter UI before initializing timers
                         if (savedFilters) {
