@@ -828,6 +828,7 @@
             position: relative;
             padding-bottom: 1px;
             margin-bottom: 1rem;
+            min-height: 150px;
         }
 
         /* Space below canvas area */
@@ -847,8 +848,6 @@
             display: none;
             touch-action: none;
             border-radius: var(--border-radius);
-            /* Match card */
-            pointer-events: none; /* Add this line */
         }
 
         #annotation-controls {
@@ -1098,20 +1097,14 @@
             /* Hide the original HTML elements */
         }
 
-        /* Ensure annotation area has position context for canvas */
-        #annotation-area {
-            position: relative;
-            /* Maybe add min-height if needed */
-            min-height: 150px;
-            /* Example: ensure some space initially */
+        /* When annotation mode is active, hide the original text */
+        #question-text.drawn-on-canvas {
+            visibility: hidden;
         }
 
-        /* Adjust canvas positioning if needed */
-        #annotationCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            /* width/height set by JS */
+        /* Ensure the canvas is interactive when annotation mode is active */
+        #annotationCanvas.annotation-active {
+            pointer-events: auto;
         }
 
         /* Timer Container Styles */
@@ -3117,23 +3110,23 @@
             function activateAnnotationMode() {
                 isAnnotationActive = true;
                 annotationCanvas.style.display = 'block';
-                annotationControls.style.display = 'block'; // Or 'flex' if your CSS uses that
+                annotationCanvas.classList.add('annotation-active');
+                annotationControls.style.display = 'block';
                 toggleAnnotationButton.classList.add('annotation-active');
-                toggleAnnotationButton.textContent = 'View Question Text'; // Or similar "active" state text
+                toggleAnnotationButton.textContent = 'View Question Text';
+                questionTextElement.classList.add('drawn-on-canvas');
 
-
-                resizeCanvas(); // This will perform the initial draw of text onto the canvas
-                setTool(currentTool); // Ensure tool styles are applied
+                resizeCanvas();
+                setTool(currentTool);
             }
             function deactivateAnnotationMode() {
                 isAnnotationActive = false;
                 annotationCanvas.style.display = 'none';
+                annotationCanvas.classList.remove('annotation-active');
                 annotationControls.style.display = 'none';
                 toggleAnnotationButton.classList.remove('annotation-active');
                 toggleAnnotationButton.textContent = 'Annotate Question';
-
-                // Optionally save current drawing or clear it
-                // clearCanvas(); // If you don't want drawings to persist when toggling
+                questionTextElement.classList.remove('drawn-on-canvas');
             }
             function toggleAnnotationMode() {
                 if (isAnnotationActive) {
@@ -3168,23 +3161,22 @@
             }
             function startDrawing(e) {
                 if (!isAnnotationActive) return;
-                annotationCanvas.style.pointerEvents = 'auto';
                 e.preventDefault(); // Important for touch events to prevent page scroll
                 isDrawing = true;
                 const coords = getCoords(e);
                 [lastX, lastY] = [coords.x, coords.y];
 
-                // Set drawing properties based on current tool (already done in setTool, but good for composite op)
+                // Set drawing properties based on current tool
                 if (currentTool === 'eraser') {
                     annotationCtx.globalCompositeOperation = 'destination-out';
-                    // For eraser, you might want to draw a small circle on click even without mousemove
+                    // For eraser, draw a small circle on click
                     annotationCtx.beginPath();
                     annotationCtx.arc(lastX, lastY, eraserWidth / 2, 0, Math.PI * 2, false);
                     annotationCtx.fill();
                 } else {
                     annotationCtx.globalCompositeOperation = 'source-over';
                 }
-                annotationCtx.beginPath(); // Start a new path for the line
+                annotationCtx.beginPath();
                 annotationCtx.moveTo(lastX, lastY);
             }
             function draw(e) {
