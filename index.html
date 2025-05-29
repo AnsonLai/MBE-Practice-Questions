@@ -849,7 +849,6 @@
             touch-action: none;
             border-radius: var(--border-radius);
             background: transparent;
-            pointer-events: none;
         }
 
         #annotationCanvas.annotation-active {
@@ -1117,12 +1116,17 @@
             pointer-events: auto;
         }
 
-        /* Force text visibility in annotation mode */
+        /* Force text visibility in annotation mode only for elements with drawn-on-canvas class */
         #current-group-intro.drawn-on-canvas,
         #question-text.drawn-on-canvas {
             visibility: visible !important;
             display: block !important;
             opacity: 1 !important;
+        }
+
+        /* Ensure group intro without drawn-on-canvas class stays hidden when empty */
+        #current-group-intro:not(.drawn-on-canvas) {
+            display: none !important;
         }
 
         /* Timer Container Styles */
@@ -1685,7 +1689,7 @@
             let lastY = 0;
             let penColor = '#0000FF';
             let penWidth = 2;
-            let highlighterColor = 'rgba(60, 255, 131, 0.003)';
+            let highlighterColor = 'rgba(60, 255, 131, 0.4)';
             let highlighterWidth = 15;
             let eraserWidth = 25;
 
@@ -2644,7 +2648,10 @@
                 // resizeCanvas will also handle drawing text if annotation is active
                 if (isAnnotationActive) {
                     questionTextElement.classList.add('drawn-on-canvas');
-                    groupIntroElement.classList.add('drawn-on-canvas');
+                    // Only add drawn-on-canvas class to group intro if it has content and is visible
+                    if (groupIntroElement.style.display !== 'none' && groupIntroElement.innerHTML.trim() !== '') {
+                        groupIntroElement.classList.add('drawn-on-canvas');
+                    }
                     resizeCanvas();
                 } else {
                     clearCanvas(); // Ensure canvas is clear if not active
@@ -3137,7 +3144,11 @@
                 toggleAnnotationButton.classList.add('annotation-active');
                 toggleAnnotationButton.textContent = 'View Question Text';
                 questionTextElement.classList.add('drawn-on-canvas');
-                groupIntroElement.classList.add('drawn-on-canvas');
+                
+                // Only add drawn-on-canvas class to group intro if it has content and is visible
+                if (groupIntroElement.style.display !== 'none' && groupIntroElement.innerHTML.trim() !== '') {
+                    groupIntroElement.classList.add('drawn-on-canvas');
+                }
 
                 resizeCanvas();
                 setTool(currentTool);
@@ -3208,10 +3219,12 @@
                 e.preventDefault();
                 const coords = getCoords(e);
 
-                // annotationCtx.beginPath(); // Should not be here for continuous lines
-                // moveTo is set in startDrawing or at the end of previous draw segment
                 annotationCtx.lineTo(coords.x, coords.y);
                 annotationCtx.stroke(); // Draws the segment
+
+                // Start a new path for the next segment to ensure continuous drawing
+                annotationCtx.beginPath();
+                annotationCtx.moveTo(coords.x, coords.y);
 
                 // Update lastX, lastY for the next segment
                 [lastX, lastY] = [coords.x, coords.y];
