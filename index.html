@@ -2152,13 +2152,10 @@
                 nextQuestionButton.style.display = 'none'; // No more questions
 
                 // Display appropriate end message or review screen
-                if (hideAnswerMode) {
-                    displayFinalReviewScreen();
-                } else {
-                    quizAreaElement.style.display = 'none';
-                    endOfQuizMessageElement.innerHTML = `<h2>Session Ended</h2><p>Your session time limit of ${formatTime(sessionTimeLimit)} was reached.</p>`;
-                    endOfQuizMessageElement.style.display = 'block';
-                }
+                displayFinalReviewScreen();
+                // Optionally, you might want to pass a specific message to the review screen indicating it was due to timeout.
+                // For now, just calling it directly will show the standard review.
+                // The endOfQuizMessageElement logic is removed as the review screen will now always show.
             }
             async function handleQuestionTimeout() {
                 alert('Time for this question is up!');
@@ -2909,7 +2906,7 @@
                     deactivateAnnotationMode();
                     pauseQuestionTimer(); pauseSessionTimer(); pauseStopwatch();
                     // Removed saveToLocalStorage()
-                    if (hideAnswerMode) displayFinalReviewScreen();
+                    displayFinalReviewScreen(); // Call unconditionally
                     await clearActiveSessionState(); // Quiz ended
                     return;
                 }
@@ -2953,7 +2950,7 @@
                     deactivateAnnotationMode();
                     pauseQuestionTimer(); pauseSessionTimer(); pauseStopwatch();
                     // Removed saveToLocalStorage()
-                    if (hideAnswerMode) displayFinalReviewScreen();
+                    displayFinalReviewScreen(); // Call unconditionally
                     await clearActiveSessionState(); // Quiz ended
                 }
             }
@@ -3544,7 +3541,13 @@
                     const sessionAttemptData = sessionAttempts.get(question.question_id);
 
                     html += `<li style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px;">`;
-                    html += `<p><strong>Q${index + 1} (ID: ${escapeHtml(question.question_id)}):</strong> ${escapeHtml(question.text.substring(0, 150))}...</p>`;
+                    let questionTextPreview = "[Question text not available]";
+                    if (question && typeof question.text === 'string') {
+                        questionTextPreview = escapeHtml(question.text.substring(0, 150)) + (question.text.length > 150 ? "..." : "");
+                    } else if (question && question.text) { // Handle cases where question.text might exist but not be a string
+                        questionTextPreview = escapeHtml(String(question.text).substring(0, 150)) + (String(question.text).length > 150 ? "..." : "");
+                    }
+                    html += `<p><strong>Q${index + 1} (ID: ${escapeHtml(question.question_id)}):</strong> ${questionTextPreview}</p>`;
 
                     if (sessionAttemptData) { // If the question was attempted in *this* session
                         const { attempt } = sessionAttemptData;
