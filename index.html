@@ -937,6 +937,13 @@
             #question-text {
                 font-size: 1.1rem;
             }
+
+            /* Ensure container aligns correctly with open sidebar on tablets */
+            body.sidebar-open .container {
+                margin-left: 0; /* Align to the new "left edge" created by body's padding-left */
+                                /* The 'width: 95%' from this media query will apply. */
+                                /* The 'margin-right: auto' from the default 'margin: 2rem auto' will handle the right side. */
+            }
         }
 
         /* Mobile Devices */
@@ -1407,18 +1414,10 @@
             <button id="clear-providers-filter" class="clear-filter-button">Clear Providers</button>
         </div>
         <div class="sidebar-section">
-            <h3>Years</h3>
-            <div id="filter-years-list" class="filter-options-list">
-                <p>Load data to see years.</p>
-            </div>
-            <button id="clear-years-filter" class="clear-filter-button">Clear Years</button>
-        </div>
-        <div class="sidebar-section">
             <h3>Attempts</h3>
             <label><input type="radio" name="filter-attempts" value="all" checked> Show All Questions</label>
             <label><input type="radio" name="filter-attempts" value="attempted"> Questions with Attempts</label>
             <label><input type="radio" name="filter-attempts" value="unattempted"> Questions without Attempts</label>
-            <label><input type="radio" name="filter-attempts" value="correct"> Questions with Correct Attempts</label>
             <label><input type="radio" name="filter-attempts" value="incorrect"> Questions with Incorrect Attempts (Any)</label>
             <label><input type="radio" name="filter-attempts" value="incorrect_only"> Show Incorrectly Answered Only (Last Attempt)</label>
             <button id="clear-attempts-filter" class="clear-filter-button">Reset Attempts Filter</button>
@@ -1647,11 +1646,9 @@
             const applyFiltersButton = document.getElementById('apply-filters-button');
             const filterCategoriesList = document.getElementById('filter-categories-list');
             const filterProvidersList = document.getElementById('filter-providers-list');
-            const filterYearsList = document.getElementById('filter-years-list');
             const filterScrambleCheckbox = document.getElementById('filter-scramble');
             const clearCategoriesButton = document.getElementById('clear-categories-filter');
             const clearProvidersButton = document.getElementById('clear-providers-filter');
-            const clearYearsButton = document.getElementById('clear-years-filter');
 
             const performanceModal = document.getElementById('performance-modal');
             const closePerformanceModalButton = document.getElementById('close-performance-modal');
@@ -1805,7 +1802,6 @@
             applyFiltersButton.addEventListener('click', applyFiltersAndStartQuiz);
             clearCategoriesButton.addEventListener('click', () => clearCheckboxes(filterCategoriesList));
             clearProvidersButton.addEventListener('click', () => clearCheckboxes(filterProvidersList));
-            clearYearsButton.addEventListener('click', () => clearCheckboxes(filterYearsList));
             loadSampleButton.addEventListener('click', handleLoadSampleData);
             showAnswerButton.addEventListener('click', showCurrentAnswer);
             reviewSessionButton.addEventListener('click', showReviewModal);
@@ -1930,7 +1926,6 @@
                 if (!quizData || !quizData.questions || quizData.questions.length === 0) {
                     filterCategoriesList.innerHTML = '<p>Load data to see categories.</p>';
                     filterProvidersList.innerHTML = '<p>Load data to see providers.</p>';
-                    filterYearsList.innerHTML = '<p>Load data to see years.</p>';
                     applyFiltersButton.disabled = true;
                     if (performanceButton) {
                         performanceButton.disabled = true;
@@ -1940,17 +1935,14 @@
 
                 const categories = new Set();
                 const providers = new Set();
-                const years = new Set();
 
                 quizData.questions.forEach(q => {
                     if (q.category) categories.add(q.category);
                     if (q.source?.provider) providers.add(q.source.provider);
-                    if (q.source?.year) years.add(q.source.year);
                 });
 
                 populateCheckboxList(filterCategoriesList, [...categories].sort());
                 populateCheckboxList(filterProvidersList, [...providers].sort());
-                populateCheckboxList(filterYearsList, [...years].sort((a, b) => b - a));
 
                 applyFiltersButton.disabled = false;
                 if (performanceButton) {
@@ -1999,15 +1991,12 @@
                     .map(cb => cb.value);
                 const selectedProviders = Array.from(filterProvidersList.querySelectorAll('input[type="checkbox"]:checked'))
                     .map(cb => cb.value);
-                const selectedYears = Array.from(filterYearsList.querySelectorAll('input[type="checkbox"]:checked'))
-                    .map(cb => cb.value); // Consider if these years should be numbers or strings
 
                 return {
                     attempts: attemptsFilter,
                     notes: notesFilter,
                     categories: selectedCategories,
                     providers: selectedProviders,
-                    years: selectedYears,
                     scramble: scramble
                 };
             }
@@ -2396,12 +2385,11 @@
                     // Attempts filter
                     if (filters.attempts === 'attempted' && !hasAttempts) return false;
                     if (filters.attempts === 'unattempted' && hasAttempts) return false;
-                    if (filters.attempts === 'correct' || filters.attempts === 'incorrect') {
+                    if (filters.attempts === 'incorrect') {
                         if (!hasAttempts) return false;
-                        const hasCorrectAttempt = q.user_attempts.some(attempt => attempt.chosen_answer === q.answer?.correct_choice);
-                        if (filters.attempts === 'correct' && !hasCorrectAttempt) return false;
-                    if (filters.attempts === 'incorrect' && q.user_attempts.every(attempt => attempt.chosen_answer === q.answer?.correct_choice)) return false; // Need at least one incorrect (any attempt)
-                }
+                        // If every attempt is correct, then this question does not have any incorrect attempts.
+                        if (q.user_attempts.every(attempt => attempt.chosen_answer === q.answer?.correct_choice)) return false;
+                    }
                 if (filters.attempts === 'incorrect_only') {
                     if (!hasAttempts) return false; // Must have attempts
                     const lastAttempt = q.user_attempts[q.user_attempts.length - 1];
@@ -2421,7 +2409,6 @@
 
                     if (filters.categories.length > 0 && (!q.category || !filters.categories.includes(q.category))) return false;
                     if (filters.providers.length > 0 && (!q.source?.provider || !filters.providers.includes(q.source.provider))) return false;
-                    if (filters.years.length > 0 && (!q.source?.year || !filters.years.includes(q.source.year))) return false;
 
                     return true;
                 });
@@ -3023,7 +3010,6 @@
 
                 restoreCheckboxList(filterCategoriesList, filters.categories);
                 restoreCheckboxList(filterProvidersList, filters.providers);
-                restoreCheckboxList(filterYearsList, filters.years);
 
                 // Restore Timer and Exam Mode settings from sidebar inputs if they were part of 'activeFilters'
                 // For this implementation, getFilterSettings() does not include these.
@@ -3367,7 +3353,7 @@
                     return { /* Return a default empty stats object */
                         totalQuestions: 0, uniqueQuestionsAttempted: 0, correctAttempts: 0,
                         incorrectAttempts: 0, accuracy: 0, averageTimePerAttempted: 0,
-                        questionsWithNotes: 0, byCategory: {}, byProvider: {}, byYear: {}
+                        questionsWithNotes: 0, byCategory: {}, byProvider: {}
                     };
                 }
 
@@ -3381,7 +3367,6 @@
 
                 const categoryStats = {}; // { categoryName: { total: 0, correct: 0, sumTime: 0, numAttempts: 0 } }
                 const providerStats = {}; // Similar structure
-                const yearStats = {};     // Similar structure
 
                 data.questions.forEach(q => {
                     if (q.user_attempts && q.user_attempts.length > 0) {
@@ -3426,17 +3411,6 @@
                                 providerStats[q.source.provider].numAllAttempts++;
                             });
                         }
-                        // Stats by year
-                        if (q.source?.year) {
-                            const yearStr = String(q.source.year);
-                            if (!yearStats[yearStr]) yearStats[yearStr] = { totalLastAttempts: 0, correctLastAttempts: 0, sumTimeAllAttempts: 0, numAllAttempts: 0 };
-                            yearStats[yearStr].totalLastAttempts++;
-                            if (lastAttempt.chosen_answer === q.answer?.correct_choice) yearStats[yearStr].correctLastAttempts++;
-                            q.user_attempts.forEach(att => {
-                                yearStats[yearStr].sumTimeAllAttempts += (att.time_spent_seconds || 0);
-                                yearStats[yearStr].numAllAttempts++;
-                            });
-                        }
                     }
                 });
 
@@ -3453,8 +3427,7 @@
                     averageTimePerAttempted: parseFloat(averageTimePerSingleAttempt.toFixed(1)), // Avg time per *any* attempt
                     questionsWithNotes: questionsWithAnyNotes.size,
                     byCategory: categoryStats,
-                    byProvider: providerStats,
-                    byYear: yearStats
+                    byProvider: providerStats
                 };
             }
             function displayPerformanceStats(stats) {
@@ -3492,7 +3465,6 @@
 
                 html += generateDetailedStatsHtml('Performance by Category', stats.byCategory);
                 html += generateDetailedStatsHtml('Performance by Provider', stats.byProvider);
-                html += generateDetailedStatsHtml('Performance by Year', stats.byYear);
 
                 performanceStatsContent.innerHTML = html;
             }
@@ -3612,24 +3584,6 @@
                 // Timers should have been paused already.
                 resetQuizState(true); // Reset UI but keep data loaded
                 openSidebar(); // Show the sidebar for new settings.
-            }
-
-            const newPerfButtonElement = document.createElement('button');
-            newPerfButtonElement.id = 'show-performance-button';
-            newPerfButtonElement.textContent = 'Performance Dashboard';
-            newPerfButtonElement.disabled = true; // Initial state
-
-            if (applyFiltersButton && applyFiltersButton.parentNode) {
-                applyFiltersButton.parentNode.insertBefore(newPerfButtonElement, applyFiltersButton.nextSibling);
-                performanceButton = newPerfButtonElement; // Assign to the higher-scoped `let` variable
-
-                // Now that performanceButton is assigned (if successful), add styles and listeners
-                performanceButton.style.marginTop = "1rem";
-                // applyFiltersButton.style.marginBottom = "0"; // This was styling applyFiltersButton, keep if intended
-                performanceButton.addEventListener('click', showPerformanceModal);
-            } else {
-                console.error("Could not find 'apply-filters-button' or its parent. Performance button not added.");
-                // performanceButton will remain null if the above fails.
             }
 
 
