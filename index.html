@@ -1093,8 +1093,12 @@
 
         #current-group-intro.drawn-on-canvas,
         #question-text.drawn-on-canvas {
-            display: none;
-            /* Hide the original HTML elements */
+            /* Text should remain visible behind canvas for annotation */
+        }
+
+        /* Text remains visible when annotation mode is active */
+        #question-text.drawn-on-canvas {
+            /* Text should remain visible behind canvas for annotation */
         }
 
         /* When annotation mode is active, hide the original text */
@@ -2531,8 +2535,10 @@
                 console.log('questionTextElement classList before setting text:', questionTextElement.classList); // Temporary logging
                 questionTextElement.innerText = question.question_text;
                 console.log('questionTextElement classList after setting text:', questionTextElement.classList); // Temporary logging
-                questionTextElement.classList.remove('drawn-on-canvas');
-                groupIntroElement.classList.remove('drawn-on-canvas');
+                if (!isAnnotationActive) {
+                    questionTextElement.classList.remove('drawn-on-canvas');
+                    groupIntroElement.classList.remove('drawn-on-canvas');
+                }
 
                 // Protective measure for display style if annotation is not active
                 if (!isAnnotationActive) {
@@ -2623,6 +2629,8 @@
                 // Annotation: clear previous canvas drawings & resize for new content
                 // resizeCanvas will also handle drawing text if annotation is active
                 if (isAnnotationActive) {
+                    questionTextElement.classList.add('drawn-on-canvas');
+                    groupIntroElement.classList.add('drawn-on-canvas');
                     resizeCanvas();
                 } else {
                     clearCanvas(); // Ensure canvas is clear if not active
@@ -3115,6 +3123,7 @@
                 toggleAnnotationButton.classList.add('annotation-active');
                 toggleAnnotationButton.textContent = 'View Question Text';
                 questionTextElement.classList.add('drawn-on-canvas');
+                groupIntroElement.classList.add('drawn-on-canvas');
 
                 resizeCanvas();
                 setTool(currentTool);
@@ -3127,6 +3136,7 @@
                 toggleAnnotationButton.classList.remove('annotation-active');
                 toggleAnnotationButton.textContent = 'Annotate Question';
                 questionTextElement.classList.remove('drawn-on-canvas');
+                groupIntroElement.classList.remove('drawn-on-canvas');
             }
             function toggleAnnotationMode() {
                 if (isAnnotationActive) {
