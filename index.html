@@ -2537,6 +2537,7 @@
                     lastDisplayedGroupId = question.group_id;
                 } else if (!question.group_id && lastDisplayedGroupId !== null) { 
                     // Current question has no group, and a group intro was previously displayed
+                    groupIntroElement.innerHTML = `<h3></h3><p></p>`;
                     groupIntroElement.style.display = 'none';
                     groupIntroElement.classList.remove('has-content');
                     lastDisplayedGroupId = null;
