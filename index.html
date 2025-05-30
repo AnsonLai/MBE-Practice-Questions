@@ -3238,7 +3238,7 @@
 
                 // Set drawing properties based on current tool
                 if (currentTool === 'eraser') {
-                    annotationCtx.globalCompositeOperation = 'destination-out';
+                    annotationCtx.globalCompositeOperation = 'source-over';
                     // For eraser, draw a small circle on click
                     annotationCtx.beginPath();
                     annotationCtx.arc(lastX, lastY, eraserWidth / 2, 0, Math.PI * 2, false);
@@ -3295,17 +3295,17 @@
                         annotationCanvas.style.cursor = 'crosshair'; // Or a custom highlighter cursor
                         annotationCtx.strokeStyle = highlighterColor;
                         annotationCtx.lineWidth = highlighterWidth;
-                        annotationCtx.lineCap = 'round'; // 'butt' can also work well for highlighters
+                        annotationCtx.lineCap = 'butt'; // 'butt' can also work well for highlighters
                         annotationCtx.lineJoin = 'round';
                         annotationCtx.globalCompositeOperation = 'source-over'; // Or 'multiply' for blending
                         break;
                     case 'eraser':
-                        annotationCanvas.style.cursor = 'grab'; // Or a custom eraser cursor
+                        annotationCanvas.style.cursor = 'crosshair'; // Or a custom eraser cursor
                         // lineWidth for eraser is effectively its "size"
                         annotationCtx.lineWidth = eraserWidth;
                         annotationCtx.lineCap = 'round';
                         annotationCtx.lineJoin = 'round';
-                        annotationCtx.globalCompositeOperation = 'destination-out';
+                        annotationCtx.globalCompositeOperation = 'source-over';
                         break;
                 }
             }
