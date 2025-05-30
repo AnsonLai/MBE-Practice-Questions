@@ -3442,7 +3442,28 @@
                     return;
                 }
 
-                let html = '<ul>';
+                let html = '';
+
+                // Last Session Stats (from sessionAttempts)
+                if (sessionAttempts.size > 0) {
+                    let sessionCorrect = 0;
+                    sessionAttempts.forEach(attemptData => {
+                        if (attemptData.attempt.chosen_answer === attemptData.question.answer?.correct_choice) {
+                            sessionCorrect++;
+                        }
+                    });
+                    const sessionAccuracy = ((sessionCorrect / sessionAttempts.size) * 100).toFixed(1);
+                    html += '<div class="category-stats" style="background: #f5f5f5; padding: 1rem; border-radius: 5px;">';
+                    html += '<h3>Last Session Performance</h3>';
+                    html += '<ul>';
+                    html += `<li><strong>Questions Attempted:</strong> ${sessionAttempts.size}</li>`;
+                    html += `<li><strong>Correct Answers:</strong> ${sessionCorrect}</li>`;
+                    html += `<li><strong>Session Accuracy:</strong> ${sessionAccuracy}%</li>`;
+                    html += '</ul></div><br>';
+                }
+
+                // Overall Stats
+                html += '<h3>Overall Statistics</h3><ul>';
                 html += `<li><strong>Total Questions in Database:</strong> ${stats.totalQuestions}</li>`;
                 html += `<li><strong>Unique Questions Attempted:</strong> ${stats.uniqueQuestionsAttempted}</li>`;
                 html += `<li><strong>Correct:</strong> ${stats.correctAttempts}</li>`;
@@ -3452,26 +3473,27 @@
                 html += `<li><strong>Questions with Notes:</strong> ${stats.questionsWithNotes}</li>`;
                 html += '</ul>';
 
-                const generateDetailedStatsHtml = (title, detailedStats) => {
-                    let sectionHtml = '';
-                    if (Object.keys(detailedStats).length > 0) {
-                        sectionHtml += `<div class="category-stats"><h3>${title}</h3><ul>`;
-                        for (const key in detailedStats) {
-                            const item = detailedStats[key];
-                            const itemAccuracy = item.totalLastAttempts > 0 ? (item.correctLastAttempts / item.totalLastAttempts * 100).toFixed(1) : 0;
-                            const itemAvgTime = item.numAllAttempts > 0 ? (item.sumTimeAllAttempts / item.numAllAttempts).toFixed(1) : 0;
-                            sectionHtml += `<li><strong>${escapeHtml(key)}:</strong> ` +
-                                `${item.correctLastAttempts}/${item.totalLastAttempts} attempted questions correct on last try (${itemAccuracy}%) - ` +
-                                `Avg Time (all attempts for this ${title.split(' ')[2].toLowerCase()}): ${itemAvgTime}s</li>`;
-                        }
-                        sectionHtml += '</ul></div>';
-                    }
-                    return sectionHtml;
-                };
+                // Performance by Category (sorted by accuracy)
+                if (Object.keys(stats.byCategory).length > 0) {
+                    html += '<div class="category-stats"><h3>Performance by Category</h3><ul>';
+                    
+                    // Convert to array and sort by accuracy
+                    const sortedCategories = Object.entries(stats.byCategory)
+                        .map(([category, data]) => ({
+                            category,
+                            accuracy: data.totalLastAttempts > 0 ? (data.correctLastAttempts / data.totalLastAttempts * 100) : 0,
+                            ...data
+                        }))
+                        .sort((a, b) => b.accuracy - a.accuracy);
 
-                html += generateDetailedStatsHtml('Performance by Category', stats.byCategory);
-                html += generateDetailedStatsHtml('Performance by Provider', stats.byProvider);
-                html += generateDetailedStatsHtml('Performance by Year', stats.byYear);
+                    sortedCategories.forEach(item => {
+                        const avgTime = item.numAllAttempts > 0 ? (item.sumTimeAllAttempts / item.numAllAttempts).toFixed(1) : 0;
+                        html += `<li><strong>${escapeHtml(item.category)}:</strong> ` +
+                            `${item.correctLastAttempts}/${item.totalLastAttempts} correct (${item.accuracy.toFixed(1)}%) - ` +
+                            `Avg Time: ${avgTime}s</li>`;
+                    });
+                    html += '</ul></div>';
+                }
 
                 performanceStatsContent.innerHTML = html;
             }
