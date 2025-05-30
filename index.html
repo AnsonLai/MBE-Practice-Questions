@@ -3239,7 +3239,7 @@
 
                 // Set drawing properties based on current tool
                 if (currentTool === 'eraser') {
-                    annotationCtx.globalCompositeOperation = 'source-over';
+                    annotationCtx.globalCompositeOperation = 'destination-out';
                     // For eraser, draw a small circle on click
                     annotationCtx.beginPath();
                     annotationCtx.arc(lastX, lastY, eraserWidth / 2, 0, Math.PI * 2, false);
@@ -3306,7 +3306,7 @@
                         annotationCtx.lineWidth = eraserWidth;
                         annotationCtx.lineCap = 'round';
                         annotationCtx.lineJoin = 'round';
-                        annotationCtx.globalCompositeOperation = 'source-over';
+                        annotationCtx.globalCompositeOperation = 'destination-out';
                         break;
                 }
             }
