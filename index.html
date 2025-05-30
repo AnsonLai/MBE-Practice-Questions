@@ -1694,7 +1694,7 @@
             let lastY = 0;
             let penColor = '#0000FF';
             let penWidth = 2;
-            let highlighterColor = 'rgba(60, 255, 131, 0.02)';
+            let highlighterColor = 'rgba(60, 255, 131, 0.03)';
             let highlighterWidth = 15;
             let eraserWidth = 25;
 
@@ -3243,6 +3243,7 @@
                     // For eraser, draw a small circle on click
                     annotationCtx.beginPath();
                     annotationCtx.arc(lastX, lastY, eraserWidth / 2, 0, Math.PI * 2, false);
+                    annotationCtx.fillStyle = 'rgba(0,0,0,1)'; // Fully opaque black for hard erasing
                     annotationCtx.fill();
                 } else {
                     annotationCtx.globalCompositeOperation = 'source-over';
@@ -3255,12 +3256,19 @@
                 e.preventDefault();
                 const coords = getCoords(e);
 
-                annotationCtx.lineTo(coords.x, coords.y);
-                annotationCtx.stroke(); // Draws the segment
-
-                // Start a new path for the next segment to ensure continuous drawing
-                annotationCtx.beginPath();
-                annotationCtx.moveTo(coords.x, coords.y);
+                if (currentTool === 'eraser') {
+                    // For eraser, draw circles along the path
+                    annotationCtx.beginPath();
+                    annotationCtx.arc(coords.x, coords.y, eraserWidth / 2, 0, Math.PI * 2, false);
+                    annotationCtx.fillStyle = 'rgba(0,0,0,1)'; // Fully opaque black for hard erasing
+                    annotationCtx.fill();
+                } else {
+                    annotationCtx.lineTo(coords.x, coords.y);
+                    annotationCtx.stroke(); // Draws the segment
+                    // Start a new path for the next segment
+                    annotationCtx.beginPath();
+                    annotationCtx.moveTo(coords.x, coords.y);
+                }
 
                 // Update lastX, lastY for the next segment
                 [lastX, lastY] = [coords.x, coords.y];
@@ -3302,11 +3310,11 @@
                         break;
                     case 'eraser':
                         annotationCanvas.style.cursor = 'crosshair'; // Or a custom eraser cursor
-                        // lineWidth for eraser is effectively its "size"
                         annotationCtx.lineWidth = eraserWidth;
                         annotationCtx.lineCap = 'round';
                         annotationCtx.lineJoin = 'round';
                         annotationCtx.globalCompositeOperation = 'destination-out';
+                        annotationCtx.fillStyle = 'rgba(0,0,0,1)'; // Ensure eraser is fully opaque
                         break;
                 }
             }
