@@ -2522,7 +2522,7 @@
                 console.log('Rendering question:', question); // Temporary logging
 
                 // Group Introduction
-                if (question.group_id && question.group_id !== lastDisplayedGroupId) {
+                if (question.group_id) {
                     const group = quizData.groups.find(g => g.group_id === question.group_id);
                     if (group) {
                         groupIntroElement.innerHTML = `<h3>${escapeHtml(group.text || 'Question Group')}</h3><p>${escapeHtml(group.intro_text || '').replace(/\n/g, '<br>')}</p>`;
@@ -2535,14 +2535,12 @@
                         groupIntroElement.classList.remove('has-content');
                     }
                     lastDisplayedGroupId = question.group_id;
-                } else if (!question.group_id && lastDisplayedGroupId !== null) { 
+                } else if (!question.group_id) { 
                     // Current question has no group, and a group intro was previously displayed
                     groupIntroElement.innerHTML = `<h3></h3><p></p>`;
                     groupIntroElement.style.display = 'none';
                     groupIntroElement.classList.remove('has-content');
                     lastDisplayedGroupId = null;
-                }
-                // If question.group_id is the same as lastDisplayedGroupId, do nothing.
 
 
                 // Question Meta Tooltip
@@ -3084,7 +3082,7 @@
                 finalReviewArea.style.display = 'none';
                 finalReviewContent.innerHTML = '';
                 quizProgressElement.textContent = '';
-                groupIntroElement.innerHTML = '';
+                groupIntroElement.innerHTML = `<h3></h3><p></p>`;
                 groupIntroElement.style.display = 'none';
                 feedbackAreaElement.innerHTML = '';
                 feedbackAreaElement.style.display = 'none';
