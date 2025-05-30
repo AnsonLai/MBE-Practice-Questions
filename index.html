@@ -3296,9 +3296,9 @@
                         annotationCanvas.style.cursor = 'crosshair'; // Or a custom highlighter cursor
                         annotationCtx.strokeStyle = highlighterColor;
                         annotationCtx.lineWidth = highlighterWidth;
-                        annotationCtx.lineCap = 'butt'; // 'butt' can also work well for highlighters
-                        annotationCtx.lineJoin = 'round';
-                        annotationCtx.globalCompositeOperation = 'source-over'; // Or 'multiply' for blending
+                        annotationCtx.lineCap = 'square'; // Square cap for more uniform highlighting
+                        annotationCtx.lineJoin = 'miter'; // Sharp corners for consistent thickness
+                        annotationCtx.globalCompositeOperation = 'multiply'; // Better blending for highlights
                         break;
                     case 'eraser':
                         annotationCanvas.style.cursor = 'crosshair'; // Or a custom eraser cursor
