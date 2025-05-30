@@ -1124,6 +1124,11 @@
             opacity: 1 !important;
         }
 
+        /* Ensure group intro with content is always visible */
+        #current-group-intro.has-content {
+            display: block !important;
+        }
+
         /* Ensure group intro without drawn-on-canvas class stays hidden when empty */
         #current-group-intro:not(.drawn-on-canvas) {
             display: none !important;
@@ -2522,14 +2527,17 @@
                     if (group) {
                         groupIntroElement.innerHTML = `<h3>${escapeHtml(group.text || 'Question Group')}</h3><p>${escapeHtml(group.intro_text || '').replace(/\n/g, '<br>')}</p>`;
                         groupIntroElement.style.display = 'block';
+                        groupIntroElement.classList.add('has-content'); // Add class to indicate content exists
                     } else {
                         // Group not found, though group_id was present. Hide intro.
                         groupIntroElement.style.display = 'none';
+                        groupIntroElement.classList.remove('has-content');
                     }
                     lastDisplayedGroupId = question.group_id;
                 } else if (!question.group_id && lastDisplayedGroupId !== null) { 
                     // Current question has no group, and a group intro was previously displayed
                     groupIntroElement.style.display = 'none';
+                    groupIntroElement.classList.remove('has-content');
                     lastDisplayedGroupId = null;
                 }
                 // If question.group_id is the same as lastDisplayedGroupId, do nothing.
@@ -2561,8 +2569,9 @@
                 // Protective measure for display style if annotation is not active
                 if (!isAnnotationActive) {
                     questionTextElement.style.display = ''; // Reset to default (typically block for h2)
-                    if (groupIntroElement.style.display !== 'none') { // Only change if it's supposed to be visible
-                        groupIntroElement.style.display = ''; // Reset to default (typically block)
+                    // For group intro, only reset style if it has content, otherwise let CSS rules handle hiding
+                    if (groupIntroElement.classList.contains('has-content')) {
+                        groupIntroElement.style.display = 'block'; // Ensure it's visible if it has content
                     }
                 }
 
