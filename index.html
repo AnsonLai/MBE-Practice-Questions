@@ -1542,10 +1542,9 @@
                     </span>
                 </div>
 
-                <div id="current-group-intro" class="question-group-intro" style="display:none;"></div>
-
                 <div id="annotation-area">
                     <!-- Meta display removed from here -->
+                    <div id="current-group-intro" class="question-group-intro" style="display:none;"></div>
                     <h2 id="question-text"></h2>
                     <form id="choices-form"></form>
                     <div id="annotation-spacer"></div>
@@ -2649,11 +2648,19 @@
                 // resizeCanvas will also handle drawing text if annotation is active
                 if (isAnnotationActive) {
                     questionTextElement.classList.add('drawn-on-canvas');
-                    // Only add drawn-on-canvas class to group intro if it has content and is visible
-                    if (groupIntroElement.style.display !== 'none' && groupIntroElement.innerHTML.trim() !== '') {
-                        groupIntroElement.classList.add('drawn-on-canvas');
-                    }
-                    resizeCanvas();
+                    // Always add drawn-on-canvas class to group intro when annotation is active
+                    groupIntroElement.classList.add('drawn-on-canvas');
+                    
+                    // Ensure proper positioning for both elements
+                    questionTextElement.style.position = 'relative';
+                    questionTextElement.style.zIndex = '1';
+                    groupIntroElement.style.position = 'relative';
+                    groupIntroElement.style.zIndex = '1';
+                    
+                    // Resize canvas to cover both elements properly
+                    requestAnimationFrame(() => {
+                        resizeCanvas();
+                    });
                 } else {
                     clearCanvas(); // Ensure canvas is clear if not active
                 }
@@ -3106,9 +3113,12 @@
                 console.log('Quiz state reset.');
             }
 
-            // --- Annotation Functions --- (all unchanged)
+            // --- Annotation Functions --- (updated for better group intro coverage)
             function resizeCanvas() {
                 if (!annotationArea || !annotationCanvas) return;
+
+                // Force a reflow to ensure accurate measurements after any content changes
+                annotationArea.offsetHeight;
 
                 const dpr = window.devicePixelRatio || 1;
                 const areaWidth = annotationArea.clientWidth;
@@ -3122,10 +3132,11 @@
                 annotationCanvas.style.width = `${areaWidth}px`;
                 annotationCanvas.style.height = `${areaHeight}px`;
                 
-                // Set canvas position
+                // Set canvas position to cover the entire annotation area
                 annotationCanvas.style.position = 'absolute';
                 annotationCanvas.style.top = '0px';
                 annotationCanvas.style.left = '0px';
+                annotationCanvas.style.zIndex = '10';
 
                 // Scale context for DPR
                 annotationCtx.scale(dpr, dpr);
@@ -3146,13 +3157,21 @@
                 toggleAnnotationButton.textContent = 'View Question Text';
                 questionTextElement.classList.add('drawn-on-canvas');
                 
-                // Only add drawn-on-canvas class to group intro if it has content and is visible
-                if (groupIntroElement.style.display !== 'none' && groupIntroElement.innerHTML.trim() !== '') {
-                    groupIntroElement.classList.add('drawn-on-canvas');
-                }
+                // Always add drawn-on-canvas class to group intro when annotation is active
+                // This ensures it's properly covered by the canvas
+                groupIntroElement.classList.add('drawn-on-canvas');
 
-                resizeCanvas();
-                setTool(currentTool);
+                // Ensure both elements remain visible behind the canvas
+                questionTextElement.style.position = 'relative';
+                questionTextElement.style.zIndex = '1';
+                groupIntroElement.style.position = 'relative';
+                groupIntroElement.style.zIndex = '1';
+
+                // Wait for next frame to ensure DOM updates are complete before resizing
+                requestAnimationFrame(() => {
+                    resizeCanvas();
+                    setTool(currentTool);
+                });
             }
             function deactivateAnnotationMode() {
                 isAnnotationActive = false;
@@ -3163,6 +3182,12 @@
                 toggleAnnotationButton.textContent = 'Annotate Question';
                 questionTextElement.classList.remove('drawn-on-canvas');
                 groupIntroElement.classList.remove('drawn-on-canvas');
+                
+                // Reset positioning styles
+                questionTextElement.style.position = '';
+                questionTextElement.style.zIndex = '';
+                groupIntroElement.style.position = '';
+                groupIntroElement.style.zIndex = '';
             }
             function toggleAnnotationMode() {
                 if (isAnnotationActive) {
