@@ -2530,6 +2530,7 @@
                         groupIntroElement.classList.add('has-content'); // Add class to indicate content exists
                     } else {
                         // Group not found, though group_id was present. Hide intro.
+                        groupIntroElement.innerHTML = `<h3></h3><p></p>`;
                         groupIntroElement.style.display = 'none';
                         groupIntroElement.classList.remove('has-content');
                     }
