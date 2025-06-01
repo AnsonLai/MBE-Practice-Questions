@@ -1952,7 +1952,6 @@
                 });
             }
 
-
             document.getElementById('clear-attempts-filter').addEventListener('click', () => {
                 document.querySelector('input[name="filter-attempts"][value="all"]').checked = true;
             });
@@ -3210,9 +3209,9 @@
                 jsonFileElement.value = '';
 
                 populateFilterOptions(); // Will use current quizData
-                document.querySelector('input[name="filter-attempts"][value="all"]').checked = true;
+                document.querySelector('input[name="filter-attempts"][value="unattempted"]').checked = true;
                 document.querySelector('input[name="filter-notes"][value="all"]').checked = true;
-                filterScrambleCheckbox.checked = false;
+                filterScrambleCheckbox.checked = true;
 
                 deactivateAnnotationMode();
                 clearCanvas();
