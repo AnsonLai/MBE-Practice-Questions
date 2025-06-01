@@ -5,6 +5,8 @@
       "group_id": "15dc7ab9-1716-4154-9b08-d884a327afcc",
       "question_text": "What is the holding in Palsgraf v. Long Island Railroad Co.?",
       "category": "Torts",
+      "sub_category": "Negligence",
+      "category_notes": "rare, don't worry about studying",
       "source": {
         "name": "Barbri Mock Exam 1",
         "provider": "Barbri",
@@ -28,6 +30,8 @@
       "group_id": "15dc7ab9-1716-4154-9b08-d884a327afcc",
       "question_text": "Applying Palsgraf, which of the following is true?",
       "category": "Torts",
+      "sub_category": "Intentional torts",
+      "category_notes": "rare",
       "source": {
         "name": "Barbri Mock Exam 1",
         "provider": "Barbri",
@@ -60,6 +64,8 @@
       "group_id": null,
       "question_text": "Under the Federal Rules of Evidence, which of the following constitutes hearsay?",
       "category": "Evidence",
+      "sub_category": "Presentation of evidence",
+      "category_notes": "very common, consider checking page 34",
       "source": {
         "name": "NCBE MBE Study Aid",
         "provider": "NCBE",
