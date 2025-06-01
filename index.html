@@ -1436,9 +1436,9 @@
         </div>
         <div class="sidebar-section">
             <h3>Attempts</h3>
-            <label><input type="radio" name="filter-attempts" value="all" checked> Show All Questions</label>
+            <label><input type="radio" name="filter-attempts" value="all"> Show All Questions</label>
             <label><input type="radio" name="filter-attempts" value="attempted"> Questions with Attempts</label>
-            <label><input type="radio" name="filter-attempts" value="unattempted"> Questions without Attempts</label>
+            <label><input type="radio" name="filter-attempts" value="unattempted" checked> Questions without Attempts</label>
             <label><input type="radio" name="filter-attempts" value="incorrect"> Questions with Incorrect Attempts (Any)</label>
             <label><input type="radio" name="filter-attempts" value="incorrect_only"> Show Incorrectly Answered Only (Last Attempt)</label>
             <button id="clear-attempts-filter" class="clear-filter-button">Reset Attempts Filter</button>
@@ -1454,17 +1454,17 @@
 
         <div class="sidebar-section">
             <h3>Order</h3>
-            <label><input type="checkbox" id="filter-scramble"> Scramble Question Order</label>
+            <label><input type="checkbox" id="filter-scramble" checked> Scramble Question Order</label>
         </div>
         <div class="sidebar-section">
             <h3>Timer Settings</h3>
             <div class="setting-item">
                 <label for="session-time-limit">Session Time Limit (minutes):</label>
-                <input type="number" id="session-time-limit" min="1" max="240" value="60" step="1">
+                <input type="number" id="session-time-limit" min="1" max="240" value="30" step="1">
             </div>
             <div class="setting-item">
                 <label for="question-limit">Number of Questions (Sprint):</label>
-                <input type="number" id="question-limit" min="1" max="200" value="50" step="1">
+                <input type="number" id="question-limit" min="1" max="200" value="20" step="1">
             </div>
             <div class="setting-item">
                 <label><input type="checkbox" id="enable-session-timer"> Enable Session Timer</label>
@@ -1723,6 +1723,79 @@
 
             // --- Dexie Interaction Functions ---
 
+            async function saveCurrentSettingsToDB() {
+                try {
+                    const userSettings = {
+                        attempts: document.querySelector('input[name="filter-attempts"]:checked')?.value,
+                        notes: document.querySelector('input[name="filter-notes"]:checked')?.value,
+                        scramble: document.getElementById('filter-scramble')?.checked,
+                        sessionTimeLimit: document.getElementById('session-time-limit')?.value,
+                        questionLimit: document.getElementById('question-limit')?.value,
+                        enableSessionTimer: document.getElementById('enable-session-timer')?.checked,
+                        enableQuestionTimer: document.getElementById('enable-question-timer')?.checked,
+                        enableStopwatch: document.getElementById('enable-stopwatch')?.checked,
+                        questionTimeLimit: document.getElementById('question-time-limit')?.value,
+                        hideAnswer: document.getElementById('setting-hide-answer')?.checked,
+                        categories: Array.from(document.getElementById('filter-categories-list').querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value),
+                        providers: Array.from(document.getElementById('filter-providers-list').querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value),
+                    };
+                    await db.appState.put({ key: 'userQuizSettings', value: userSettings });
+                    console.log('User quiz settings saved to DexieDB.');
+                } catch (error) {
+                    console.error('Error saving user quiz settings to DexieDB:', error);
+                }
+            }
+
+            async function loadUserSettingsFromDB() {
+                try {
+                    const savedSettings = await db.appState.get('userQuizSettings');
+                    if (savedSettings && savedSettings.value) {
+                        const settings = savedSettings.value;
+                        console.log('Loading user quiz settings from DexieDB:', settings);
+
+                        // Radio buttons
+                        const attemptsRadio = document.querySelector(`input[name="filter-attempts"][value="${settings.attempts}"]`);
+                        if (attemptsRadio) attemptsRadio.checked = true;
+                        const notesRadio = document.querySelector(`input[name="filter-notes"][value="${settings.notes}"]`);
+                        if (notesRadio) notesRadio.checked = true;
+
+                        // Checkboxes
+                        if (document.getElementById('filter-scramble') && typeof settings.scramble !== 'undefined') document.getElementById('filter-scramble').checked = settings.scramble;
+                        if (document.getElementById('enable-session-timer') && typeof settings.enableSessionTimer !== 'undefined') document.getElementById('enable-session-timer').checked = settings.enableSessionTimer;
+                        if (document.getElementById('enable-question-timer') && typeof settings.enableQuestionTimer !== 'undefined') document.getElementById('enable-question-timer').checked = settings.enableQuestionTimer;
+                        if (document.getElementById('enable-stopwatch') && typeof settings.enableStopwatch !== 'undefined') document.getElementById('enable-stopwatch').checked = settings.enableStopwatch;
+                        if (document.getElementById('setting-hide-answer') && typeof settings.hideAnswer !== 'undefined') document.getElementById('setting-hide-answer').checked = settings.hideAnswer;
+
+                        // Number inputs
+                        if (document.getElementById('session-time-limit') && typeof settings.sessionTimeLimit !== 'undefined') document.getElementById('session-time-limit').value = settings.sessionTimeLimit;
+                        if (document.getElementById('question-limit') && typeof settings.questionLimit !== 'undefined') document.getElementById('question-limit').value = settings.questionLimit;
+                        if (document.getElementById('question-time-limit') && typeof settings.questionTimeLimit !== 'undefined') document.getElementById('question-time-limit').value = settings.questionTimeLimit;
+
+                        // Dynamic checkboxes (categories and providers)
+                        // These rely on populateCheckboxList having been called first.
+                        if (settings.categories && Array.isArray(settings.categories)) {
+                            document.getElementById('filter-categories-list').querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                                if (settings.categories.includes(cb.value)) {
+                                    cb.checked = true;
+                                }
+                            });
+                        }
+                        if (settings.providers && Array.isArray(settings.providers)) {
+                            document.getElementById('filter-providers-list').querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                                if (settings.providers.includes(cb.value)) {
+                                    cb.checked = true;
+                                }
+                            });
+                        }
+                        console.log('User quiz settings applied to UI.');
+                    } else {
+                        console.log('No user quiz settings found in DexieDB.');
+                    }
+                } catch (error) {
+                    console.error('Error loading user quiz settings from DexieDB:', error);
+                }
+            }
+
             async function loadQuizDataFromDB() {
                 try {
                     const questions = await db.questions.toArray();
@@ -1816,6 +1889,30 @@
             // --- Event Listeners ---
             loadJsonButton.addEventListener('click', handleLoadJson);
             saveJsonButton.addEventListener('click', handleSaveJson);
+
+            // Event listeners for saving settings automatically
+            document.querySelectorAll('input[name="filter-attempts"]').forEach(radio => radio.addEventListener('change', saveCurrentSettingsToDB));
+            document.querySelectorAll('input[name="filter-notes"]').forEach(radio => radio.addEventListener('change', saveCurrentSettingsToDB));
+            document.getElementById('filter-scramble')?.addEventListener('change', saveCurrentSettingsToDB);
+            document.getElementById('session-time-limit')?.addEventListener('change', saveCurrentSettingsToDB);
+            document.getElementById('question-limit')?.addEventListener('change', saveCurrentSettingsToDB);
+            document.getElementById('enable-session-timer')?.addEventListener('change', saveCurrentSettingsToDB);
+            document.getElementById('enable-question-timer')?.addEventListener('change', saveCurrentSettingsToDB);
+            document.getElementById('enable-stopwatch')?.addEventListener('change', saveCurrentSettingsToDB);
+            document.getElementById('question-time-limit')?.addEventListener('change', saveCurrentSettingsToDB);
+            document.getElementById('setting-hide-answer')?.addEventListener('change', saveCurrentSettingsToDB);
+
+            // Event delegation for dynamic checkboxes
+            filterCategoriesList.addEventListener('change', (event) => {
+                if (event.target.type === 'checkbox') {
+                    saveCurrentSettingsToDB();
+                }
+            });
+            filterProvidersList.addEventListener('change', (event) => {
+                if (event.target.type === 'checkbox') {
+                    saveCurrentSettingsToDB();
+                }
+            });
             submitAnswerButton.addEventListener('click', handleSubmitAnswer);
             nextQuestionButton.addEventListener('click', handleNextQuestion);
             sidebarToggleButton.addEventListener('click', toggleSidebar);
@@ -2486,6 +2583,7 @@
                     await displayNextQuestionInternal();
                     quizProgressElement.textContent = `Question 1 of ${masterQuestionList.length}`;
                     closeSidebar();
+                    await saveCurrentSettingsToDB(); // Save settings after successful start
                 } else {
                     quizAreaElement.style.display = 'none';
                     endOfQuizMessageElement.innerHTML = `<h2>No Questions Found</h2><p>No questions matched the selected filter criteria.</p>`;
@@ -2936,6 +3034,7 @@
                     // Removed saveToLocalStorage()
                     displayFinalReviewScreen(); // Call unconditionally
                     await clearActiveSessionState(); // Quiz ended
+                    await saveCurrentSettingsToDB(); // Save settings
                     return;
                 }
 
@@ -2985,6 +3084,7 @@
                     // Removed saveToLocalStorage()
                     displayFinalReviewScreen(); // Call unconditionally
                     await clearActiveSessionState(); // Quiz ended
+                    await saveCurrentSettingsToDB(); // Save settings
                 }
             }
 
@@ -3610,7 +3710,7 @@
                 // applyFiltersAndStartQuiz will reset necessary states like currentQuestionIndex,
                 // timers, and repopulate masterQuestionList based on current sidebar filters.
                 // It also handles displaying the quiz area.
-                applyFiltersAndStartQuiz();
+                applyFiltersAndStartQuiz(); // This will call saveCurrentSettingsToDB
             }
             async function handleBackToSettings() {
                 console.log("Returning to settings.");
@@ -3628,10 +3728,15 @@
             async function initializeApp() {
                 registerServiceWorker();
                 const loadedFromDB = await loadQuizDataFromDB();
+                populateFilterOptions(); // Populate dynamic filter options first
+                await loadUserSettingsFromDB(); // Then load and apply saved settings
+
                 let sessionRestored = false;
 
                 if (loadedFromDB) {
                     // Attempt to load and restore an active session
+                    // Note: Session restoration might override some of the general user settings loaded above,
+                    // especially for filters, which is the intended behavior.
                     const savedMasterList = await loadAppState('activeMasterQuestionList');
                     const savedIndex = await loadAppState('activeCurrentQuestionIndex');
                     const savedFilters = await loadAppState('activeFilters');
@@ -3705,17 +3810,20 @@
                     } else {
                         console.log("No active session found or session data invalid. Initializing normally.");
                         resetQuizState(true); // Resets UI, keeps quizData loaded from DB
-                        populateFilterOptions();
+                        // populateFilterOptions(); // Already called above
                         saveJsonButton.disabled = false;
                         if (performanceButton) {
                             performanceButton.disabled = !(quizData.questions && quizData.questions.length > 0);
                         }
-                        alert("Loaded previous quiz progress from the browser database. Adjust settings and click 'Apply Filters & Start Quiz' to begin.");
+                        // Alert might be redundant if settings are visibly loaded. Consider removing or rephrasing.
+                        // alert("Loaded previous quiz progress from the browser database. Adjust settings and click 'Apply Filters & Start Quiz' to begin.");
+                        console.log("Data loaded from DB. User settings (if any) applied. No active session restored, or session data was invalid.");
                     }
                 } else {
                     resetQuizState(false); // Full reset, quizData will be empty
-                    populateFilterOptions(); // Still populate, might show "load data" messages
+                    // populateFilterOptions(); // Already called above
                     if (performanceButton) performanceButton.disabled = true;
+                    console.log("No data in DB. UI reset. User settings (if any) applied.");
                 }
 
                 if (!sessionRestored) { // If no session was restored, do default timer/UI setup
