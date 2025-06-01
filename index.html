@@ -3143,7 +3143,7 @@
                 document.querySelector(`input[name="filter-notes"][value="${filters.notes || 'all'}"]`).checked = true;
 
                 // Restore checkboxes
-                filterScrambleCheckbox.checked = filters.scramble || false;
+                filterScrambleCheckbox.checked = filters.scramble || true;
 
                 // Helper to check checkboxes in a list
                 const restoreCheckboxList = (container, selectedItems) => {
