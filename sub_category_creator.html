@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Sub-Category Editor (v4)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 2em;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        #main-container {
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .control-box {
+            background-color: #fff;
+            padding: 1.5em;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5em;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.5em;
+        }
+
+        input[type="password"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        #start-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            width: 100%;
+        }
+
+        #start-button:disabled {
+            background-color: #a0cffc;
+            cursor: not-allowed;
+        }
+
+        #drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #aaa;
+            font-size: 1.2em;
+            transition: border-color 0.3s, color 0.3s;
+        }
+
+        #drop-zone.dragover {
+            border-color: #007bff;
+            color: #007bff;
+        }
+
+        #status {
+            margin-top: 1em;
+            font-style: italic;
+            color: #555;
+            text-align: center;
+        }
+
+        #output-container {
+            margin-top: 2em;
+        }
+
+        #output {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 1em;
+            border-radius: 8px;
+            max-height: 600px;
+            overflow-y: scroll;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="main-container">
+        <h1>JSON Sub-Category Editor</h1>
+        <p>This tool will find the first question with a blank sub-category and start processing from there.</p>
+
+        <div id="step1" class="control-box">
+            <label for="api-key">1. Enter your Gemini API Key</label>
+            <input type="password" id="api-key" placeholder="Your API key is kept private in your browser">
+        </div>
+
+        <div id="step2" class="control-box">
+            <label>2. Drag & Drop JSON File</label>
+            <div id="drop-zone">
+                <p>Drop JSON file here</p>
+            </div>
+        </div>
+
+        <div id="step3" class="control-box">
+            <label>3. Perform Actions on Loaded File</label>
+            <div style="display: flex; gap: 10px;">
+                <button id="start-button" disabled style="flex-grow: 1;">Start or Resume Processing</button>
+                <button id="clear-button" disabled title="Clear all sub-categories and notes from the loaded file."
+                    style="background-color: #dc3545;">Clear Data</button>
+            </div>
+        </div>
+
+        <div id="status">Ready for a file.</div>
+
+        <div id="output-container">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Edited JSON Output:</h2>
+                <button id="copy-button" title="Copy JSON to clipboard"
+                    style="padding: 5px 10px; cursor: pointer;">Copy</button>
+            </div>
+            <pre id="output"></pre>
+        </div>
+
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const outputElement = document.getElementById('output');
+        const apiKeyInput = document.getElementById('api-key');
+        const statusElement = document.getElementById('status');
+        const startButton = document.getElementById('start-button');
+        const clearButton = document.getElementById('clear-button');
+
+        let loadedData = null;
+
+        const mbe_categories_with_subcategories = { "Civil Procedure": ["Jurisdiction: Subject Matter & Personal", "Venue, Transfer & Forum Non Conveniens", "Service of Process & Law Applied by Federal Courts (Erie Doctrine)", "Pleadings, Rule 11 & Joinder (incl. Class Actions)", "Discovery, Disclosure & Pretrial Conferences/Orders", "Injunctions & Adjudication Without Trial (Summary Judgment, Dismissals)", "Jury Trials (Right to, Selection, Instructions)", "Motions (Pretrial, Judgment as a Matter of Law, Post-trial)", "Verdicts, Judgments & Preclusion (Claim & Issue)", "Appealability & Review", "Other Civil Procedure Issues"], "Constitutional Law": ["The Nature of Judicial Review (Standing, Ripeness, Mootness, Political Questions)", "Separation of Powers: Congressional Powers (Commerce, Taxing, Spending)", "Separation of Powers: Presidential Powers & Interbranch Relations", "Federalism (Supremacy, Preemption, Dormant Commerce Clause, Intergovernmental Immunities)", "State Action Doctrine", "Due Process (Procedural & Substantive)", "Equal Protection", "First Amendment: Freedom of Speech & Press", "First Amendment: Freedom of Religion (Establishment & Free Exercise) & Association", "Takings Clause & Contracts Clause", "Other Individual Rights (Privileges & Immunities, Bills of Attainder, Ex Post Facto Laws)", "Eleventh Amendment & State Sovereign Immunity", "Other Constitutional Law Issues"], "Contracts and Sales": ["Contract Formation: Mutual Assent (Offer & Acceptance, Implied-in-Fact)", "Contract Formation: Consideration & Enforceable Obligations without Consideration (Promissory Estoppel, Restitution)", "Defenses to Contract Enforceability (Incapacity, Duress, Mistake, Fraud, Illegality, Statute of Frauds)", "Contract Content & Meaning (Parol Evidence, Interpretation, Omitted/Implied Terms)", "UCC Article 2: Formation, Terms, Warranties & Risk of Loss", "Conditions (Express & Constructive) & Excuses for Non-Performance (Impossibility, Impracticability, Frustration)", "Breach of Contract (Material/Partial, Anticipatory Repudiation) & Obligations of Good Faith", "Contract Remedies: Monetary Damages (Expectation, Consequential, Incidental, Liquidated)", "Contract Remedies: Equitable Relief & Restitution (Specific Performance, Rescission, Reformation)", "Third-Party Rights (Beneficiaries, Assignment of Rights, Delegation of Duties)", "Discharge of Contractual Duties (Accord & Satisfaction, Substituted Contract, Novation, Rescission, Release)", "Modification of Contracts", "Other Contracts & Sales Issues"], "Criminal Law and Procedure": ["Homicide (Intended Killings, Unintended Killings, Felony Murder)", "Other Crimes Against Persons & Property (Theft, Robbery, Burglary, Assault, Battery, Rape, Arson, Possession)", "Inchoate Offenses (Attempt, Conspiracy, Solicitation) & Parties to Crime", "General Principles of Criminal Liability (Actus Reus, Mens Rea, Strict Liability, Causation)", "Defenses to Crimes (Insanity, Intoxication, Justification, Excuse, Mistake)", "Fourth Amendment: Arrest, Search & Seizure", "Fifth Amendment: Confessions/Self-Incrimination (Miranda), Double Jeopardy, Due Process", "Sixth Amendment: Right to Counsel, Fair Trial (Speedy Trial, Jury, Confrontation), Identification Procedures", "Pre-Trial Procedures (Bail, Grand Juries) & Guilty Pleas", "Sentencing, Punishment (Eighth Amendment - Cruel & Unusual) & Appeals", "Burdens of Proof & Persuasion", "Jurisdiction in Criminal Cases", "Other Criminal Law & Procedure Issues"], "Evidence": ["Presentation of Evidence: Introduction, Objections, Witness Competency & Examination", "Relevance & Reasons for Excluding Relevant Evidence (Unfair Prejudice, Confusion, Waste of Time)", "Authentication & Identification (incl. Best Evidence Rule for Writings, Recordings, Photos)", "Character Evidence, Habit & Similar Acts/Events", "Expert Testimony (Qualifications, Bases, Reliability, Subject Matter)", "Privileges (Spousal, Attorney-Client, Physician/Psychotherapist) & Other Policy Exclusions (Remedial Measures, Compromise)", "Hearsay: Definition & Non-Hearsay (Prior Statements by Witness, Statements Attributable to Party-Opponent)", "Hearsay Exceptions: Availability Immaterial (Present Sense Impression, Excited Utterance, State of Mind, Medical Diagnosis, Business Records, Public Records)", "Hearsay Exceptions: Declarant Unavailable (Former Testimony, Statements Against Interest, Dying Declarations, Forfeiture)", "Confrontation Clause & Its Impact on Hearsay)", "Impeachment, Contradiction & Rehabilitation of Witnesses", "Judicial Notice & Presumptions", "Other Evidence Issues"], "Real Property": ["Present Estates & Future Interests (incl. Rules Affecting These Interests like RAP)", "Co-tenancy (Tenancy in Common, Joint Tenancy) & Rights/Obligations of Co-tenants", "Landlord-Tenant Law (Types of Tenancies, Possession, Rent, Transfers, Termination, Habitability)", "Rights in Real Property: Easements, Profits & Licenses (Creation, Scope, Termination)", "Rights in Real Property: Restrictive Covenants & Equitable Servitudes (Nature, Creation, Transfer, Termination)", "Zoning, Land Use Regulation & Fixtures (incl. Fair Housing)", "Real Estate Contracts: Formation, Construction & Statute of Frauds)", "Real Estate Contracts: Marketability of Title, Risk of Loss (Equitable Conversion) & Remedies for Breach", "Mortgages/Security Devices: Types, Security Relationships & Rights Prior to Foreclosure", "Mortgages/Security Devices: Transfers by Mortgagor/Mortgagee, Discharge & Foreclosure", "Titles: Adverse Possession & Transfer by Deed (Requirements, Types of Deeds)", "Title Assurance Systems: Recording Acts (Types, Chain of Title) & Title Insurance", "Other Real Property Issues (Including Conflicts of Law, Transfer by Will/Operation of Law)"], "Torts": ["Intentional Torts (to Person & Property, and Defenses)", "Negligence - General Duty & Standard of Care (Reasonably Prudent Person, Special Classes)", "Negligence - Special Duty Rules (Failure to Act, Owners/Occupiers of Land, Statutory Standards)", "Negligence - Breach of Duty & Causation (Actual & Proximate Cause, Res Ipsa Loquitur, Multiple Causes)", "Negligence - Damages (incl. Pure Economic Loss, Emotional Distress) & Defenses (Contributory/Comparative Negligence, Assumption of Risk)", "Vicarious Liability & Joint Tortfeasor Liability (incl. Apportionment)", "Strict Liability (Common Law - Abnormally Dangerous Activities, Animals) & Nuisance", "Products Liability (Theories: Strict Liability, Negligence, Warranty; Defenses)", "Defamation & Invasion of Privacy (Defenses & Constitutional Limitations)", "Misrepresentation (Intentional/Fraudulent & Negligent)", "Intentional Interference with Business Relations", "Other Torts Issues"] };
+
+        function handleFileDrop(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    loadedData = JSON.parse(e.target.result);
+                    outputElement.textContent = JSON.stringify(loadedData, null, 2);
+                    statusElement.textContent = `File "${file.name}" loaded. Click "Start Processing" to begin.`;
+                    startButton.disabled = false;
+                    clearButton.disabled = false;
+                } catch (error) {
+                    statusElement.textContent = `Error parsing JSON: ${error.message}`;
+                    outputElement.textContent = '';
+                    loadedData = null;
+                    startButton.disabled = true;
+                    clearButton.disabled = true;
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        dropZone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = event.dataTransfer.files[0];
+            if (file) {
+                handleFileDrop(file);
+            }
+        });
+
+        startButton.addEventListener('click', () => {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                alert("Please enter your Gemini API Key before processing.");
+                return;
+            }
+            if (!loadedData) {
+                alert("Please drop a JSON file first.");
+                return;
+            }
+
+            // --- NEW LOGIC: Find the first unprocessed question ---
+            const questions = loadedData.questions;
+            const firstUnprocessedIndex = questions.findIndex(q => !q.sub_category || q.sub_category.trim() === "");
+
+            if (firstUnprocessedIndex === -1) {
+                statusElement.textContent = "All questions appear to have a sub-category. Nothing to process.";
+                alert("Processing complete! All questions already have a sub-category.");
+                return;
+            }
+
+            startButton.disabled = true;
+            statusElement.textContent = `Found first blank sub-category at question ${firstUnprocessedIndex + 1}. Starting process...`;
+
+            // Start processing from the found index
+            processDataInBatches(apiKey, firstUnprocessedIndex);
+        });
+
+        clearButton.addEventListener('click', () => {
+            if (!loadedData || !loadedData.questions) {
+                alert("No data loaded to clear.");
+                return;
+            }
+
+            if (confirm("Are you sure you want to ERASE all existing sub-category and category_notes data? This action cannot be undone.")) {
+                loadedData.questions.forEach(q => {
+                    q.sub_category = "";
+                    q.category_notes = "";
+                });
+
+                outputElement.textContent = JSON.stringify(loadedData, null, 2);
+                statusElement.textContent = "All sub-categories and notes have been cleared from the data.";
+                alert("Data cleared successfully.");
+            }
+        });
+
+        async function getSubCategoryFromAI(apiKey, category, combinedText) {
+            const MODEL_ID = "gemini-2.0-flash-lite";
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${apiKey}`;
+
+            const prompt = `
+You are an expert legal analyst specializing in the US Multi-state Bar Exam (MBE). Your task is to categorize a given MBE question into a specific sub-category based on a provided list.
+
+The parent category is: "${category}"
+
+The available sub-categories for "${category}" are:
+${mbe_categories_with_subcategories[category].map(c => `- "${c}"`).join('\n')}
+
+Analyze the following question text and respond with ONLY the single, most appropriate sub-category name from the list above. Do not add any extra explanation, formatting, or text. Your entire response must be just the sub-category name.
+
+Question Text:
+---
+${combinedText}
+---
+            `;
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "text/plain",
+                }
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.json();
+                    throw new Error(`API Error (${response.status}): ${errorBody.error.message}`);
+                }
+
+                const responseData = await response.json();
+                return responseData.candidates[0].content.parts[0].text.trim();
+
+            } catch (error) {
+                console.error(error);
+                statusElement.textContent = `Error: ${error.message}`;
+                return null;
+            }
+        }
+
+        async function processDataInBatches(apiKey, startIndex = 0) {
+            const batchSize = 1000;
+            const questions = loadedData.questions;
+            const groups = loadedData.groups || {};
+            const endIndex = Math.min(startIndex + batchSize, questions.length);
+
+            for (let i = startIndex; i < endIndex; i++) {
+                const question = questions[i];
+                // Skip if question somehow already has a sub-category
+                if (question.sub_category && question.sub_category.trim() !== "") {
+                    continue;
+                }
+                statusElement.textContent = `Processing question ${i + 1} of ${questions.length}...`;
+
+                let combinedText = question.question_text;
+                if (question.group_id && groups[question.group_id]) {
+                    combinedText = `${groups[question.group_id].text}\n\n---\n\n${combinedText}`;
+                }
+
+                const llmSuggestion = await getSubCategoryFromAI(apiKey, question.category, combinedText);
+
+                if (llmSuggestion === null) {
+                    statusElement.textContent = `Processing failed at question ${i + 1}. Please check the console and your API key, then try again.`;
+                    startButton.disabled = false;
+                    return;
+                }
+
+                const validSubcategories = mbe_categories_with_subcategories[question.category] || [];
+                if (validSubcategories.includes(llmSuggestion)) {
+                    question.sub_category = llmSuggestion;
+                } else {
+                    const otherCategory = validSubcategories.find(c => c.startsWith("Other")) || "Error: No Match Found";
+                    question.sub_category = otherCategory;
+                    console.warn(`Mismatch for QID ${question.question_id || i + 1}. AI suggested: "${llmSuggestion}". Fell back to: "${otherCategory}"`);
+                }
+
+                question.category_notes = "";
+                outputElement.textContent = JSON.stringify(loadedData, null, 2);
+            }
+
+            const nextUnprocessedIndex = questions.findIndex((q, index) => index >= endIndex && (!q.sub_category || q.sub_category.trim() === ""));
+
+            if (nextUnprocessedIndex !== -1) {
+                const continueProcessing = confirm(`Processed a batch ending at question ${endIndex}. Continue to the next unprocessed question?`);
+                if (continueProcessing) {
+                    await processDataInBatches(apiKey, nextUnprocessedIndex);
+                } else {
+                    statusElement.textContent = "Processing paused by user.";
+                    startButton.disabled = false;
+                }
+            } else {
+                statusElement.textContent = "All questions processed successfully!";
+                startButton.disabled = false;
+            }
+        }
+
+        const copyButton = document.getElementById('copy-button');
+
+        copyButton.addEventListener('click', () => {
+            const outputText = outputElement.textContent;
+
+            if (outputText && outputText.trim() !== "") {
+                navigator.clipboard.writeText(outputText).then(() => {
+                    // Provide user feedback on success
+                    copyButton.textContent = 'Copied!';
+                    statusElement.textContent = 'Output JSON copied to clipboard.';
+                    setTimeout(() => {
+                        copyButton.textContent = 'Copy';
+                    }, 2000); // Revert button text after 2 seconds
+                }).catch(err => {
+                    // Handle potential errors
+                    console.error('Failed to copy text: ', err);
+                    alert('Could not copy text to clipboard. See console for details.');
+                });
+            } else {
+                alert('There is no output to copy yet.');
+            }
+        });
+
+    </script>
+</body>
+
+</html>

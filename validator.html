@@ -166,6 +166,93 @@
             "Contracts and Sales", "Constitutional Law", "Criminal Law and Procedure",
             "Civil Procedure", "Evidence", "Real Property", "Torts",
         ];
+        
+        const mbe_categories_with_subcategories = {
+            "Civil Procedure": [
+                "Jurisdiction: Subject Matter & Personal", "Venue, Transfer & Forum Non Conveniens",
+                "Service of Process & Law Applied by Federal Courts (Erie Doctrine)",
+                "Pleadings, Rule 11 & Joinder (incl. Class Actions)", "Discovery, Disclosure & Pretrial Conferences/Orders",
+                "Injunctions & Adjudication Without Trial (Summary Judgment, Dismissals)", "Jury Trials (Right to, Selection, Instructions)",
+                "Motions (Pretrial, Judgment as a Matter of Law, Post-trial)", "Verdicts, Judgments & Preclusion (Claim & Issue)",
+                "Appealability & Review", "Other Civil Procedure Issues"
+            ],
+            "Constitutional Law": [
+                "The Nature of Judicial Review (Standing, Ripeness, Mootness, Political Questions)",
+                "Separation of Powers: Congressional Powers (Commerce, Taxing, Spending)",
+                "Separation of Powers: Presidential Powers & Interbranch Relations",
+                "Federalism (Supremacy, Preemption, Dormant Commerce Clause, Intergovernmental Immunities)", "State Action Doctrine",
+                "Due Process (Procedural & Substantive)", "Equal Protection", "First Amendment: Freedom of Speech & Press",
+                "First Amendment: Freedom of Religion (Establishment & Free Exercise) & Association", "Takings Clause & Contracts Clause",
+                "Other Individual Rights (Privileges & Immunities, Bills of Attainder, Ex Post Facto Laws)",
+                "Eleventh Amendment & State Sovereign Immunity", "Other Constitutional Law Issues"
+            ],
+            "Contracts and Sales": [
+                "Contract Formation: Mutual Assent (Offer & Acceptance, Implied-in-Fact)",
+                "Contract Formation: Consideration & Enforceable Obligations without Consideration (Promissory Estoppel, Restitution)",
+                "Defenses to Contract Enforceability (Incapacity, Duress, Mistake, Fraud, Illegality, Statute of Frauds)",
+                "Contract Content & Meaning (Parol Evidence, Interpretation, Omitted/Implied Terms)",
+                "UCC Article 2: Formation, Terms, Warranties & Risk of Loss",
+                "Conditions (Express & Constructive) & Excuses for Non-Performance (Impossibility, Impracticability, Frustration)",
+                "Breach of Contract (Material/Partial, Anticipatory Repudiation) & Obligations of Good Faith",
+                "Contract Remedies: Monetary Damages (Expectation, Consequential, Incidental, Liquidated)",
+                "Contract Remedies: Equitable Relief & Restitution (Specific Performance, Rescission, Reformation)",
+                "Third-Party Rights (Beneficiaries, Assignment of Rights, Delegation of Duties)",
+                "Discharge of Contractual Duties (Accord & Satisfaction, Substituted Contract, Novation, Rescission, Release)",
+                "Modification of Contracts", "Other Contracts & Sales Issues"
+            ],
+            "Criminal Law and Procedure": [
+                "Homicide (Intended Killings, Unintended Killings, Felony Murder)",
+                "Other Crimes Against Persons & Property (Theft, Robbery, Burglary, Assault, Battery, Rape, Arson, Possession)",
+                "Inchoate Offenses (Attempt, Conspiracy, Solicitation) & Parties to Crime",
+                "General Principles of Criminal Liability (Actus Reus, Mens Rea, Strict Liability, Causation)",
+                "Defenses to Crimes (Insanity, Intoxication, Justification, Excuse, Mistake)",
+                "Fourth Amendment: Arrest, Search & Seizure",
+                "Fifth Amendment: Confessions/Self-Incrimination (Miranda), Double Jeopardy, Due Process",
+                "Sixth Amendment: Right to Counsel, Fair Trial (Speedy Trial, Jury, Confrontation), Identification Procedures",
+                "Pre-Trial Procedures (Bail, Grand Juries) & Guilty Pleas",
+                "Sentencing, Punishment (Eighth Amendment - Cruel & Unusual) & Appeals", "Burdens of Proof & Persuasion",
+                "Jurisdiction in Criminal Cases", "Other Criminal Law & Procedure Issues"
+            ],
+            "Evidence": [
+                "Presentation of Evidence: Introduction, Objections, Witness Competency & Examination",
+                "Relevance & Reasons for Excluding Relevant Evidence (Unfair Prejudice, Confusion, Waste of Time)",
+                "Authentication & Identification (incl. Best Evidence Rule for Writings, Recordings, Photos)",
+                "Character Evidence, Habit & Similar Acts/Events", "Expert Testimony (Qualifications, Bases, Reliability, Subject Matter)",
+                "Privileges (Spousal, Attorney-Client, Physician/Psychotherapist) & Other Policy Exclusions (Remedial Measures, Compromise)",
+                "Hearsay: Definition & Non-Hearsay (Prior Statements by Witness, Statements Attributable to Party-Opponent)",
+                "Hearsay Exceptions: Availability Immaterial (Present Sense Impression, Excited Utterance, State of Mind, Medical Diagnosis, Business Records, Public Records)",
+                "Hearsay Exceptions: Declarant Unavailable (Former Testimony, Statements Against Interest, Dying Declarations, Forfeiture)",
+                "Confrontation Clause & Its Impact on Hearsay", "Impeachment, Contradiction & Rehabilitation of Witnesses",
+                "Judicial Notice & Presumptions", "Other Evidence Issues"
+            ],
+            "Real Property": [
+                "Present Estates & Future Interests (incl. Rules Affecting These Interests like RAP)",
+                "Co-tenancy (Tenancy in Common, Joint Tenancy) & Rights/Obligations of Co-tenants",
+                "Landlord-Tenant Law (Types of Tenancies, Possession, Rent, Transfers, Termination, Habitability)",
+                "Rights in Real Property: Easements, Profits & Licenses (Creation, Scope, Termination)",
+                "Rights in Real Property: Restrictive Covenants & Equitable Servitudes (Nature, Creation, Transfer, Termination)",
+                "Zoning, Land Use Regulation & Fixtures (incl. Fair Housing)", "Real Estate Contracts: Formation, Construction & Statute of Frauds",
+                "Real Estate Contracts: Marketability of Title, Risk of Loss (Equitable Conversion) & Remedies for Breach",
+                "Mortgages/Security Devices: Types, Security Relationships & Rights Prior to Foreclosure",
+                "Mortgages/Security Devices: Transfers by Mortgagor/Mortgagee, Discharge & Foreclosure",
+                "Titles: Adverse Possession & Transfer by Deed (Requirements, Types of Deeds)",
+                "Title Assurance Systems: Recording Acts (Types, Chain of Title) & Title Insurance",
+                "Other Real Property Issues (Including Conflicts of Law, Transfer by Will/Operation of Law)"
+            ],
+            "Torts": [
+                "Intentional Torts (to Person & Property, and Defenses)",
+                "Negligence - General Duty & Standard of Care (Reasonably Prudent Person, Special Classes)",
+                "Negligence - Special Duty Rules (Failure to Act, Owners/Occupiers of Land, Statutory Standards)",
+                "Negligence - Breach of Duty & Causation (Actual & Proximate Cause, Res Ipsa Loquitur, Multiple Causes)",
+                "Negligence - Damages (incl. Pure Economic Loss, Emotional Distress) & Defenses (Contributory/Comparative Negligence, Assumption of Risk)",
+                "Vicarious Liability & Joint Tortfeasor Liability (incl. Apportionment)",
+                "Strict Liability (Common Law - Abnormally Dangerous Activities, Animals) & Nuisance",
+                "Products Liability (Theories: Strict Liability, Negligence, Warranty; Defenses)",
+                "Defamation & Invasion of Privacy (Defenses & Constitutional Limitations)",
+                "Misrepresentation (Intentional/Fraudulent & Negligent)", "Intentional Interference with Business Relations",
+                "Other Torts Issues"
+            ]
+        };
 
         function processFile(file) {
             resultsDiv.textContent = 'Processing...';
@@ -268,14 +355,14 @@
                         }
                     });
             } catch (err) {
-                 // Fallback for older browsers if navigator.clipboard itself is not available
-                try {
-                    document.execCommand('copy');
-                    copyJsonBtn.textContent = 'Copied! (fallback)';
-                } catch (e) {
-                    copyJsonBtn.textContent = 'Copy Failed!';
-                    console.error('Initial navigator.clipboard failed, and fallback copy also failed: ', e);
-                }
+               // Fallback for older browsers if navigator.clipboard itself is not available
+               try {
+                   document.execCommand('copy');
+                   copyJsonBtn.textContent = 'Copied! (fallback)';
+               } catch (e) {
+                   copyJsonBtn.textContent = 'Copy Failed!';
+                   console.error('Initial navigator.clipboard failed, and fallback copy also failed: ', e);
+               }
             }
         });
 
@@ -404,8 +491,34 @@
                             if (typeof question.choices[choiceKey] !== 'string') errors.push(`Q '${qIdDisplay}': Choice '${choiceKey}' not a string.`);
                         }
                     }
+                    // CATEGORY VALIDATION (EXISTING)
                     if (!question.category) errors.push(`Q '${qIdDisplay}': Missing 'category'.`);
                     else if (!allowedCategories.includes(question.category)) errors.push(`Q '${qIdDisplay}': Invalid category '${question.category}'. Allowed: ${allowedCategories.join(', ')}.`);
+                    
+                    // NEW: SUB-CATEGORY VALIDATION
+                    if (!question.sub_category) {
+                        errors.push(`Q '${qIdDisplay}': Missing 'sub_category' property.`);
+                    } else if (typeof question.sub_category !== 'string' || question.sub_category.trim() === '') {
+                        errors.push(`Q '${qIdDisplay}': 'sub_category' must be a non-empty string.`);
+                    } else {
+                        const validSubCategories = mbe_categories_with_subcategories[question.category];
+                        if (validSubCategories) {
+                            if (!validSubCategories.includes(question.sub_category)) {
+                                errors.push(`Q '${qIdDisplay}': Invalid 'sub_category' ('${question.sub_category}') for the category '${question.category}'. Check spelling and case.`);
+                            }
+                        } else if (question.category) {
+                            // This case is for when the main category is invalid, which is already caught above.
+                            // The error for an invalid main category is sufficient.
+                        }
+                    }
+
+                    // NEW: CATEGORY-NOTES VALIDATION
+                    if (!question.hasOwnProperty('category_notes')) {
+                        warnings.push(`Q '${qIdDisplay}': Missing 'category_notes' property. It should be present and set to an empty string ("").`);
+                    } else if (question.category_notes !== "") {
+                        warnings.push(`Q '${qIdDisplay}': 'category_notes' should be an empty string (""). Found value: "${question.category_notes}"`);
+                    }
+
                 });
             }
 
