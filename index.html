@@ -15,203 +15,25 @@
     <link rel="stylesheet" href="styles/style.css">
 </head>
 
-<!-- Performance Dashboard Modal -->
-<div id="performance-modal" class="modal">
-    <div class="modal-content">
-        <span class="close-button" id="close-performance-modal">×</span>
-        <h2>Performance Dashboard</h2>
-        <div id="performance-stats-content">
-            <p>Loading statistics...</p>
-        </div>
-    </div>
+<!-- Modals loaded from html/modals.html -->
+<div id="modals-container">
+    <!-- Content will be loaded dynamically from html/modals.html -->
 </div>
-
-<!-- Session Review Modal -->
-<div id="review-modal" class="modal">
-    <div class="modal-content">
-        <span class="close-button" id="close-review-modal">×</span>
-        <h2>Session Review</h2>
-        <div id="review-modal-content" style="max-height: 60vh; overflow-y: auto;">
-            <p>Loading review...</p>
-        </div>
-    </div>
-</div>
-
 
 <body>
 
-    <!-- Sidebar Toggle Button -->
-    <button id="sidebar-toggle-button" aria-label="Toggle Settings Sidebar" aria-expanded="false">☰</button>
-
-    <!-- Settings Sidebar (HTML Structure remains the same) -->
-    <div id="settings-sidebar" class="sidebar">
-        <h2>Quiz Settings</h2>
-        <div class="sidebar-section">
-            <h3>Categories</h3>
-            <div id="filter-categories-list" class="filter-options-list">
-                <p>Load data to see categories.</p>
-            </div>
-            <button id="clear-categories-filter" class="clear-filter-button">Clear Categories</button>
-        </div>
-        <div class="sidebar-section">
-            <h3>Providers</h3>
-            <div id="filter-providers-list" class="filter-options-list">
-                <p>Load data to see providers.</p>
-            </div>
-            <button id="clear-providers-filter" class="clear-filter-button">Clear Providers</button>
-        </div>
-        <div class="sidebar-section">
-            <h3>Attempts</h3>
-            <label><input type="radio" name="filter-attempts" value="all"> Show All Questions</label>
-            <label><input type="radio" name="filter-attempts" value="attempted"> Questions with Attempts</label>
-            <label><input type="radio" name="filter-attempts" value="unattempted" checked> Questions without Attempts</label>
-            <label><input type="radio" name="filter-attempts" value="incorrect"> Questions with Incorrect Attempts (Any)</label>
-            <label><input type="radio" name="filter-attempts" value="incorrect_only"> Show Incorrectly Answered Only (Last Attempt)</label>
-            <button id="clear-attempts-filter" class="clear-filter-button">Reset Attempts Filter</button>
-        </div>
-
-        <div class="sidebar-section">
-            <h3>Notes</h3>
-            <label><input type="radio" name="filter-notes" value="all" checked> Show All Questions</label>
-            <label><input type="radio" name="filter-notes" value="with-notes"> Questions with Notes</label>
-            <label><input type="radio" name="filter-notes" value="without-notes"> Questions without Notes</label>
-            <button id="clear-notes-filter" class="clear-filter-button">Reset Notes Filter</button>
-        </div>
-
-        <div class="sidebar-section">
-            <h3>Order</h3>
-            <label><input type="checkbox" id="filter-scramble" checked> Scramble Question Order</label>
-        </div>
-        <div class="sidebar-section">
-            <h3>Timer Settings</h3>
-            <div class="setting-item">
-                <label for="session-time-limit">Session Time Limit (minutes):</label>
-                <input type="number" id="session-time-limit" min="1" max="240" value="30" step="1">
-            </div>
-            <div class="setting-item">
-                <label for="question-limit">Number of Questions (Sprint):</label>
-                <input type="number" id="question-limit" min="1" max="200" value="20" step="1">
-            </div>
-            <div class="setting-item">
-                <label><input type="checkbox" id="enable-session-timer"> Enable Session Timer</label>
-            </div>
-            <div class="setting-item">
-                <label><input type="checkbox" id="enable-question-timer"> Enable Question Timer</label>
-            </div>
-            <div class="setting-item">
-                <label><input type="checkbox" id="enable-stopwatch" checked> Enable Stopwatch</label>
-            </div>
-            <div class="setting-item">
-                <label for="question-time-limit">Question Time Limit (seconds):</label>
-                <input type="number" id="question-time-limit" min="10" max="600" value="90" step="5">
-            </div>
-        </div>
-
-        <div class="sidebar-section">
-            <h3>Exam Mode</h3>
-            <div class="setting-item">
-                <label><input type="checkbox" id="setting-hide-answer"> Hide Answer After Submission</label>
-                <p style="font-size: 0.8rem; color: var(--dark-gray); margin-top: 0.2rem;">(Review answers at the end or
-                    reveal individually)</p>
-            </div>
-        </div>
-
-
-        <button id="apply-filters-button" disabled>Apply Filters & Start Quiz</button>
-        <button id="close-sidebar-button">Close Settings</button>
-
-        <div class="sidebar-footer">
-            <!-- Buy me a coffee button -->
-            <p class="small mt-2" style="text-align: center; margin-bottom: 5px;"><strong>Found this site
-                    helpful?</strong></p>
-            <div style="text-align: center; margin-top: 5px;">
-                <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
-                    data-name="bmc-button" data-slug="ansonlai" data-color="#FFDD00" data-emoji="" data-font="Lato"
-                    data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000"
-                    data-coffee-color="#ffffff"></script>
-            </div>
-        </div>
+    <!-- Sidebar loaded from html/sidebar.html -->
+    <div id="sidebar-container">
+        <!-- Content will be loaded dynamically from html/sidebar.html -->
     </div>
 
     <!-- Main Content Container -->
     <div class="container">
         <h1>MBE Practice Questions</h1>
 
-        <div id="quiz-area">
-            <div id="quiz-progress"></div>
-            <div id="timer-container">
-                <div id="session-timer" class="timer">
-                    <span class="timer-label">Session:</span>
-                    <span class="timer-value">00:00</span>
-                </div>
-                <div id="question-timer" class="timer">
-                    <span class="timer-label">Question:</span>
-                    <span class="timer-value">00:00</span>
-                </div>
-                <div id="stopwatch" class="timer">
-                    <span class="timer-label">Elapsed:</span>
-                    <span class="timer-value">00:00</span>
-                </div>
-            </div>
-
-            <button id="toggleAnnotationButton" style="display: none;">Annotate Question</button>
-            <div id="annotation-controls">
-                <span>Tools:</span>
-                <button id="penButton" data-tool="pen">Pen</button>
-                <button id="highlighterButton" data-tool="highlighter">Highlight</button>
-                <button id="eraserButton" data-tool="eraser">Eraser</button>
-                <button id="clearAnnotationButton">Clear</button>
-            </div>
-
-            <div id="current-question-card" class="question-card">
-                <!-- Meta moved inside card, wrapped for tooltip -->
-                <div class="question-meta-container">
-                    <span class="meta-tooltip-trigger" tabindex="0" role="button"
-                        aria-describedby="meta-tooltip-content">ℹ️</span>
-                    <span class="tooltip-text" id="meta-tooltip-content">
-                        <!-- Content filled by JS -->
-                    </span>
-                </div>
-
-                <div id="annotation-area">
-                    <!-- Meta display removed from here -->
-                    <div id="current-group-intro" class="question-group-intro" style="display:none;"></div>
-                    <h2 id="question-text"></h2>
-                    <form id="choices-form"></form>
-                    <div id="annotation-spacer"></div>
-                    <canvas id="annotationCanvas"></canvas>
-                </div>
-            </div>
-
-            <button id="submit-answer-button">Submit Answer</button>
-            <button id="show-answer-button"
-                style="display:none; margin-left: 10px; background-color: var(--info-color);">Show Answer</button>
-
-            <div id="feedback-area" class="feedback-area" style="display:none;"></div>
-
-            <div class="user-notes">
-                <label for="attempt-notes">Notes for future reference:</label>
-                <textarea id="attempt-notes" rows="4" placeholder="Enter notes here to be saved..." disabled></textarea>
-            </div>
-
-            <!-- Moved Quiz Controls Up -->
-            <div class="quiz-controls">
-                <button id="previous-question-button" style="display:none;">Previous Question</button>
-                <button id="review-session-button" style="display:none; background-color: var(--success-color);">Review
-                    Session</button>
-                <button id="next-question-button" style="display:none;">Next Question</button>
-            </div>
-
-            <div id="past-attempts" class="past-attempts" style="display:none;">
-                <button class="accordion-toggle" aria-expanded="false">View Past Attempts</button>
-                <div class="accordion-content" style="display: none;">
-                    <!-- The existing h4 and ul for past attempts will go here -->
-                    <h4>Past Attempts for This Question:</h4>
-                    <ul>
-                        <!-- li elements generated by renderPastAttempts -->
-                    </ul>
-                </div>
-            </div>
+        <!-- Quiz area content loaded from html/quiz_area.html -->
+        <div id="quiz-area-container">
+            <!-- Content will be loaded dynamically from html/quiz_area.html -->
         </div>
 
         <div id="end-of-quiz-message"></div>
