@@ -1,111 +1,216 @@
 I have attached a file with practice questions and answers for the US bar exam (MBE).  I want you to extract each question as a new entry in my sample schema (and potentially as groups of questions too).  Please reflow the text without adding newlines unnecessarily.  Only use newlines (\n) in the text for new paragraphs and spacing where it makes sense, not to match the formatting of the PDF.  For any inapplicable fields, just list null.  If an explanation is not provided, please add in your own explanation but put an optional ai_generated flag in the answer.  Do not number the questions in question_text, or label the answer choices with A, B, C, or D.  My interface will handle that.
+The 7 possible "categories" are "Contracts and Sales", "Constitutional Law", "Criminal Law and Procedure", "Civil Procedure", "Evidence", "Real Property" and "Torts".  Please select only from these categories.  Category notes should always be "" (an empty string), while the subcategories will depend on which category was selected.  From there, please following the following dictionary to choose a subcategory appropriate to the category you selected.
 
-The 7 possible "categories" are "Contracts and Sales", "Constitutional Law", "Criminal Law and Procedure", "Civil Procedure", "Evidence", "Real Property" and "Torts".  Please select only from these categories.
+mbe_categories_with_subcategories = {
+    "Civil Procedure": [
+        "Jurisdiction: Subject Matter & Personal",
+        "Venue, Transfer & Forum Non Conveniens",
+        "Service of Process & Law Applied by Federal Courts (Erie Doctrine)",
+        "Pleadings, Rule 11 & Joinder (incl. Class Actions)",
+        "Discovery, Disclosure & Pretrial Conferences/Orders",
+        "Injunctions & Adjudication Without Trial (Summary Judgment, Dismissals)",
+        "Jury Trials (Right to, Selection, Instructions)",
+        "Motions (Pretrial, Judgment as a Matter of Law, Post-trial)",
+        "Verdicts, Judgments & Preclusion (Claim & Issue)",
+        "Appealability & Review",
+        "Other Civil Procedure Issues"
+    ],
+    "Constitutional Law": [
+        "The Nature of Judicial Review (Standing, Ripeness, Mootness, Political Questions)",
+        "Separation of Powers: Congressional Powers (Commerce, Taxing, Spending)",
+        "Separation of Powers: Presidential Powers & Interbranch Relations",
+        "Federalism (Supremacy, Preemption, Dormant Commerce Clause, Intergovernmental Immunities)",
+        "State Action Doctrine",
+        "Due Process (Procedural & Substantive)",
+        "Equal Protection",
+        "First Amendment: Freedom of Speech & Press",
+        "First Amendment: Freedom of Religion (Establishment & Free Exercise) & Association",
+        "Takings Clause & Contracts Clause",
+        "Other Individual Rights (Privileges & Immunities, Bills of Attainder, Ex Post Facto Laws)",
+        "Eleventh Amendment & State Sovereign Immunity",
+        "Other Constitutional Law Issues"
+    ],
+    "Contracts and Sales": [
+        "Contract Formation: Mutual Assent (Offer & Acceptance, Implied-in-Fact)",
+        "Contract Formation: Consideration & Enforceable Obligations without Consideration (Promissory Estoppel, Restitution)",
+        "Defenses to Contract Enforceability (Incapacity, Duress, Mistake, Fraud, Illegality, Statute of Frauds)",
+        "Contract Content & Meaning (Parol Evidence, Interpretation, Omitted/Implied Terms)",
+        "UCC Article 2: Formation, Terms, Warranties & Risk of Loss",
+        "Conditions (Express & Constructive) & Excuses for Non-Performance (Impossibility, Impracticability, Frustration)",
+        "Breach of Contract (Material/Partial, Anticipatory Repudiation) & Obligations of Good Faith",
+        "Contract Remedies: Monetary Damages (Expectation, Consequential, Incidental, Liquidated)",
+        "Contract Remedies: Equitable Relief & Restitution (Specific Performance, Rescission, Reformation)",
+        "Third-Party Rights (Beneficiaries, Assignment of Rights, Delegation of Duties)",
+        "Discharge of Contractual Duties (Accord & Satisfaction, Substituted Contract, Novation, Rescission, Release)",
+        "Modification of Contracts",
+        "Other Contracts & Sales Issues"
+    ],
+    "Criminal Law and Procedure": [
+        "Homicide (Intended Killings, Unintended Killings, Felony Murder)",
+        "Other Crimes Against Persons & Property (Theft, Robbery, Burglary, Assault, Battery, Rape, Arson, Possession)",
+        "Inchoate Offenses (Attempt, Conspiracy, Solicitation) & Parties to Crime",
+        "General Principles of Criminal Liability (Actus Reus, Mens Rea, Strict Liability, Causation)",
+        "Defenses to Crimes (Insanity, Intoxication, Justification, Excuse, Mistake)",
+        "Fourth Amendment: Arrest, Search & Seizure",
+        "Fifth Amendment: Confessions/Self-Incrimination (Miranda), Double Jeopardy, Due Process",
+        "Sixth Amendment: Right to Counsel, Fair Trial (Speedy Trial, Jury, Confrontation), Identification Procedures",
+        "Pre-Trial Procedures (Bail, Grand Juries) & Guilty Pleas",
+        "Sentencing, Punishment (Eighth Amendment - Cruel & Unusual) & Appeals",
+        "Burdens of Proof & Persuasion",
+        "Jurisdiction in Criminal Cases",
+        "Other Criminal Law & Procedure Issues"
+    ],
+    "Evidence": [
+        "Presentation of Evidence: Introduction, Objections, Witness Competency & Examination",
+        "Relevance & Reasons for Excluding Relevant Evidence (Unfair Prejudice, Confusion, Waste of Time)",
+        "Authentication & Identification (incl. Best Evidence Rule for Writings, Recordings, Photos)",
+        "Character Evidence, Habit & Similar Acts/Events",
+        "Expert Testimony (Qualifications, Bases, Reliability, Subject Matter)",
+        "Privileges (Spousal, Attorney-Client, Physician/Psychotherapist) & Other Policy Exclusions (Remedial Measures, Compromise)",
+        "Hearsay: Definition & Non-Hearsay (Prior Statements by Witness, Statements Attributable to Party-Opponent)",
+        "Hearsay Exceptions: Availability Immaterial (Present Sense Impression, Excited Utterance, State of Mind, Medical Diagnosis, Business Records, Public Records)",
+        "Hearsay Exceptions: Declarant Unavailable (Former Testimony, Statements Against Interest, Dying Declarations, Forfeiture)",
+        "Confrontation Clause & Its Impact on Hearsay",
+        "Impeachment, Contradiction & Rehabilitation of Witnesses",
+        "Judicial Notice & Presumptions",
+        "Other Evidence Issues"
+    ],
+    "Real Property": [
+        "Present Estates & Future Interests (incl. Rules Affecting These Interests like RAP)",
+        "Co-tenancy (Tenancy in Common, Joint Tenancy) & Rights/Obligations of Co-tenants",
+        "Landlord-Tenant Law (Types of Tenancies, Possession, Rent, Transfers, Termination, Habitability)",
+        "Rights in Real Property: Easements, Profits & Licenses (Creation, Scope, Termination)",
+        "Rights in Real Property: Restrictive Covenants & Equitable Servitudes (Nature, Creation, Transfer, Termination)",
+        "Zoning, Land Use Regulation & Fixtures (incl. Fair Housing)",
+        "Real Estate Contracts: Formation, Construction & Statute of Frauds",
+        "Real Estate Contracts: Marketability of Title, Risk of Loss (Equitable Conversion) & Remedies for Breach",
+        "Mortgages/Security Devices: Types, Security Relationships & Rights Prior to Foreclosure",
+        "Mortgages/Security Devices: Transfers by Mortgagor/Mortgagee, Discharge & Foreclosure",
+        "Titles: Adverse Possession & Transfer by Deed (Requirements, Types of Deeds)",
+        "Title Assurance Systems: Recording Acts (Types, Chain of Title) & Title Insurance",
+        "Other Real Property Issues (Including Conflicts of Law, Transfer by Will/Operation of Law)"
+    ],
+    "Torts": [
+        "Intentional Torts (to Person & Property, and Defenses)",
+        "Negligence - General Duty & Standard of Care (Reasonably Prudent Person, Special Classes)",
+        "Negligence - Special Duty Rules (Failure to Act, Owners/Occupiers of Land, Statutory Standards)",
+        "Negligence - Breach of Duty & Causation (Actual & Proximate Cause, Res Ipsa Loquitur, Multiple Causes)",
+        "Negligence - Damages (incl. Pure Economic Loss, Emotional Distress) & Defenses (Contributory/Comparative Negligence, Assumption of Risk)",
+        "Vicarious Liability & Joint Tortfeasor Liability (incl. Apportionment)",
+        "Strict Liability (Common Law - Abnormally Dangerous Activities, Animals) & Nuisance",
+        "Products Liability (Theories: Strict Liability, Negligence, Warranty; Defenses)",
+        "Defamation & Invasion of Privacy (Defenses & Constitutional Limitations)",
+        "Misrepresentation (Intentional/Fraudulent & Negligent)",
+        "Intentional Interference with Business Relations",
+        "Other Torts Issues"
+    ]
+}
 
-Make sure to properly escape quotations and other symbols like \ and " with backslashes \.
 
+Make sure to properly escape quotations and other symbols like \ and " with backslashes .
 Here's a summary of the project I want help with. My main goal is to create a robust single page web app (HTML and JS only) that I can use to build a quiz application for studying for the US bar exam. I need to compile practice questions from various sources I have, like official past exams and materials from providers such as Barbri, into this single JSON format.
-
 The JSON schema needs to capture all the essential details for each multiple-choice question. This includes the question_id, the question_text, the legal category (like Torts), the choices (A, B, C, D), the answer object specifying the correct_choice and providing a detailed explanation, and information about the question's source (provider, year, etc.).  If an explanation is not provided, an AI generated explanation is added and the optional ai_generated flag is set to true.
-
-An important feature I need is the ability to handle groups of questions that are based on a common fact pattern, which is common in bar exams. So, the schema includes a groups list where each group has an ID, potentially some introductory text, and a defined question_order. Back in the main questions list, each question object has a group_id field that links it to the relevant group, or is null if it's a standalone question. This setup ensures these related questions stay together in the right sequence, preserving the necessary context.
-
+An important feature I need is the ability to handle groups of questions that are based on a common fact pattern, which is common in bar exams. So, the schema includes a groups list where each group has an ID, potentially some common text (ignore the intro_text), and a defined question_order. Back in the main questions list, each question object has a group_id field that links it to the relevant group, or is null if it's a standalone question. This setup ensures these related questions stay together in the right sequence, preserving the necessary context.
 Finally, a critical part of this system is tracking my own performance as I use the quiz app. For each question, the schema uses a user_attempts list. Every time I answer a question, a new entry should be added to this list recording my chosen_answer, the time_submitted, the time_spent_seconds for that attempt, and any notes I add. This detailed tracking is vital because it will allow me to analyze my progress, see which questions or topics are giving me trouble, monitor my speed, and review my thinking process for past attempts.
-
 This is the sample schema for you:
-
 {
-  "questions": [
-    {
-      "question_id": "91757f83-f760-425e-bc40-37afb4d5c993",
-      "group_id": "15dc7ab9-1716-4154-9b08-d884a327afcc",
-      "question_text": "What is the holding in Palsgraf v. Long Island Railroad Co.?",
-      "category": "Torts",
-      "source": {
-        "name": "Barbri Mock Exam 1",
-        "provider": "Barbri",
-        "year": 2023,
-        "question": 1
-      },
-      "answer": {
-        "correct_choice": "A",
-        "explanation": "Explanation of why A is correct, focusing on the concept of duty owed only to foreseeable plaintiffs within the zone of danger."
-      },
-      "choices": {
-        "A": "There must be a direct foreseeable link between the negligent act and the injury.",
-        "B": "Proximate cause extends to all injuries that actually result from the negligent act.",
-        "C": "A defendant is liable to all those injured, regardless of foreseeability.",
-        "D": "Liability is limited to those in the immediate zone of danger."
-      },
-      "user_attempts": []
-    },
-    {
-      "question_id": "1a216b1d-442b-47fa-a39d-a9cf88faac3b",
-      "group_id": "15dc7ab9-1716-4154-9b08-d884a327afcc",
-      "question_text": "Applying Palsgraf, which of the following is true?",
-      "category": "Torts",
-      "source": {
-        "name": "Barbri Mock Exam 1",
-        "provider": "Barbri",
-        "year": 2023,
-        "question": 2
-      },
-      "answer": {
-        "correct_choice": "C",
-        "explanation": "Explanation of why C is correct, highlighting that Palsgraf was outside the zone of foreseeable danger created by the employees' actions.",
-        "ai_generated": true
-      },
-      "choices": {
-        "A": "The railroad is liable for all injuries caused by the explosion.",
-        "B": "Palsgraf can recover because the railroad was negligent.",
-        "C": "The railroad is not liable to Palsgraf because her injury was not a foreseeable consequence of their negligence.",
-        "D": "Palsgraf can recover because she was physically injured."
-      },
-      "user_attempts": [
-        {
-          "attempt_id": 1,
-          "chosen_answer": "B",
-          "time_submitted": "2025-04-22T22:35:09.370Z",
-          "time_spent_seconds": 298.7,
-          "notes": ""
-        }
-      ]
-    },
-    {
-      "question_id": "9bac22a7-64ff-4bc0-b41e-107b876673dd",
-      "group_id": null,
-      "question_text": "Under the Federal Rules of Evidence, which of the following constitutes hearsay?",
-      "category": "Evidence",
-      "source": {
-        "name": "NCBE MBE Study Aid",
-        "provider": "NCBE",
-        "year": 2022,
-        "question": 1
-      },
-      "answer": {
-        "correct_choice": "B",
-        "explanation": "Explanation of why B is correct: It's an out-of-court statement offered to prove the truth of the matter asserted. A describes present sense impression (exception), C is non-assertive conduct (not a statement), D is an operative legal fact (not offered for truth)."
-      },
-      "choices": {
-        "A": "A witness testifying 'The car that hit me was blue' based on their own observation.",
-        "B": "A plaintiff offering a letter from an absent witness stating 'The defendant admitted fault to me'.",
-        "C": "Evidence that a person fled the scene of a crime, offered to show consciousness of guilt.",
-        "D": "A contract offered to prove the terms of an agreement."
-      },
-      "user_attempts": []
-    }
-  ],
-  "groups": [
-    {
-      "group_id": "15dc7ab9-1716-4154-9b08-d884a327afcc",
-      "text": "Palsgraf v. Long Island Railroad Co. Questions",
-      "intro_text": "The following two questions pertain to the landmark case of Palsgraf v. Long Island Railroad Co. and its implications for the element of duty in negligence law.",
-      "question_order": [
-        "91757f83-f760-425e-bc40-37afb4d5c993",
-        "1a216b1d-442b-47fa-a39d-a9cf88faac3b"
-      ]
-    }
-  ]
+"questions": [
+{
+"question_id": "91757f83-f760-425e-bc40-37afb4d5c993",
+"group_id": "15dc7ab9-1716-4154-9b08-d884a327afcc",
+"question_text": "What is the holding in Palsgraf v. Long Island Railroad Co.?",
+"category": "Torts",
+"sub_category": "Negligence - General Duty & Standard of Care (Reasonably Prudent Person, Special Classes)",
+"category_notes": "",
+"source": {
+"name": "Barbri Mock Exam 1",
+"provider": "Barbri",
+"year": 2023,
+"question": 1
+},
+"answer": {
+"correct_choice": "A",
+"explanation": "Explanation of why A is correct, focusing on the concept of duty owed only to foreseeable plaintiffs within the zone of danger."
+},
+"choices": {
+"A": "There must be a direct foreseeable link between the negligent act and the injury.",
+"B": "Proximate cause extends to all injuries that actually result from the negligent act.",
+"C": "A defendant is liable to all those injured, regardless of foreseeability.",
+"D": "Liability is limited to those in the immediate zone of danger."
+},
+"user_attempts": []
+},
+{
+"question_id": "1a216b1d-442b-47fa-a39d-a9cf88faac3b",
+"group_id": "15dc7ab9-1716-4154-9b08-d884a327afcc",
+"question_text": "Applying Palsgraf, which of the following is true?",
+"category": "Torts",
+"sub_category": "Intentional Torts (to Person & Property, and Defenses)",
+"category_notes": "",
+"source": {
+"name": "Barbri Mock Exam 1",
+"provider": "Barbri",
+"year": 2023,
+"question": 2
+},
+"answer": {
+"correct_choice": "C",
+"explanation": "Explanation of why C is correct, highlighting that Palsgraf was outside the zone of foreseeable danger created by the employees' actions.",
+"ai_generated": true
+},
+"choices": {
+"A": "The railroad is liable for all injuries caused by the explosion.",
+"B": "Palsgraf can recover because the railroad was negligent.",
+"C": "The railroad is not liable to Palsgraf because her injury was not a foreseeable consequence of their negligence.",
+"D": "Palsgraf can recover because she was physically injured."
+},
+"user_attempts": [
+{
+"attempt_id": 1,
+"chosen_answer": "B",
+"time_submitted": "2025-04-22T22:35:09.370Z",
+"time_spent_seconds": 298.7,
+"notes": ""
+}
+]
+},
+{
+"question_id": "9bac22a7-64ff-4bc0-b41e-107b876673dd",
+"group_id": null,
+"question_text": "Under the Federal Rules of Evidence, which of the following constitutes hearsay?",
+"category": "Evidence",
+"sub_category": "Hearsay: Definition & Non-Hearsay (Prior Statements by Witness, Statements Attributable to Party-Opponent)",
+"category_notes": "",
+"source": {
+"name": "NCBE MBE Study Aid",
+"provider": "NCBE",
+"year": 2022,
+"question": 1
+},
+"answer": {
+"correct_choice": "B",
+"explanation": "Explanation of why B is correct: It's an out-of-court statement offered to prove the truth of the matter asserted. A describes present sense impression (exception), C is non-assertive conduct (not a statement), D is an operative legal fact (not offered for truth)."
+},
+"choices": {
+"A": "A witness testifying 'The car that hit me was blue' based on their own observation.",
+"B": "A plaintiff offering a letter from an absent witness stating 'The defendant admitted fault to me'.",
+"C": "Evidence that a person fled the scene of a crime, offered to show consciousness of guilt.",
+"D": "A contract offered to prove the terms of an agreement."
+},
+"user_attempts": []
+}
+],
+"groups": [
+{
+"group_id": "15dc7ab9-1716-4154-9b08-d884a327afcc",
+"text": "The following two questions pertain to the landmark case of Palsgraf v. Long Island Railroad Co. and its implications for the element of duty in negligence law.",
+"intro_text": null,
+"question_order": [
+"91757f83-f760-425e-bc40-37afb4d5c993",
+"1a216b1d-442b-47fa-a39d-a9cf88faac3b"
+]
+}
+]
 }
 
 
