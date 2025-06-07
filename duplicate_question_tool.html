@@ -1,0 +1,494 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Provider Filter & Deduplicator</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --danger-color: #dc3545;
+            --bg-color: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-color: #212529;
+            --drop-zone-bg: #ffffff;
+            --drop-zone-border: #ced4da;
+            --drop-zone-hover-bg: #e9ecef;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        #drop-zone {
+            border: 2px dashed var(--drop-zone-border);
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--secondary-color);
+            background-color: var(--drop-zone-bg);
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        #drop-zone.drag-over {
+            background-color: var(--drop-zone-hover-bg);
+            border-color: var(--primary-color);
+        }
+        #file-input {
+            display: none;
+        }
+        .controls {
+            margin: 1.5rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+        }
+        .controls label {
+            font-weight: bold;
+        }
+        #provider-select {
+            flex-grow: 1;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+        .button {
+            padding: 0.75rem 1.5rem;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        .button-primary { background-color: var(--primary-color); }
+        .button-primary:hover { background-color: #0056b3; }
+        .button-primary:disabled {
+            background-color: var(--secondary-color);
+            cursor: not-allowed;
+        }
+        .button-secondary { background-color: var(--secondary-color); }
+        .button-secondary:hover { background-color: #5a6268; }
+
+        .output-container { margin-top: 1rem; }
+        #json-output {
+            width: 100%;
+            height: 400px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.85rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        .footer-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+        #status-message {
+            color: var(--secondary-color);
+            font-style: italic;
+            height: 1.2em;
+        }
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        .modal-header h2 { margin: 0; }
+        .modal-body .duplicate-group {
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+        }
+        .modal-body .duplicate-group h3 {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9rem;
+            background: #f0f0f0;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-top: 0;
+            word-wrap: break-word;
+        }
+        .modal-body .question-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid #eee;
+        }
+        .modal-body .question-item:last-child { border-bottom: none; }
+        .modal-body .question-item label {
+            display: block;
+            cursor: pointer;
+        }
+        .modal-body .question-item pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: #f9f9f9;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        .modal-body .question-item .meta {
+            font-size: 0.8rem;
+            color: var(--secondary-color);
+        }
+        .modal-footer {
+            text-align: right;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+        }
+        .modal-footer .button { margin-left: 0.5rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>JSON Provider Filter & Deduplicator</h1>
+        
+        <div id="drop-zone">
+            <p>Drag & drop your JSON file here, or click to select a file.</p>
+        </div>
+        <input type="file" id="file-input" accept=".json">
+
+        <div class="controls">
+            <label for="provider-select">Filter by Provider:</label>
+            <select id="provider-select" disabled=""><option>-- Load a file first --</option></select>
+            <button id="dedupe-button" class="button button-secondary" disabled="">Check for Duplicates</button>
+        </div>
+
+        <div class="output-container">
+            <textarea id="json-output" readonly="" placeholder="Filtered JSON will appear here..."></textarea>
+        </div>
+
+        <div class="footer-controls">
+            <div id="status-message"></div>
+            <button id="copy-button" class="button button-primary" disabled="">Copy JSON</button>
+        </div>
+    </div>
+
+    <div id="dedupe-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Manage Duplicate Questions</h2>
+            </div>
+            <div id="modal-body" class="modal-body">
+                </div>
+            <div class="modal-footer">
+                <button id="modal-cancel" class="button button-secondary">Cancel</button>
+                <button id="modal-apply" class="button button-primary">Apply Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Main UI Elements
+            const dropZone = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('file-input');
+            const providerSelect = document.getElementById('provider-select');
+            const jsonOutput = document.getElementById('json-output');
+            const copyButton = document.getElementById('copy-button');
+            const dedupeButton = document.getElementById('dedupe-button');
+            const statusMessage = document.getElementById('status-message');
+
+            // Modal UI Elements
+            const dedupeModal = document.getElementById('dedupe-modal');
+            const modalBody = document.getElementById('modal-body');
+            const modalCancel = document.getElementById('modal-cancel');
+            const modalApply = document.getElementById('modal-apply');
+            
+            let fullData = null;
+            let currentlyDisplayedData = null;
+
+            // --- Event Listeners ---
+
+            dropZone.addEventListener('click', () => fileInput.click());
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                const files = e.dataTransfer.files;
+                if (files.length) handleFile(files[0]);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) handleFile(e.target.files[0]);
+            });
+
+            providerSelect.addEventListener('change', filterAndDisplay);
+            copyButton.addEventListener('click', copyOutput);
+            dedupeButton.addEventListener('click', manageDuplicates);
+
+            // Modal event listeners
+            modalCancel.addEventListener('click', () => dedupeModal.style.display = 'none');
+            modalApply.addEventListener('click', applyDuplicateRemovals);
+            dedupeModal.addEventListener('click', (e) => {
+                if (e.target === dedupeModal) { // Click on overlay
+                    dedupeModal.style.display = 'none';
+                }
+            });
+
+
+            // --- Core Functions ---
+
+            function handleFile(file) {
+                if (file.type !== 'application/json') {
+                    alert('Please drop a valid JSON file.');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        fullData = JSON.parse(e.target.result);
+                        if (!fullData.questions || !Array.isArray(fullData.questions)) {
+                            throw new Error("JSON is missing a 'questions' array.");
+                        }
+                        populateProviderSelect();
+                        filterAndDisplay();
+                        showStatus(`Loaded ${file.name} successfully.`, 5000);
+                    } catch (error) {
+                        alert(`Error parsing JSON file: ${error.message}`);
+                        fullData = null;
+                        resetUI();
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            function populateProviderSelect() {
+                if (!fullData) return;
+                const providers = new Set(
+                    fullData.questions.map(q => q.source?.provider).filter(Boolean)
+                );
+                
+                providerSelect.innerHTML = '';
+                providerSelect.disabled = false;
+
+                const allOption = document.createElement('option');
+                allOption.value = 'all';
+                allOption.textContent = 'All Providers';
+                providerSelect.appendChild(allOption);
+
+                providers.forEach(provider => {
+                    const option = document.createElement('option');
+                    option.value = provider;
+                    option.textContent = provider;
+                    providerSelect.appendChild(option);
+                });
+            }
+
+            function filterAndDisplay() {
+                if (!fullData) return;
+
+                const selectedProvider = providerSelect.value;
+                let filteredQuestions;
+
+                if (selectedProvider === 'all') {
+                    filteredQuestions = fullData.questions;
+                } else {
+                    filteredQuestions = fullData.questions.filter(q => q.source?.provider === selectedProvider);
+                }
+
+                const requiredGroupIds = new Set(filteredQuestions.map(q => q.group_id).filter(Boolean));
+                const filteredGroups = (fullData.groups || []).filter(g => requiredGroupIds.has(g.group_id));
+
+                currentlyDisplayedData = {
+                    questions: filteredQuestions,
+                    groups: filteredGroups
+                };
+
+                const outputString = JSON.stringify(currentlyDisplayedData, null, 2);
+                jsonOutput.value = outputString;
+                copyButton.disabled = outputString.length === 0;
+                dedupeButton.disabled = currentlyDisplayedData.questions.length === 0;
+            }
+
+            function resetUI() {
+                providerSelect.innerHTML = '<option>-- Load a file first --</option>';
+                providerSelect.disabled = true;
+                jsonOutput.value = '';
+                copyButton.disabled = true;
+                dedupeButton.disabled = true;
+                currentlyDisplayedData = null;
+            }
+
+            function copyOutput() {
+                if (jsonOutput.value) {
+                    navigator.clipboard.writeText(jsonOutput.value).then(() => {
+                        showStatus("Copied to clipboard!", 3000);
+                    }).catch(err => {
+                        console.error('Failed to copy: ', err);
+                        showStatus("Failed to copy.", 3000);
+                    });
+                }
+            }
+
+            function showStatus(message, duration = 3000) {
+                statusMessage.textContent = message;
+                setTimeout(() => {
+                    if (statusMessage.textContent === message) {
+                        statusMessage.textContent = '';
+                    }
+                }, duration);
+            }
+
+            // --- Duplicate Detection Functions ---
+
+            function normalizeQuestionText(text) {
+                if (!text) return '';
+                return text.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+            }
+
+            function manageDuplicates() {
+                if (!currentlyDisplayedData || currentlyDisplayedData.questions.length === 0) {
+                    alert("No data loaded to check for duplicates.");
+                    return;
+                }
+
+                const questionMap = new Map();
+                currentlyDisplayedData.questions.forEach(q => {
+                    const normalizedText = normalizeQuestionText(q.question_text);
+                    if (!questionMap.has(normalizedText)) {
+                        questionMap.set(normalizedText, []);
+                    }
+                    questionMap.get(normalizedText).push(q);
+                });
+
+                const duplicates = Array.from(questionMap.values()).filter(group => group.length > 1);
+
+                if (duplicates.length === 0) {
+                    alert("No duplicates found in the current selection.");
+                    return;
+                }
+                
+                populateDuplicateModal(duplicates);
+                dedupeModal.style.display = 'flex';
+            }
+
+            function populateDuplicateModal(duplicateGroups) {
+                modalBody.innerHTML = ''; // Clear previous content
+
+                duplicateGroups.forEach((group, index) => {
+                    const groupEl = document.createElement('div');
+                    groupEl.className = 'duplicate-group';
+
+                    const normalizedText = normalizeQuestionText(group[0].question_text);
+                    groupEl.innerHTML = `<h3>Duplicate Set ${index + 1} (Normalized Text):</h3>`;
+                    
+                    const radioGroupName = `dedupe-group-${index}`;
+
+                    group.forEach((question, qIndex) => {
+                        const itemEl = document.createElement('div');
+                        itemEl.className = 'question-item';
+
+                        const radioId = `q-${index}-${qIndex}`;
+                        const isChecked = qIndex === 0 ? 'checked' : '';
+
+                        itemEl.innerHTML = `
+                            <label for="${radioId}">
+                                <input type="radio" id="${radioId}" name="${radioGroupName}" value="${question.question_id}" ${isChecked}>
+                                <strong>Keep this version:</strong>
+                                <p class="meta">
+                                    Provider: ${question.source?.provider || 'N/A'} | 
+                                    Source: ${question.source?.name || 'N/A'} | 
+                                    ID: ${question.question_id}
+                                </p>
+                                <pre>${question.question_text}</pre>
+                            </label>
+                        `;
+                        groupEl.appendChild(itemEl);
+                    });
+                    modalBody.appendChild(groupEl);
+                });
+            }
+
+            function applyDuplicateRemovals() {
+                const idsToKeep = new Set();
+                const radios = modalBody.querySelectorAll('input[type="radio"]:checked');
+                radios.forEach(radio => idsToKeep.add(radio.value));
+
+                const allDuplicateIds = new Set();
+                const duplicateGroups = modalBody.querySelectorAll('.duplicate-group');
+                duplicateGroups.forEach(group => {
+                    group.querySelectorAll('input[type="radio"]').forEach(radio => {
+                        allDuplicateIds.add(radio.value);
+                    });
+                });
+                
+                const idsToRemove = new Set([...allDuplicateIds].filter(id => !idsToKeep.has(id)));
+                
+                if (idsToRemove.size > 0) {
+                    // Filter the master data
+                    fullData.questions = fullData.questions.filter(q => !idsToRemove.has(q.question_id));
+                    
+                    // Also, clean up groups that might now be orphaned
+                    const remainingQuestionIds = new Set(fullData.questions.map(q => q.question_id));
+                    if(fullData.groups) {
+                        fullData.groups = fullData.groups.filter(g => {
+                            // Keep a group only if at least one of its questions still exists
+                            return g.question_order.some(qid => remainingQuestionIds.has(qid));
+                        });
+                    }
+
+                    showStatus(`Removed ${idsToRemove.size} duplicate question(s).`, 4000);
+                }
+
+                dedupeModal.style.display = 'none';
+                // Refresh the view to reflect the changes
+                filterAndDisplay();
+            }
+        });
+    </script>
+
+</body></html>
