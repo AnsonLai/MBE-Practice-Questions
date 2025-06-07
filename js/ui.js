@@ -95,22 +95,11 @@ export async function loadHtmlFragments() {
         }
     };
 
-    // IMPORTANT: The actual HTML extraction and placeholder DIV creation in index.html
-    // needs to be done carefully. This script assumes placeholders with these IDs exist.
-    // The original HTML content should be REMOVED from index.html and replaced by these placeholders.
-
-    // Example: Load sidebar into <div id="settings-sidebar-placeholder"></div>
-    // The ID 'settings-sidebar' is used here because the original div has this ID.
-    // If the plan is to replace the *entire* div, then the placeholder should be outside it,
-    // or the function should replace the placeholder div itself.
-    // For now,innerHTML is used, meaning the placeholder div should be empty.
-    await loadFragment('html/sidebar.html', 'settings-sidebar');
-
-    // Assuming a new placeholder div for all modals, e.g., <div id="modals-placeholder"></div>
-    await loadFragment('html/modals.html', 'modals-placeholder');
-
-    // Assuming the existing <div id="quiz-area"></div> will be the container for its dynamic content
-    await loadFragment('html/quiz_area.html', 'quiz-area');
+    // Load HTML fragments into their respective containers
+    // Match the container IDs from index.html
+    await loadFragment('html/sidebar.html', 'sidebar-container');
+    await loadFragment('html/modals.html', 'modals-container');
+    await loadFragment('html/quiz_area.html', 'quiz-area-container');
 }
 
 export function populateCategorySubcategoryFilter(container, categoriesWithSubcategories) {
