@@ -725,11 +725,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         await saveAppState('lastLoadedFileName', sourceDescription);
                         quizData.fileName = sourceDescription;
 
-                        const success = await loadQuizDataFromDB();
-                        if (!success) {
+                        const reloadedData = await loadQuizDataFromDB();
+                        if (!reloadedData || !reloadedData.questions || reloadedData.questions.length === 0) {
                             throw new Error("Failed to reload data from DB after import.");
                         }
-                await clearActiveSessionState(); // Clear any pending session if new data is loaded
+                        
+                        // Update global quizData with reloaded data
+                        quizData = reloadedData;
+                        
+                        await clearActiveSessionState(); // Clear any pending session if new data is loaded
                         populateFilterOptions();
                 applyFiltersAndStartQuiz(); // This will start a new quiz with the loaded data
                         saveJsonButton.disabled = false;
@@ -2122,7 +2126,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 setupEventListeners(); // Setup event listeners after elements are initialized
                 registerServiceWorker();
                 const loadedFromDB = await loadQuizDataFromDB();
-                populateFilterOptions(); // Populate dynamic filter options first
+                
+                // Update global quizData first
+                if (loadedFromDB && loadedFromDB.questions && loadedFromDB.questions.length > 0) {
+                    quizData = loadedFromDB;
+                }
+                
+                populateFilterOptions(); // Populate dynamic filter options after quizData is set
                 await loadUserSettingsFromDB(); // Then load and apply saved settings
 
                 let sessionRestored = false;
@@ -2204,22 +2214,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         console.log("No active session found or session data invalid. Initializing normally.");
                         resetQuizState(true); // Resets UI, keeps quizData loaded from DB
-                        // populateFilterOptions(); // Already called above
-
-                // Ensure quizData is properly populated by loadQuizDataFromDB before using it
-                const currentQuizData = await loadQuizDataFromDB();
-                if (currentQuizData && currentQuizData.questions && currentQuizData.questions.length > 0) {
-                    quizData = currentQuizData; // Update global quizData
-                    saveJsonButton.disabled = false;
-                    if (performanceButton) {
-                        performanceButton.disabled = false;
-                    }
-                } else {
-                    saveJsonButton.disabled = true;
-                    if (performanceButton) {
-                        performanceButton.disabled = true;
-                    }
-                        }
                         console.log("Data loaded from DB. User settings (if any) applied. No active session restored, or session data was invalid.");
                     }
                 } else {
