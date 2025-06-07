@@ -2,62 +2,79 @@ import { db, saveCurrentSettingsToDB, loadUserSettingsFromDB, loadQuizDataFromDB
 import { escapeHtml, formatTime, toggleSidebar, openSidebar, closeSidebar, populateCheckboxList, clearCheckboxes, loadHtmlFragments } from './ui.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-            // --- Element Refs ---
-            const jsonFileElement = document.getElementById('jsonFile');
-            const loadJsonButton = document.getElementById('loadJsonButton');
-            const saveJsonButton = document.getElementById('saveJsonButton');
-            const quizAreaElement = document.getElementById('quiz-area');
-            const quizProgressElement = document.getElementById('quiz-progress');
-            const groupIntroElement = document.getElementById('current-group-intro');
-            const questionMetaContainer = document.querySelector('.question-meta-container');
-            const metaTooltipContentElement = document.getElementById('meta-tooltip-content');
-            const questionTextElement = document.getElementById('question-text');
-            const choicesFormElement = document.getElementById('choices-form');
-            const attemptNotesElement = document.getElementById('attempt-notes');
-            const submitAnswerButton = document.getElementById('submit-answer-button');
-            const feedbackAreaElement = document.getElementById('feedback-area');
-            const nextQuestionButton = document.getElementById('next-question-button');
-            const previousQuestionButton = document.getElementById('previous-question-button');
-            const pastAttemptsContainer = document.getElementById('past-attempts');
-            const pastAttemptsAccordionToggle = pastAttemptsContainer.querySelector('.accordion-toggle');
-            const pastAttemptsAccordionContent = pastAttemptsContainer.querySelector('.accordion-content');
-            const endOfQuizMessageElement = document.getElementById('end-of-quiz-message');
-            const loadSampleButton = document.getElementById('loadSampleButton');
+            // --- Element Refs (will be initialized after HTML fragments load) ---
+            let jsonFileElement, loadJsonButton, saveJsonButton, quizAreaElement, quizProgressElement;
+            let groupIntroElement, questionMetaContainer, metaTooltipContentElement, questionTextElement;
+            let choicesFormElement, attemptNotesElement, submitAnswerButton, feedbackAreaElement;
+            let nextQuestionButton, previousQuestionButton, pastAttemptsContainer;
+            let pastAttemptsAccordionToggle, pastAttemptsAccordionContent, endOfQuizMessageElement, loadSampleButton;
+            let settingHideAnswerCheckbox, showAnswerButton, reviewSessionButton, finalReviewArea;
+            let finalReviewContent, restartQuizButton, backToSettingsButton, reviewModal;
+            let reviewModalContent, closeReviewModalButton, toggleAnnotationButton, annotationArea;
+            let annotationCanvas, annotationControls, penButton, highlighterButton, eraserButton;
+            let clearAnnotationButton, annotationCtx, sidebarElement, sidebarToggleButton;
+            let closeSidebarButton, applyFiltersButton, filterCategoriesList, filterProvidersList;
+            let filterScrambleCheckbox, clearCategoriesButton, clearProvidersButton;
+            let performanceModal, closePerformanceModalButton, performanceStatsContent;
 
-            const settingHideAnswerCheckbox = document.getElementById('setting-hide-answer');
-            const showAnswerButton = document.getElementById('show-answer-button');
-            const reviewSessionButton = document.getElementById('review-session-button');
-            const finalReviewArea = document.getElementById('final-review-area');
-            const finalReviewContent = document.getElementById('final-review-content');
-            const restartQuizButton = document.getElementById('restart-quiz-button');
-            const backToSettingsButton = document.getElementById('back-to-settings-button');
-            const reviewModal = document.getElementById('review-modal');
-            const reviewModalContent = document.getElementById('review-modal-content');
-            const closeReviewModalButton = document.getElementById('close-review-modal');
+            // Function to initialize element references after HTML fragments are loaded
+            function initializeElementReferences() {
+                jsonFileElement = document.getElementById('jsonFile');
+                loadJsonButton = document.getElementById('loadJsonButton');
+                saveJsonButton = document.getElementById('saveJsonButton');
+                quizAreaElement = document.getElementById('quiz-area');
+                quizProgressElement = document.getElementById('quiz-progress');
+                groupIntroElement = document.getElementById('current-group-intro');
+                questionMetaContainer = document.querySelector('.question-meta-container');
+                metaTooltipContentElement = document.getElementById('meta-tooltip-content');
+                questionTextElement = document.getElementById('question-text');
+                choicesFormElement = document.getElementById('choices-form');
+                attemptNotesElement = document.getElementById('attempt-notes');
+                submitAnswerButton = document.getElementById('submit-answer-button');
+                feedbackAreaElement = document.getElementById('feedback-area');
+                nextQuestionButton = document.getElementById('next-question-button');
+                previousQuestionButton = document.getElementById('previous-question-button');
+                pastAttemptsContainer = document.getElementById('past-attempts');
+                pastAttemptsAccordionToggle = pastAttemptsContainer?.querySelector('.accordion-toggle');
+                pastAttemptsAccordionContent = pastAttemptsContainer?.querySelector('.accordion-content');
+                endOfQuizMessageElement = document.getElementById('end-of-quiz-message');
+                loadSampleButton = document.getElementById('loadSampleButton');
 
-            const toggleAnnotationButton = document.getElementById('toggleAnnotationButton');
-            const annotationArea = document.getElementById('annotation-area');
-            const annotationCanvas = document.getElementById('annotationCanvas');
-            const annotationControls = document.getElementById('annotation-controls');
-            const penButton = document.getElementById('penButton');
-            const highlighterButton = document.getElementById('highlighterButton');
-            const eraserButton = document.getElementById('eraserButton');
-            const clearAnnotationButton = document.getElementById('clearAnnotationButton');
-            const annotationCtx = annotationCanvas.getContext('2d', { alpha: true });
+                settingHideAnswerCheckbox = document.getElementById('setting-hide-answer');
+                showAnswerButton = document.getElementById('show-answer-button');
+                reviewSessionButton = document.getElementById('review-session-button');
+                finalReviewArea = document.getElementById('final-review-area');
+                finalReviewContent = document.getElementById('final-review-content');
+                restartQuizButton = document.getElementById('restart-quiz-button');
+                backToSettingsButton = document.getElementById('back-to-settings-button');
+                reviewModal = document.getElementById('review-modal');
+                reviewModalContent = document.getElementById('review-modal-content');
+                closeReviewModalButton = document.getElementById('close-review-modal');
 
-            const sidebarElement = document.getElementById('settings-sidebar');
-            const sidebarToggleButton = document.getElementById('sidebar-toggle-button');
-            const closeSidebarButton = document.getElementById('close-sidebar-button');
-            const applyFiltersButton = document.getElementById('apply-filters-button');
-            const filterCategoriesList = document.getElementById('filter-categories-list');
-            const filterProvidersList = document.getElementById('filter-providers-list');
-            const filterScrambleCheckbox = document.getElementById('filter-scramble');
-            const clearCategoriesButton = document.getElementById('clear-categories-filter');
-            const clearProvidersButton = document.getElementById('clear-providers-filter');
+                toggleAnnotationButton = document.getElementById('toggleAnnotationButton');
+                annotationArea = document.getElementById('annotation-area');
+                annotationCanvas = document.getElementById('annotationCanvas');
+                annotationControls = document.getElementById('annotation-controls');
+                penButton = document.getElementById('penButton');
+                highlighterButton = document.getElementById('highlighterButton');
+                eraserButton = document.getElementById('eraserButton');
+                clearAnnotationButton = document.getElementById('clearAnnotationButton');
+                annotationCtx = annotationCanvas?.getContext('2d', { alpha: true });
 
-            const performanceModal = document.getElementById('performance-modal');
-            const closePerformanceModalButton = document.getElementById('close-performance-modal');
-            const performanceStatsContent = document.getElementById('performance-stats-content');
+                sidebarElement = document.getElementById('settings-sidebar');
+                sidebarToggleButton = document.getElementById('sidebar-toggle-button');
+                closeSidebarButton = document.getElementById('close-sidebar-button');
+                applyFiltersButton = document.getElementById('apply-filters-button');
+                filterCategoriesList = document.getElementById('filter-categories-list');
+                filterProvidersList = document.getElementById('filter-providers-list');
+                filterScrambleCheckbox = document.getElementById('filter-scramble');
+                clearCategoriesButton = document.getElementById('clear-categories-filter');
+                clearProvidersButton = document.getElementById('clear-providers-filter');
+
+                performanceModal = document.getElementById('performance-modal');
+                closePerformanceModalButton = document.getElementById('close-performance-modal');
+                performanceStatsContent = document.getElementById('performance-stats-content');
+            }
 
             // --- State Vars ---
             let quizData = { questions: [], groups: [], fileName: null }; // Holds the in-memory quiz data, populated from Dexie
@@ -96,153 +113,156 @@ document.addEventListener('DOMContentLoaded', () => {
             let questionTimerInterval = null;
             let stopwatchInterval = null;
 
-            // --- Event Listeners ---
-            loadJsonButton.addEventListener('click', handleLoadJson);
-            saveJsonButton.addEventListener('click', handleSaveJson);
+            // Function to setup event listeners after elements are initialized
+            function setupEventListeners() {
+                // --- Event Listeners ---
+                loadJsonButton?.addEventListener('click', handleLoadJson);
+                saveJsonButton?.addEventListener('click', handleSaveJson);
 
-            // Event listeners for saving settings automatically
-            document.querySelectorAll('input[name="filter-attempts"]').forEach(radio => radio.addEventListener('change', saveCurrentSettingsToDB));
-            document.querySelectorAll('input[name="filter-notes"]').forEach(radio => radio.addEventListener('change', saveCurrentSettingsToDB));
-            document.getElementById('filter-scramble')?.addEventListener('change', saveCurrentSettingsToDB);
-            document.getElementById('session-time-limit')?.addEventListener('change', saveCurrentSettingsToDB);
-            document.getElementById('question-limit')?.addEventListener('change', saveCurrentSettingsToDB);
-            document.getElementById('enable-session-timer')?.addEventListener('change', saveCurrentSettingsToDB);
-            document.getElementById('enable-question-timer')?.addEventListener('change', saveCurrentSettingsToDB);
-            document.getElementById('enable-stopwatch')?.addEventListener('change', saveCurrentSettingsToDB);
-            document.getElementById('question-time-limit')?.addEventListener('change', saveCurrentSettingsToDB);
-            document.getElementById('setting-hide-answer')?.addEventListener('change', saveCurrentSettingsToDB);
+                // Event listeners for saving settings automatically
+                document.querySelectorAll('input[name="filter-attempts"]').forEach(radio => radio.addEventListener('change', saveCurrentSettingsToDB));
+                document.querySelectorAll('input[name="filter-notes"]').forEach(radio => radio.addEventListener('change', saveCurrentSettingsToDB));
+                document.getElementById('filter-scramble')?.addEventListener('change', saveCurrentSettingsToDB);
+                document.getElementById('session-time-limit')?.addEventListener('change', saveCurrentSettingsToDB);
+                document.getElementById('question-limit')?.addEventListener('change', saveCurrentSettingsToDB);
+                document.getElementById('enable-session-timer')?.addEventListener('change', saveCurrentSettingsToDB);
+                document.getElementById('enable-question-timer')?.addEventListener('change', saveCurrentSettingsToDB);
+                document.getElementById('enable-stopwatch')?.addEventListener('change', saveCurrentSettingsToDB);
+                document.getElementById('question-time-limit')?.addEventListener('change', saveCurrentSettingsToDB);
+                document.getElementById('setting-hide-answer')?.addEventListener('change', saveCurrentSettingsToDB);
 
-            // Event delegation for dynamic checkboxes
-            filterCategoriesList.addEventListener('change', (event) => {
-                if (event.target.type === 'checkbox') {
-                    saveCurrentSettingsToDB();
+                // Event delegation for dynamic checkboxes
+                filterCategoriesList?.addEventListener('change', (event) => {
+                    if (event.target.type === 'checkbox') {
+                        saveCurrentSettingsToDB();
+                    }
+                });
+                filterProvidersList?.addEventListener('change', (event) => {
+                    if (event.target.type === 'checkbox') {
+                        saveCurrentSettingsToDB();
+                    }
+                });
+                submitAnswerButton?.addEventListener('click', handleSubmitAnswer);
+                nextQuestionButton?.addEventListener('click', handleNextQuestion);
+                sidebarToggleButton?.addEventListener('click', toggleSidebar);
+                closeSidebarButton?.addEventListener('click', closeSidebar);
+                applyFiltersButton?.addEventListener('click', applyFiltersAndStartQuiz);
+                clearCategoriesButton?.addEventListener('click', () => clearCheckboxes(filterCategoriesList));
+                clearProvidersButton?.addEventListener('click', () => clearCheckboxes(filterProvidersList));
+                loadSampleButton?.addEventListener('click', handleLoadSampleData);
+                showAnswerButton?.addEventListener('click', showCurrentAnswer);
+                reviewSessionButton?.addEventListener('click', showReviewModal);
+                restartQuizButton?.addEventListener('click', handleRestartQuiz);
+                backToSettingsButton?.addEventListener('click', handleBackToSettings);
+                closeReviewModalButton?.addEventListener('click', closeReviewModal);
+                reviewModal?.addEventListener('click', (event) => { if (event.target === reviewModal) closeReviewModal(); });
+
+                // Accordion for Past Attempts
+                if (pastAttemptsAccordionToggle && pastAttemptsAccordionContent) {
+                    pastAttemptsAccordionToggle.addEventListener('click', () => {
+                        const isExpanded = pastAttemptsAccordionToggle.getAttribute('aria-expanded') === 'true';
+                        pastAttemptsAccordionToggle.setAttribute('aria-expanded', String(!isExpanded));
+                        pastAttemptsAccordionContent.classList.toggle('open');
+                        if (!isExpanded) {
+                            // Opening
+                            pastAttemptsAccordionContent.style.display = 'block'; // Make it visible before calculating scrollHeight
+                            pastAttemptsAccordionContent.style.maxHeight = pastAttemptsAccordionContent.scrollHeight + "px";
+                        } else {
+                            // Closing
+                            pastAttemptsAccordionContent.style.maxHeight = '0';
+                            // Listen for transition end to set display: none for accessibility and layout
+                            pastAttemptsAccordionContent.addEventListener('transitionend', function handler() {
+                                if (pastAttemptsAccordionToggle.getAttribute('aria-expanded') === 'false') { // Check again in case of rapid clicks
+                                    pastAttemptsAccordionContent.style.display = 'none';
+                                }
+                                pastAttemptsAccordionContent.removeEventListener('transitionend', handler);
+                            });
+                        }
+                    });
                 }
-            });
-            filterProvidersList.addEventListener('change', (event) => {
-                if (event.target.type === 'checkbox') {
-                    saveCurrentSettingsToDB();
-                }
-            });
-            submitAnswerButton.addEventListener('click', handleSubmitAnswer);
-            nextQuestionButton.addEventListener('click', handleNextQuestion);
-            sidebarToggleButton.addEventListener('click', toggleSidebar);
-            closeSidebarButton.addEventListener('click', closeSidebar);
-            applyFiltersButton.addEventListener('click', applyFiltersAndStartQuiz);
-            clearCategoriesButton.addEventListener('click', () => clearCheckboxes(filterCategoriesList));
-            clearProvidersButton.addEventListener('click', () => clearCheckboxes(filterProvidersList));
-            loadSampleButton.addEventListener('click', handleLoadSampleData);
-            showAnswerButton.addEventListener('click', showCurrentAnswer);
-            reviewSessionButton.addEventListener('click', showReviewModal);
-            restartQuizButton.addEventListener('click', handleRestartQuiz);
-            backToSettingsButton.addEventListener('click', handleBackToSettings);
-            closeReviewModalButton.addEventListener('click', closeReviewModal);
-            reviewModal.addEventListener('click', (event) => { if (event.target === reviewModal) closeReviewModal(); });
 
-            // Accordion for Past Attempts
-            if (pastAttemptsAccordionToggle && pastAttemptsAccordionContent) {
-                pastAttemptsAccordionToggle.addEventListener('click', () => {
-                    const isExpanded = pastAttemptsAccordionToggle.getAttribute('aria-expanded') === 'true';
-                    pastAttemptsAccordionToggle.setAttribute('aria-expanded', String(!isExpanded));
-                    pastAttemptsAccordionContent.classList.toggle('open');
-                    if (!isExpanded) {
-                        // Opening
-                        pastAttemptsAccordionContent.style.display = 'block'; // Make it visible before calculating scrollHeight
-                        pastAttemptsAccordionContent.style.maxHeight = pastAttemptsAccordionContent.scrollHeight + "px";
-                    } else {
-                        // Closing
-                        pastAttemptsAccordionContent.style.maxHeight = '0';
-                        // Listen for transition end to set display: none for accessibility and layout
-                        pastAttemptsAccordionContent.addEventListener('transitionend', function handler() {
-                            if (pastAttemptsAccordionToggle.getAttribute('aria-expanded') === 'false') { // Check again in case of rapid clicks
-                                pastAttemptsAccordionContent.style.display = 'none';
+                document.getElementById('clear-attempts-filter')?.addEventListener('click', () => {
+                    document.querySelector('input[name="filter-attempts"][value="all"]').checked = true;
+                });
+                document.getElementById('clear-notes-filter')?.addEventListener('click', () => {
+                    document.querySelector('input[name="filter-notes"][value="all"]').checked = true;
+                });
+
+                const referenceButtonForPerformance = applyFiltersButton;
+                performanceButton = document.createElement('button');
+                performanceButton.id = 'show-performance-button';
+                performanceButton.textContent = 'Performance Dashboard';
+                performanceButton.disabled = true;
+                referenceButtonForPerformance?.parentNode?.insertBefore(performanceButton, referenceButtonForPerformance.nextSibling);
+                performanceButton.style.marginTop = "1rem";
+                if (applyFiltersButton) applyFiltersButton.style.marginBottom = "0";
+                performanceButton?.addEventListener('click', showPerformanceModal);
+                closePerformanceModalButton?.addEventListener('click', closePerformanceModal);
+                performanceModal?.addEventListener('click', (event) => { if (event.target === performanceModal) closePerformanceModal(); });
+
+                document.getElementById('enable-session-timer')?.addEventListener('change', (e) => { sessionTimerEnabled = e.target.checked; updateTimerVisibility(); });
+                document.getElementById('enable-question-timer')?.addEventListener('change', (e) => { questionTimerEnabled = e.target.checked; updateTimerVisibility(); });
+                document.getElementById('enable-stopwatch')?.addEventListener('change', (e) => { stopwatchEnabled = e.target.checked; updateTimerVisibility(); });
+                document.getElementById('session-time-limit')?.addEventListener('change', (e) => { sessionTimeLimit = Math.max(1, parseInt(e.target.value, 10) || 60) * 60; });
+                document.getElementById('question-time-limit')?.addEventListener('change', (e) => { questionTimeLimit = Math.max(10, parseInt(e.target.value, 10) || 90); });
+                document.getElementById('question-limit')?.addEventListener('change', (e) => { questionLimit = Math.max(1, parseInt(e.target.value, 10) || 50); });
+
+                toggleAnnotationButton?.addEventListener('click', toggleAnnotationMode);
+                annotationCanvas?.addEventListener('mousedown', startDrawing);
+                annotationCanvas?.addEventListener('mousemove', draw);
+                annotationCanvas?.addEventListener('mouseup', stopDrawing);
+                annotationCanvas?.addEventListener('mouseout', stopDrawing);
+                annotationCanvas?.addEventListener('touchstart', startDrawing, { passive: false });
+                annotationCanvas?.addEventListener('touchmove', draw, { passive: false });
+                annotationCanvas?.addEventListener('touchend', stopDrawing);
+                annotationCanvas?.addEventListener('touchcancel', stopDrawing);
+                penButton?.addEventListener('click', () => setTool('pen'));
+                highlighterButton?.addEventListener('click', () => setTool('highlighter'));
+                eraserButton?.addEventListener('click', () => setTool('eraser'));
+                clearAnnotationButton?.addEventListener('click', clearCanvas);
+
+                previousQuestionButton?.addEventListener('click', handlePreviousQuestion);
+
+                window.addEventListener('beforeunload', async () => {
+                    await saveNotesForCurrentAttempt(); // Existing functionality
+
+                    // Save active quiz session state if a quiz is in progress
+                    if (masterQuestionList && masterQuestionList.length > 0 && currentQuestionIndex >= 0 && currentQuestionIndex < masterQuestionList.length) {
+                        console.log("beforeunload: Saving active quiz session state.");
+                        try {
+                            await saveAppState('activeMasterQuestionList', masterQuestionList);
+                            await saveAppState('activeCurrentQuestionIndex', currentQuestionIndex);
+                            await saveAppState('activeFilters', getFilterSettings()); // Save current filter settings
+                            await saveAppState('activeHideAnswerMode', hideAnswerMode);
+                            await saveAppState('activeQuestionLimit', questionLimit); // Save the question limit used for this session
+                            await saveAppState('activeSessionTimeRemaining', sessionTimeRemaining);
+                            await saveAppState('activeStopwatchTime', stopwatchTime);
+                            console.log("beforeunload: Active quiz session state saved.");
+
+                            // Save sessionAttempts
+                            if (sessionAttempts && sessionAttempts.size > 0) {
+                                const serializableSessionAttempts = Array.from(sessionAttempts.entries());
+                                await saveAppState('activeSessionAttempts', serializableSessionAttempts);
+                                console.log("beforeunload: Active sessionAttempts saved.");
+                            } else {
+                                await db.appState.delete('activeSessionAttempts'); // Or saveAppState('activeSessionAttempts', null);
+                                console.log("beforeunload: No active sessionAttempts to save, or it's empty. Cleared from DB.");
                             }
-                            pastAttemptsAccordionContent.removeEventListener('transitionend', handler);
-                        });
+                        } catch (error) {
+                            console.error("beforeunload: Error saving active quiz session state:", error);
+                        }
+                    } else {
+                        // If no active quiz, ensure any lingering session state is cleared (optional, but good for consistency)
+                        // This might be too aggressive if user just loaded data but hasn't started.
+                        // Consider clearing only if a quiz was previously active but is now finished/reset.
+                        // For now, only save if active. Clearing will be handled at specific points (new quiz, end quiz).
+                        console.log("beforeunload: No active quiz session to save.");
+                        // Also clear sessionAttempts from DB if no active quiz
+                        await db.appState.delete('activeSessionAttempts');
+                        console.log("beforeunload: No active quiz, ensuring activeSessionAttempts is cleared from DB.");
                     }
                 });
             }
-
-            document.getElementById('clear-attempts-filter').addEventListener('click', () => {
-                document.querySelector('input[name="filter-attempts"][value="all"]').checked = true;
-            });
-            document.getElementById('clear-notes-filter').addEventListener('click', () => {
-                document.querySelector('input[name="filter-notes"][value="all"]').checked = true;
-            });
-
-            const referenceButtonForPerformance = applyFiltersButton;
-            performanceButton = document.createElement('button');
-            performanceButton.id = 'show-performance-button';
-            performanceButton.textContent = 'Performance Dashboard';
-            performanceButton.disabled = true;
-            referenceButtonForPerformance.parentNode.insertBefore(performanceButton, referenceButtonForPerformance.nextSibling);
-            performanceButton.style.marginTop = "1rem";
-            applyFiltersButton.style.marginBottom = "0";
-            performanceButton.addEventListener('click', showPerformanceModal);
-            closePerformanceModalButton.addEventListener('click', closePerformanceModal);
-            performanceModal.addEventListener('click', (event) => { if (event.target === performanceModal) closePerformanceModal(); });
-
-            document.getElementById('enable-session-timer')?.addEventListener('change', (e) => { sessionTimerEnabled = e.target.checked; updateTimerVisibility(); });
-            document.getElementById('enable-question-timer')?.addEventListener('change', (e) => { questionTimerEnabled = e.target.checked; updateTimerVisibility(); });
-            document.getElementById('enable-stopwatch')?.addEventListener('change', (e) => { stopwatchEnabled = e.target.checked; updateTimerVisibility(); });
-            document.getElementById('session-time-limit')?.addEventListener('change', (e) => { sessionTimeLimit = Math.max(1, parseInt(e.target.value, 10) || 60) * 60; });
-            document.getElementById('question-time-limit')?.addEventListener('change', (e) => { questionTimeLimit = Math.max(10, parseInt(e.target.value, 10) || 90); });
-            document.getElementById('question-limit')?.addEventListener('change', (e) => { questionLimit = Math.max(1, parseInt(e.target.value, 10) || 50); });
-
-            toggleAnnotationButton.addEventListener('click', toggleAnnotationMode);
-            annotationCanvas.addEventListener('mousedown', startDrawing);
-            annotationCanvas.addEventListener('mousemove', draw);
-            annotationCanvas.addEventListener('mouseup', stopDrawing);
-            annotationCanvas.addEventListener('mouseout', stopDrawing);
-            annotationCanvas.addEventListener('touchstart', startDrawing, { passive: false });
-            annotationCanvas.addEventListener('touchmove', draw, { passive: false });
-            annotationCanvas.addEventListener('touchend', stopDrawing);
-            annotationCanvas.addEventListener('touchcancel', stopDrawing);
-            penButton.addEventListener('click', () => setTool('pen'));
-            highlighterButton.addEventListener('click', () => setTool('highlighter'));
-            eraserButton.addEventListener('click', () => setTool('eraser'));
-            clearAnnotationButton.addEventListener('click', clearCanvas);
-
-            previousQuestionButton.addEventListener('click', handlePreviousQuestion);
-
-            window.addEventListener('beforeunload', async () => {
-                await saveNotesForCurrentAttempt(); // Existing functionality
-
-                // Save active quiz session state if a quiz is in progress
-                if (masterQuestionList && masterQuestionList.length > 0 && currentQuestionIndex >= 0 && currentQuestionIndex < masterQuestionList.length) {
-                    console.log("beforeunload: Saving active quiz session state.");
-                    try {
-                        await saveAppState('activeMasterQuestionList', masterQuestionList);
-                        await saveAppState('activeCurrentQuestionIndex', currentQuestionIndex);
-                        await saveAppState('activeFilters', getFilterSettings()); // Save current filter settings
-                        await saveAppState('activeHideAnswerMode', hideAnswerMode);
-                        await saveAppState('activeQuestionLimit', questionLimit); // Save the question limit used for this session
-                        await saveAppState('activeSessionTimeRemaining', sessionTimeRemaining);
-                        await saveAppState('activeStopwatchTime', stopwatchTime);
-                        console.log("beforeunload: Active quiz session state saved.");
-
-                        // Save sessionAttempts
-                        if (sessionAttempts && sessionAttempts.size > 0) {
-                            const serializableSessionAttempts = Array.from(sessionAttempts.entries());
-                            await saveAppState('activeSessionAttempts', serializableSessionAttempts);
-                            console.log("beforeunload: Active sessionAttempts saved.");
-                        } else {
-                            await db.appState.delete('activeSessionAttempts'); // Or saveAppState('activeSessionAttempts', null);
-                            console.log("beforeunload: No active sessionAttempts to save, or it's empty. Cleared from DB.");
-                        }
-                    } catch (error) {
-                        console.error("beforeunload: Error saving active quiz session state:", error);
-                    }
-                } else {
-                    // If no active quiz, ensure any lingering session state is cleared (optional, but good for consistency)
-                    // This might be too aggressive if user just loaded data but hasn't started.
-                    // Consider clearing only if a quiz was previously active but is now finished/reset.
-                    // For now, only save if active. Clearing will be handled at specific points (new quiz, end quiz).
-                    console.log("beforeunload: No active quiz session to save.");
-                    // Also clear sessionAttempts from DB if no active quiz
-                    await db.appState.delete('activeSessionAttempts');
-                    console.log("beforeunload: No active quiz, ensuring activeSessionAttempts is cleared from DB.");
-                }
-            });
 
             // --- Sidebar Functions ---
             function populateFilterOptions() {
@@ -1880,6 +1900,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- Initial Page Load Sequence ---
             async function initializeApp() {
                 await loadHtmlFragments(); // Load HTML snippets first
+                initializeElementReferences(); // Initialize element references after fragments are loaded
+                setupEventListeners(); // Setup event listeners after elements are initialized
                 registerServiceWorker();
                 const loadedFromDB = await loadQuizDataFromDB();
                 populateFilterOptions(); // Populate dynamic filter options first
