@@ -1371,3 +1371,108 @@
                 font-size: 1.3rem;
             }
         }
+
+/* Styles for new category/subcategory filter in sidebar */
+.category-filter-item {
+    margin-bottom: 8px; /* Space between main category groups */
+}
+
+.main-category-line {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.main-category-line label { /* Label for main category checkbox */
+    display: flex; /* Align checkbox and text */
+    align-items: center;
+    flex-grow: 1; /* Allow label to take available space */
+}
+
+.main-category-line input[type="checkbox"] {
+    margin-right: 6px;
+}
+
+.subcategory-toggle {
+    cursor: pointer;
+    padding: 2px 6px;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    font-size: 0.9em;
+    margin-left: auto; /* Push toggle to the right */
+    user-select: none; /* Prevent text selection on click */
+}
+
+.subcategory-toggle:hover {
+    background-color: #e0e0e0;
+}
+
+.subcategory-list {
+    list-style-type: none;
+    padding-left: 25px; /* Indentation for subcategories */
+    margin-top: 4px;
+    border-left: 1px dashed #ddd; /* Optional: visual guide for nesting */
+}
+
+.subcategory-list li {
+    padding: 3px 0;
+}
+
+.subcategory-list label { /* Label for subcategory checkbox */
+    display: flex;
+    align-items: center;
+    font-size: 0.95em;
+}
+
+.subcategory-list input[type="checkbox"] {
+    margin-right: 6px;
+}
+
+/* Hide subcategory list by default if JS adds 'display: none;' */
+/* No specific CSS needed for hiding if inline style is used, */
+/* but a class-based approach would be: */
+/* .subcategory-list.hidden { display: none; } */
+
+
+/* Styles for subcategory performance display in modal */
+.subcategory-performance-toggle {
+    background-color: #e7f1ff; /* Light blue background */
+    border: 1px solid #cce0ff;
+    color: #0056b3; /* Darker blue text */
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-left: 10px; /* Space from main category stats */
+    margin-top: 5px; /* Space from main category line if it wraps */
+    display: inline-block; /* Allow margin-top */
+}
+
+.subcategory-performance-toggle:hover {
+    background-color: #d0e0f8;
+}
+
+.subcategory-performance-details {
+    background-color: #fdfdfd; /* Slightly off-white background for details */
+    border: 1px solid #eee;
+    padding: 10px;
+    margin-top: 5px;
+    margin-left: 20px; /* Indent subcategory details */
+    border-radius: 4px;
+}
+
+.subcategory-performance-details ul {
+    list-style-type: none;
+    padding-left: 10px; /* Further indent list items if needed */
+    margin: 0;
+}
+
+.subcategory-performance-details li {
+    padding: 4px 0;
+    font-size: 0.95em;
+    border-bottom: 1px dotted #f0f0f0; /* Separator for subcategory items */
+}
+.subcategory-performance-details li:last-child {
+    border-bottom: none;
+}

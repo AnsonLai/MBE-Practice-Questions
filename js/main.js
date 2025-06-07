@@ -1,5 +1,110 @@
 import { db, saveCurrentSettingsToDB, loadUserSettingsFromDB, loadQuizDataFromDB, saveQuestionToDB, saveAppState, loadAppState, clearActiveSessionState } from './db.js';
-import { escapeHtml, formatTime, toggleSidebar, openSidebar, closeSidebar, populateCheckboxList, clearCheckboxes, loadHtmlFragments } from './ui.js';
+import { escapeHtml, formatTime, toggleSidebar, openSidebar, closeSidebar, populateCheckboxList, clearCheckboxes, loadHtmlFragments, populateCategorySubcategoryFilter } from './ui.js';
+
+const mbe_categories_with_subcategories = {
+    "Civil Procedure": [
+        "Jurisdiction: Subject Matter & Personal",
+        "Venue, Transfer & Forum Non Conveniens",
+        "Service of Process & Law Applied by Federal Courts (Erie Doctrine)",
+        "Pleadings, Rule 11 & Joinder (incl. Class Actions)",
+        "Discovery, Disclosure & Pretrial Conferences/Orders",
+        "Injunctions & Adjudication Without Trial (Summary Judgment, Dismissals)",
+        "Jury Trials (Right to, Selection, Instructions)",
+        "Motions (Pretrial, Judgment as a Matter of Law, Post-trial)",
+        "Verdicts, Judgments & Preclusion (Claim & Issue)",
+        "Appealability & Review",
+        "Other Civil Procedure Issues"
+    ],
+    "Constitutional Law": [
+        "The Nature of Judicial Review (Standing, Ripeness, Mootness, Political Questions)",
+        "Separation of Powers: Congressional Powers (Commerce, Taxing, Spending)",
+        "Separation of Powers: Presidential Powers & Interbranch Relations",
+        "Federalism (Supremacy, Preemption, Dormant Commerce Clause, Intergovernmental Immunities)",
+        "State Action Doctrine",
+        "Due Process (Procedural & Substantive)",
+        "Equal Protection",
+        "First Amendment: Freedom of Speech & Press",
+        "First Amendment: Freedom of Religion (Establishment & Free Exercise) & Association",
+        "Takings Clause & Contracts Clause",
+        "Other Individual Rights (Privileges & Immunities, Bills of Attainder, Ex Post Facto Laws)",
+        "Eleventh Amendment & State Sovereign Immunity",
+        "Other Constitutional Law Issues"
+    ],
+    "Contracts and Sales": [
+        "Contract Formation: Mutual Assent (Offer & Acceptance, Implied-in-Fact)",
+        "Contract Formation: Consideration & Enforceable Obligations without Consideration (Promissory Estoppel, Restitution)",
+        "Defenses to Contract Enforceability (Incapacity, Duress, Mistake, Fraud, Illegality, Statute of Frauds)",
+        "Contract Content & Meaning (Parol Evidence, Interpretation, Omitted/Implied Terms)",
+        "UCC Article 2: Formation, Terms, Warranties & Risk of Loss",
+        "Conditions (Express & Constructive) & Excuses for Non-Performance (Impossibility, Impracticability, Frustration)",
+        "Breach of Contract (Material/Partial, Anticipatory Repudiation) & Obligations of Good Faith",
+        "Contract Remedies: Monetary Damages (Expectation, Consequential, Incidental, Liquidated)",
+        "Contract Remedies: Equitable Relief & Restitution (Specific Performance, Rescission, Reformation)",
+        "Third-Party Rights (Beneficiaries, Assignment of Rights, Delegation of Duties)",
+        "Discharge of Contractual Duties (Accord & Satisfaction, Substituted Contract, Novation, Rescission, Release)",
+        "Modification of Contracts",
+        "Other Contracts & Sales Issues"
+    ],
+    "Criminal Law and Procedure": [
+        "Homicide (Intended Killings, Unintended Killings, Felony Murder)",
+        "Other Crimes Against Persons & Property (Theft, Robbery, Burglary, Assault, Battery, Rape, Arson, Possession)",
+        "Inchoate Offenses (Attempt, Conspiracy, Solicitation) & Parties to Crime",
+        "General Principles of Criminal Liability (Actus Reus, Mens Rea, Strict Liability, Causation)",
+        "Defenses to Crimes (Insanity, Intoxication, Justification, Excuse, Mistake)",
+        "Fourth Amendment: Arrest, Search & Seizure",
+        "Fifth Amendment: Confessions/Self-Incrimination (Miranda), Double Jeopardy, Due Process",
+        "Sixth Amendment: Right to Counsel, Fair Trial (Speedy Trial, Jury, Confrontation), Identification Procedures",
+        "Pre-Trial Procedures (Bail, Grand Juries) & Guilty Pleas",
+        "Sentencing, Punishment (Eighth Amendment - Cruel & Unusual) & Appeals",
+        "Burdens of Proof & Persuasion",
+        "Jurisdiction in Criminal Cases",
+        "Other Criminal Law & Procedure Issues"
+    ],
+    "Evidence": [
+        "Presentation of Evidence: Introduction, Objections, Witness Competency & Examination",
+        "Relevance & Reasons for Excluding Relevant Evidence (Unfair Prejudice, Confusion, Waste of Time)",
+        "Authentication & Identification (incl. Best Evidence Rule for Writings, Recordings, Photos)",
+        "Character Evidence, Habit & Similar Acts/Events",
+        "Expert Testimony (Qualifications, Bases, Reliability, Subject Matter)",
+        "Privileges (Spousal, Attorney-Client, Physician/Psychotherapist) & Other Policy Exclusions (Remedial Measures, Compromise)",
+        "Hearsay: Definition & Non-Hearsay (Prior Statements by Witness, Statements Attributable to Party-Opponent)",
+        "Hearsay Exceptions: Availability Immaterial (Present Sense Impression, Excited Utterance, State of Mind, Medical Diagnosis, Business Records, Public Records)",
+        "Hearsay Exceptions: Declarant Unavailable (Former Testimony, Statements Against Interest, Dying Declarations, Forfeiture)",
+        "Confrontation Clause & Its Impact on Hearsay",
+        "Impeachment, Contradiction & Rehabilitation of Witnesses",
+        "Judicial Notice & Presumptions",
+        "Other Evidence Issues"
+    ],
+    "Real Property": [
+        "Present Estates & Future Interests (incl. Rules Affecting These Interests like RAP)",
+        "Co-tenancy (Tenancy in Common, Joint Tenancy) & Rights/Obligations of Co-tenants",
+        "Landlord-Tenant Law (Types of Tenancies, Possession, Rent, Transfers, Termination, Habitability)",
+        "Rights in Real Property: Easements, Profits & Licenses (Creation, Scope, Termination)",
+        "Rights in Real Property: Restrictive Covenants & Equitable Servitudes (Nature, Creation, Transfer, Termination)",
+        "Zoning, Land Use Regulation & Fixtures (incl. Fair Housing)",
+        "Real Estate Contracts: Formation, Construction & Statute of Frauds",
+        "Real Estate Contracts: Marketability of Title, Risk of Loss (Equitable Conversion) & Remedies for Breach",
+        "Mortgages/Security Devices: Types, Security Relationships & Rights Prior to Foreclosure",
+        "Mortgages/Security Devices: Transfers by Mortgagor/Mortgagee, Discharge & Foreclosure",
+        "Titles: Adverse Possession & Transfer by Deed (Requirements, Types of Deeds)",
+        "Title Assurance Systems: Recording Acts (Types, Chain of Title) & Title Insurance",
+        "Other Real Property Issues (Including Conflicts of Law, Transfer by Will/Operation of Law)"
+    ],
+    "Torts": [
+        "Intentional Torts (to Person & Property, and Defenses)",
+        "Negligence - General Duty & Standard of Care (Reasonably Prudent Person, Special Classes)",
+        "Negligence - Special Duty Rules (Failure to Act, Owners/Occupiers of Land, Statutory Standards)",
+        "Negligence - Breach of Duty & Causation (Actual & Proximate Cause, Res Ipsa Loquitur, Multiple Causes)",
+        "Negligence - Damages (incl. Pure Economic Loss, Emotional Distress) & Defenses (Contributory/Comparative Negligence, Assumption of Risk)",
+        "Vicarious Liability & Joint Tortfeasor Liability (incl. Apportionment)",
+        "Strict Liability (Common Law - Abnormally Dangerous Activities, Animals) & Nuisance",
+        "Products Liability (Theories: Strict Liability, Negligence, Warranty; Defenses)",
+        "Defamation & Invasion of Privacy (Defenses & Constitutional Limitations)",
+        "Misrepresentation (Intentional/Fraudulent & Negligent)",
+        "Intentional Interference with Business Relations",
+        "Other Torts Issues"
+    ]
+};
 
 document.addEventListener('DOMContentLoaded', () => {
             // --- Element Refs ---
@@ -246,30 +351,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // --- Sidebar Functions ---
             function populateFilterOptions() {
+                // Check if quizData is loaded for enabling buttons and populating providers
                 if (!quizData || !quizData.questions || quizData.questions.length === 0) {
-                    filterCategoriesList.innerHTML = '<p>Load data to see categories.</p>';
+                    // Providers list will show 'Load data to see providers.'
                     filterProvidersList.innerHTML = '<p>Load data to see providers.</p>';
+                    // Categories list will be populated by mbe_categories_with_subcategories, but buttons remain disabled
                     applyFiltersButton.disabled = true;
                     if (performanceButton) {
                         performanceButton.disabled = true;
                     }
-                    return;
+                } else {
+                    // Populate providers from quizData
+                    const providers = new Set();
+                    quizData.questions.forEach(q => {
+                        if (q.source?.provider) providers.add(q.source.provider);
+                    });
+                    populateCheckboxList(filterProvidersList, [...providers].sort()); // Keep this for providers
+
+                    applyFiltersButton.disabled = false;
+                    if (performanceButton) {
+                        performanceButton.disabled = false;
+                    }
                 }
 
-                const categories = new Set();
-                const providers = new Set();
-
-                quizData.questions.forEach(q => {
-                    if (q.category) categories.add(q.category);
-                    if (q.source?.provider) providers.add(q.source.provider);
-                });
-
-                populateCheckboxList(filterCategoriesList, [...categories].sort());
-                populateCheckboxList(filterProvidersList, [...providers].sort());
-
-                applyFiltersButton.disabled = false;
-                if (performanceButton) {
-                    performanceButton.disabled = false;
+                // Always populate categories and subcategories from the fixed list
+                // Ensure mbe_categories_with_subcategories is accessible here
+                if (typeof mbe_categories_with_subcategories !== 'undefined' && mbe_categories_with_subcategories) {
+                    populateCategorySubcategoryFilter(filterCategoriesList, mbe_categories_with_subcategories);
+                } else {
+                    // Fallback or error if mbe_categories_with_subcategories is not defined
+                    filterCategoriesList.innerHTML = '<p>Error: Category definitions are missing.</p>';
+                    // Consider disabling buttons if categories can't be loaded
+                    applyFiltersButton.disabled = true;
+                    if (performanceButton) {
+                        performanceButton.disabled = true;
+                    }
                 }
             }
 
@@ -278,15 +394,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 const notesFilter = document.querySelector('input[name="filter-notes"]:checked')?.value || 'all';
                 const scramble = filterScrambleCheckbox.checked;
 
-                const selectedCategories = Array.from(filterCategoriesList.querySelectorAll('input[type="checkbox"]:checked'))
-                    .map(cb => cb.value);
+                const selectedCategoriesAndSubcategories = {};
+                const mainCategoryCheckboxes = filterCategoriesList.querySelectorAll('input[name="filter-main-category"]');
+
+                mainCategoryCheckboxes.forEach(cb => {
+                    const mainCategoryName = cb.value;
+                    if (cb.checked) {
+                        const selectedSubcategories = [];
+                        // Ensure sanitization for the selector matches the one used in populateCategorySubcategoryFilter
+                        const sanitizedMainCategoryName = mainCategoryName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+                        const subCategoryCheckboxes = filterCategoriesList.querySelectorAll(`input[name="filter-subcategory-${sanitizedMainCategoryName}"]:checked`);
+
+                        subCategoryCheckboxes.forEach(subCb => {
+                            selectedSubcategories.push(subCb.value);
+                        });
+                        selectedCategoriesAndSubcategories[mainCategoryName] = selectedSubcategories;
+                    }
+                });
+
                 const selectedProviders = Array.from(filterProvidersList.querySelectorAll('input[type="checkbox"]:checked'))
                     .map(cb => cb.value);
 
                 return {
                     attempts: attemptsFilter,
                     notes: notesFilter,
-                    categories: selectedCategories,
+                    categories: selectedCategoriesAndSubcategories, // New structure
                     providers: selectedProviders,
                     scramble: scramble
                 };
@@ -690,7 +822,30 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (hasAttempts && q.user_attempts.every(attempt => attempt.notes && attempt.notes.trim() !== '')) return false;
                     }
 
-                    if (filters.categories.length > 0 && (!q.category || !filters.categories.includes(q.category))) return false;
+                    // New Category/Subcategory Filter Logic
+                    const questionCategory = q.category;
+                    const questionSubCategory = q.sub_category; // Assuming q.sub_category exists
+                    const selectedCategoriesMap = filters.categories; // This is the object from getFilterSettings
+
+                    if (Object.keys(selectedCategoriesMap).length > 0) { // If any main category filters are active
+                        if (!selectedCategoriesMap.hasOwnProperty(questionCategory)) {
+                            return false; // Question's main category is not among the selected main categories.
+                        }
+
+                        // Main category is selected, now check subcategories.
+                        const selectedSubcategories = selectedCategoriesMap[questionCategory]; // Array of selected subcategory names.
+
+                        // If specific subcategories are selected for this main category, the question must match one of them.
+                        if (selectedSubcategories.length > 0) {
+                            if (!questionSubCategory || !selectedSubcategories.includes(questionSubCategory)) {
+                                return false; // Question has no sub_category, or it's not in the selected list.
+                            }
+                        }
+                        // If selectedSubcategories.length is 0, it means the main category is selected,
+                        // and all its subcategories are implicitly included. So, no further sub_category check.
+                    }
+
+                    // Provider filter (existing logic)
                     if (filters.providers.length > 0 && (!q.source?.provider || !filters.providers.includes(q.source.provider))) return false;
 
                     return true;
@@ -1648,13 +1803,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         // Stats by category (based on last attempt of this question)
                         if (q.category) {
-                            if (!categoryStats[q.category]) categoryStats[q.category] = { totalLastAttempts: 0, correctLastAttempts: 0, sumTimeAllAttempts: 0, numAllAttempts: 0 };
-                            categoryStats[q.category].totalLastAttempts++;
-                            if (lastAttempt.chosen_answer === q.answer?.correct_choice) categoryStats[q.category].correctLastAttempts++;
-                            q.user_attempts.forEach(att => { // Sum time and count from all attempts for this category
-                                categoryStats[q.category].sumTimeAllAttempts += (att.time_spent_seconds || 0);
-                                categoryStats[q.category].numAllAttempts++;
+                            if (!categoryStats[q.category]) {
+                                categoryStats[q.category] = {
+                                    overall: { totalLastAttempts: 0, correctLastAttempts: 0, sumTimeAllAttempts: 0, numAllAttempts: 0 },
+                                    subcategories: {}
+                                };
+                            }
+                            // Update overall category stats
+                            categoryStats[q.category].overall.totalLastAttempts++;
+                            if (lastAttempt.chosen_answer === q.answer?.correct_choice) {
+                                categoryStats[q.category].overall.correctLastAttempts++;
+                            }
+                            q.user_attempts.forEach(att => {
+                                categoryStats[q.category].overall.sumTimeAllAttempts += (att.time_spent_seconds || 0);
+                                categoryStats[q.category].overall.numAllAttempts++;
                             });
+
+                            // Update subcategory stats if sub_category exists
+                            if (q.sub_category) {
+                                if (!categoryStats[q.category].subcategories[q.sub_category]) {
+                                    categoryStats[q.category].subcategories[q.sub_category] = {
+                                        totalLastAttempts: 0, correctLastAttempts: 0, sumTimeAllAttempts: 0, numAllAttempts: 0
+                                    };
+                                }
+                                categoryStats[q.category].subcategories[q.sub_category].totalLastAttempts++;
+                                if (lastAttempt.chosen_answer === q.answer?.correct_choice) {
+                                    categoryStats[q.category].subcategories[q.sub_category].correctLastAttempts++;
+                                }
+                                q.user_attempts.forEach(att => {
+                                    categoryStats[q.category].subcategories[q.sub_category].sumTimeAllAttempts += (att.time_spent_seconds || 0);
+                                    categoryStats[q.category].subcategories[q.sub_category].numAllAttempts++;
+                                });
+                            }
                         }
                         // Stats by provider
                         if (q.source?.provider) {
@@ -1738,25 +1918,63 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (Object.keys(stats.byCategory).length > 0) {
                     html += '<div class="category-stats"><h3>Performance by Category</h3><ul>';
 
-                    // Convert to array and sort by accuracy
+                    // Convert to array, include category name, and sort by overall accuracy
                     const sortedCategories = Object.entries(stats.byCategory)
-                        .map(([category, data]) => ({
-                            category,
-                            accuracy: data.totalLastAttempts > 0 ? (data.correctLastAttempts / data.totalLastAttempts * 100) : 0,
-                            ...data
+                        .map(([categoryName, categoryData]) => ({
+                            categoryName, // Keep category name for display
+                            overall: categoryData.overall,
+                            subcategories: categoryData.subcategories,
+                            // Calculate accuracy for sorting, using overall stats
+                            accuracy: categoryData.overall.totalLastAttempts > 0 ? (categoryData.overall.correctLastAttempts / categoryData.overall.totalLastAttempts * 100) : 0
                         }))
                         .sort((a, b) => b.accuracy - a.accuracy);
 
                     sortedCategories.forEach(item => {
-                        const avgTime = item.numAllAttempts > 0 ? (item.sumTimeAllAttempts / item.numAllAttempts).toFixed(1) : 0;
-                        html += `<li><strong>${escapeHtml(item.category)}:</strong> ` +
-                            `${item.correctLastAttempts}/${item.totalLastAttempts} correct (${item.accuracy.toFixed(1)}%) - ` +
-                            `Avg Time: ${avgTime}s</li>`;
+                        const categoryName = item.categoryName;
+                        const overallStats = item.overall;
+                        const subcategoriesMap = item.subcategories;
+
+                        const overallAccuracy = item.accuracy; // Already calculated for sorting
+                        const overallAvgTime = overallStats.numAllAttempts > 0 ? (overallStats.sumTimeAllAttempts / overallStats.numAllAttempts).toFixed(1) : '0.0';
+
+                        html += `<li><strong>${escapeHtml(categoryName)} (Overall):</strong> ` +
+                            `${overallStats.correctLastAttempts}/${overallStats.totalLastAttempts} correct (${overallAccuracy.toFixed(1)}%) - ` +
+                            `Avg Time: ${overallAvgTime}s`;
+
+                        if (subcategoriesMap && Object.keys(subcategoriesMap).length > 0) {
+                            // Use a sanitized version of categoryName for the ID
+                            const sanitizedCategoryName = categoryName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+                            html += `<button class="subcategory-performance-toggle" data-category-target="subs-for-${escapeHtml(sanitizedCategoryName)}">Show Subcategories [+]</button>`;
+                            html += `<div class="subcategory-performance-details" id="subs-for-${escapeHtml(sanitizedCategoryName)}" style="display: none; margin-left: 20px;"><ul>`;
+
+                            Object.entries(subcategoriesMap).forEach(([subName, subData]) => {
+                                const subAccuracy = subData.totalLastAttempts > 0 ? (subData.correctLastAttempts / subData.totalLastAttempts * 100).toFixed(1) : '0.0';
+                                const subAvgTime = subData.numAllAttempts > 0 ? (subData.sumTimeAllAttempts / subData.numAllAttempts).toFixed(1) : '0.0';
+                                html += `<li><strong>${escapeHtml(subName)}:</strong> ` +
+                                    `${subData.correctLastAttempts}/${subData.totalLastAttempts} correct (${subAccuracy}%) - ` +
+                                    `Avg Time: ${subAvgTime}s</li>`;
+                            });
+                            html += `</ul></div>`;
+                        }
+                        html += `</li>`;
                     });
                     html += '</ul></div>';
                 }
 
                 performanceStatsContent.innerHTML = html;
+
+                // After setting innerHTML, attach event listeners:
+                document.querySelectorAll('.subcategory-performance-toggle').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const targetId = button.dataset.categoryTarget;
+                        const detailsDiv = document.getElementById(targetId);
+                        if (detailsDiv) {
+                            const isHidden = detailsDiv.style.display === 'none';
+                            detailsDiv.style.display = isHidden ? 'block' : 'none';
+                            button.textContent = isHidden ? `Hide Subcategories [-]` : `Show Subcategories [+]`;
+                        }
+                    });
+                });
             }
             function closePerformanceModal() {
                 performanceModal.style.display = 'none';
