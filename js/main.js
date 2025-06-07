@@ -1494,7 +1494,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const restoreCheckboxList = (container, selectedItems) => {
                     if (!selectedItems) return;
                     container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                        cb.checked = selectedItems.includes(cb.value);
+                        // Handle both array and object types for selectedItems
+                        if (Array.isArray(selectedItems)) {
+                            cb.checked = selectedItems.includes(cb.value);
+                        } else if (typeof selectedItems === 'object') {
+                            // For objects (like categories), check if the key exists
+                            cb.checked = selectedItems.hasOwnProperty(cb.value);
+                        }
                     });
                 };
 
