@@ -112,3 +112,113 @@ export async function loadHtmlFragments() {
     // Assuming the existing <div id="quiz-area"></div> will be the container for its dynamic content
     await loadFragment('html/quiz_area.html', 'quiz-area');
 }
+
+export function populateCategorySubcategoryFilter(container, categoriesWithSubcategories) {
+    if (!container) {
+        console.error("Container element not provided for populateCategorySubcategoryFilter.");
+        return;
+    }
+    if (!categoriesWithSubcategories || Object.keys(categoriesWithSubcategories).length === 0) {
+        container.innerHTML = '<p>No categories available.</p>';
+        return;
+    }
+
+    container.innerHTML = ''; // Clear previous options
+
+    Object.entries(categoriesWithSubcategories).forEach(([category, subcategories]) => {
+        const categoryWrapper = document.createElement('div');
+        categoryWrapper.className = 'category-filter-item';
+
+        const mainCategoryLine = document.createElement('div');
+        mainCategoryLine.className = 'main-category-line';
+
+        const categoryCheckbox = document.createElement('input');
+        categoryCheckbox.type = 'checkbox';
+        categoryCheckbox.value = category;
+        categoryCheckbox.name = 'filter-main-category'; // Group main category checkboxes
+        // Sanitize category name for ID: replace spaces and special characters
+        const sanitizedCategoryId = category.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+        categoryCheckbox.id = `main-cat-${sanitizedCategoryId}`;
+
+        const categoryLabel = document.createElement('label');
+        categoryLabel.htmlFor = categoryCheckbox.id;
+        // categoryLabel.textContent = ` ${escapeHtml(category)}`; // Text next to checkbox
+
+        const categoryLabelText = document.createElement('span');
+        categoryLabelText.textContent = ` ${escapeHtml(category)}`;
+        categoryLabel.appendChild(categoryLabelText);
+
+
+        const toggleButton = document.createElement('span');
+        toggleButton.className = 'subcategory-toggle';
+        toggleButton.textContent = '[+]';
+        toggleButton.style.cursor = 'pointer';
+        toggleButton.style.marginLeft = '5px';
+        toggleButton.setAttribute('aria-label', `Toggle subcategories for ${escapeHtml(category)}`);
+
+        mainCategoryLine.appendChild(categoryCheckbox);
+        mainCategoryLine.appendChild(categoryLabel); // Label contains the text span now
+        mainCategoryLine.appendChild(toggleButton);
+        categoryWrapper.appendChild(mainCategoryLine);
+
+        const subcategoryList = document.createElement('ul');
+        subcategoryList.className = 'subcategory-list';
+        subcategoryList.style.display = 'none'; // Hidden by default
+        subcategoryList.style.marginLeft = '20px'; // Indent subcategories
+        subcategoryList.setAttribute('aria-labelledby', categoryCheckbox.id);
+
+
+        if (subcategories && subcategories.length > 0) {
+            subcategories.forEach(subcategory => {
+                const subItem = document.createElement('li');
+                const subCheckbox = document.createElement('input');
+                subCheckbox.type = 'checkbox';
+                subCheckbox.value = subcategory;
+                 // Sanitize subcategory and category names for name attribute
+                const sanitizedSubcategoryName = subcategory.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+                subCheckbox.name = `filter-subcategory-${sanitizedCategoryId}`; // Unique name per parent
+                subCheckbox.dataset.parentCategory = category;
+                subCheckbox.id = `sub-cat-${sanitizedCategoryId}-${sanitizedSubcategoryName}`;
+
+
+                const subLabel = document.createElement('label');
+                subLabel.htmlFor = subCheckbox.id;
+                // subLabel.appendChild(subCheckbox); // Checkbox inside label for better click handling
+                // subLabel.appendChild(document.createTextNode(` ${escapeHtml(subcategory)}`));
+
+                // Append checkbox first, then text node for spacing
+                subLabel.appendChild(subCheckbox);
+                subLabel.appendChild(document.createTextNode(' ')); // Add space
+                subLabel.appendChild(document.createTextNode(escapeHtml(subcategory)));
+
+
+                subItem.appendChild(subLabel);
+                subcategoryList.appendChild(subItem);
+            });
+        } else {
+            const noSubItem = document.createElement('li');
+            noSubItem.textContent = 'No subcategories';
+            noSubItem.style.fontStyle = 'italic';
+            subcategoryList.appendChild(noSubItem);
+        }
+        categoryWrapper.appendChild(subcategoryList);
+        container.appendChild(categoryWrapper);
+
+        toggleButton.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent any default action if wrapped in something clickable
+            const isHidden = subcategoryList.style.display === 'none';
+            subcategoryList.style.display = isHidden ? 'block' : 'none';
+            toggleButton.textContent = isHidden ? '[-]' : '[+]';
+            toggleButton.setAttribute('aria-expanded', String(isHidden));
+        });
+
+        // Optional: Clicking main category label also toggles subcategories
+        // categoryLabelText.addEventListener('click', (e) => {
+        //     // Avoid interfering with checkbox click
+        //     if (e.target !== categoryCheckbox) {
+        //        e.preventDefault();
+        //        toggleButton.click(); // Simulate click on the toggle button
+        //     }
+        // });
+    });
+}
