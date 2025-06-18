@@ -1,5 +1,5 @@
 // js/ui.js - DOM manipulation and UI update functions
-import { domManager } from './dom-manager.js';
+import { getElement, querySelector, querySelectorAll } from './dom.js';
 
 export function escapeHtml(unsafe) {
     if (typeof unsafe !== 'string') {
@@ -7,11 +7,11 @@ export function escapeHtml(unsafe) {
         return String(unsafe); // Convert to string to prevent errors, or handle as error
     }
     return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
+        .replace(/&/g, "&")
+        .replace(/</g, "<")
+        .replace(/>/g, ">")
+        .replace(/"/g, '"')
+            .replace(/'/g, "'");
 }
 
 export function formatTime(totalSeconds) {
@@ -24,17 +24,8 @@ export function formatTime(totalSeconds) {
 }
 
 export function toggleSidebar() {
-    // Try DOM manager first, fallback to direct DOM queries
-    let sidebarElement = domManager.get('settingsSidebar');
-    if (!sidebarElement) {
-        sidebarElement = document.getElementById('settings-sidebar');
-    }
-    
-    if (!sidebarElement) {
-        console.warn('Sidebar element not found - skipping toggle');
-        return;
-    }
-    
+    const sidebarElement = getElement('settings-sidebar');
+    const sidebarToggleButton = getElement('sidebar-toggle-button');
     const isOpen = sidebarElement.classList.contains('open');
     if (isOpen) {
         closeSidebar();
@@ -44,22 +35,8 @@ export function toggleSidebar() {
 }
 
 export function openSidebar() {
-    // Try DOM manager first, fallback to direct DOM queries
-    let sidebarElement = domManager.get('settingsSidebar');
-    let sidebarToggleButton = domManager.get('sidebarToggleButton');
-    
-    if (!sidebarElement) {
-        sidebarElement = document.getElementById('settings-sidebar');
-    }
-    if (!sidebarToggleButton) {
-        sidebarToggleButton = document.getElementById('sidebar-toggle-button');
-    }
-    
-    if (!sidebarElement || !sidebarToggleButton) {
-        console.warn('Required sidebar elements not found - skipping open');
-        return;
-    }
-    
+    const sidebarElement = getElement('settings-sidebar');
+    const sidebarToggleButton = getElement('sidebar-toggle-button');
     sidebarElement.classList.add('open');
     document.body.classList.add('sidebar-open');
     sidebarToggleButton.setAttribute('aria-expanded', 'true');
@@ -67,22 +44,8 @@ export function openSidebar() {
 }
 
 export function closeSidebar() {
-    // Try DOM manager first, fallback to direct DOM queries
-    let sidebarElement = domManager.get('settingsSidebar');
-    let sidebarToggleButton = domManager.get('sidebarToggleButton');
-    
-    if (!sidebarElement) {
-        sidebarElement = document.getElementById('settings-sidebar');
-    }
-    if (!sidebarToggleButton) {
-        sidebarToggleButton = document.getElementById('sidebar-toggle-button');
-    }
-    
-    if (!sidebarElement || !sidebarToggleButton) {
-        console.warn('Required sidebar elements not found - skipping close');
-        return;
-    }
-    
+    const sidebarElement = getElement('settings-sidebar');
+    const sidebarToggleButton = getElement('sidebar-toggle-button');
     sidebarElement.classList.remove('open');
     document.body.classList.remove('sidebar-open');
     sidebarToggleButton.setAttribute('aria-expanded', 'false');
@@ -109,6 +72,7 @@ export function populateCheckboxList(container, items) {
 }
 
 export function clearCheckboxes(container) {
+    // Use the container's querySelectorAll directly since we have the container reference
     const checkboxes = container.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach(checkbox => {
         checkbox.checked = false;
@@ -122,7 +86,7 @@ export async function loadHtmlFragments() {
             const response = await fetch(fragmentPath);
             if (!response.ok) throw new Error(`Failed to load ${fragmentPath}: ${response.status} ${response.statusText}`);
             const html = await response.text();
-            const placeholder = document.getElementById(placeholderId);
+            const placeholder = getElement(placeholderId);
             if (placeholder) {
                 placeholder.innerHTML = html;
             } else {

@@ -1,8 +1,6 @@
 import { db, saveCurrentSettingsToDB, loadUserSettingsFromDB, loadQuizDataFromDB, saveQuestionToDB, saveAppState, loadAppState, clearActiveSessionState } from './db.js';
 import { escapeHtml, formatTime, toggleSidebar, openSidebar, closeSidebar, populateCheckboxList, clearCheckboxes, loadHtmlFragments, populateCategorySubcategoryFilter } from './ui.js';
-import { domManager, settingsManager } from './dom-manager.js';
-import { appState } from './state-manager.js';
-import { eventManager } from './modules/event-manager.js';
+import { getElement, querySelector, querySelectorAll, initializeElements, createElement } from './dom.js';
 
 const mbe_categories_with_subcategories = {
     "Civil Procedure": [
@@ -110,74 +108,212 @@ const mbe_categories_with_subcategories = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-            // Initialize centralized state management
-            appState.initialize();
-            
-            // Set up state change listeners to handle UI synchronization
-            appState.subscribe('filters', () => {
-                console.log('Filters changed, UI will be updated automatically');
-            });
-            
-            // Subscribe to timer changes for display updates
-            appState.subscribe('timers.sessionTimeRemaining', (newValue) => {
-                updateSessionTimerDisplay();
-            });
-            
-            appState.subscribe('timers.stopwatchTime', (newValue) => {
-                updateStopwatchDisplay();
-            });
-            
-            appState.subscribe('timers.questionTimeRemaining', (newValue) => {
-                updateQuestionTimerDisplay();
-            });
+            // --- Element Refs (will be initialized after HTML fragments load) ---
+            let jsonFileElement, loadJsonButton, saveJsonButton, quizAreaElement, quizProgressElement;
+            let groupIntroElement, questionMetaContainer, metaTooltipContentElement, questionTextElement;
+            let choicesFormElement, attemptNotesElement, submitAnswerButton, feedbackAreaElement;
+            let nextQuestionButton, previousQuestionButton, pastAttemptsContainer;
+            let pastAttemptsAccordionToggle, pastAttemptsAccordionContent, endOfQuizMessageElement, loadSampleButton;
+            let settingHideAnswerCheckbox, showAnswerButton, reviewSessionButton, finalReviewArea;
+            let finalReviewContent, restartQuizButton, backToSettingsButton, reviewModal;
+            let reviewModalContent, closeReviewModalButton, toggleAnnotationButton, annotationArea;
+            let annotationCanvas, annotationControls, penButton, highlighterButton, eraserButton;
+            let clearAnnotationButton, annotationCtx, sidebarElement, sidebarToggleButton;
+            let closeSidebarButton, applyFiltersButton, filterCategoriesList, filterProvidersList;
+            let filterScrambleCheckbox, clearCategoriesButton, clearProvidersButton;
+            let performanceModal, closePerformanceModalButton, performanceStatsContent;
+
+            // Function to initialize element references after HTML fragments are loaded
+            function initializeElementReferences() {
+                // Use the initializeElements function to get all elements at once
+                const elements = initializeElements({
+                    jsonFileElement: 'jsonFile',
+                    loadJsonButton: 'loadJsonButton',
+                    saveJsonButton: 'saveJsonButton',
+                    quizAreaElement: 'quiz-area',
+                    quizProgressElement: 'quiz-progress',
+                    groupIntroElement: 'current-group-intro',
+                    metaTooltipContentElement: 'meta-tooltip-content',
+                    questionTextElement: 'question-text',
+                    choicesFormElement: 'choices-form',
+                    attemptNotesElement: 'attempt-notes',
+                    submitAnswerButton: 'submit-answer-button',
+                    feedbackAreaElement: 'feedback-area',
+                    nextQuestionButton: 'next-question-button',
+                    previousQuestionButton: 'previous-question-button',
+                    pastAttemptsContainer: 'past-attempts',
+                    endOfQuizMessageElement: 'end-of-quiz-message',
+                    loadSampleButton: 'loadSampleButton',
+                    settingHideAnswerCheckbox: 'setting-hide-answer',
+                    showAnswerButton: 'show-answer-button',
+                    reviewSessionButton: 'review-session-button',
+                    finalReviewArea: 'final-review-area',
+                    finalReviewContent: 'final-review-content',
+                    restartQuizButton: 'restart-quiz-button',
+                    backToSettingsButton: 'back-to-settings-button',
+                    reviewModal: 'review-modal',
+                    reviewModalContent: 'review-modal-content',
+                    closeReviewModalButton: 'close-review-modal',
+                    toggleAnnotationButton: 'toggleAnnotationButton',
+                    annotationArea: 'annotation-area',
+                    annotationCanvas: 'annotationCanvas',
+                    annotationControls: 'annotation-controls',
+                    penButton: 'penButton',
+                    highlighterButton: 'highlighterButton',
+                    eraserButton: 'eraserButton',
+                    clearAnnotationButton: 'clearAnnotationButton',
+                    sidebarElement: 'settings-sidebar',
+                    sidebarToggleButton: 'sidebar-toggle-button',
+                    closeSidebarButton: 'close-sidebar-button',
+                    applyFiltersButton: 'apply-filters-button',
+                    filterCategoriesList: 'filter-categories-list',
+                    filterProvidersList: 'filter-providers-list',
+                    filterScrambleCheckbox: 'filter-scramble',
+                    clearCategoriesButton: 'clear-categories-filter',
+                    clearProvidersButton: 'clear-providers-filter',
+                    performanceModal: 'performance-modal',
+                    closePerformanceModalButton: 'close-performance-modal',
+                    performanceStatsContent: 'performance-stats-content'
+                });
+                
+                // Assign all elements to their respective variables
+                jsonFileElement = elements.jsonFileElement;
+                loadJsonButton = elements.loadJsonButton;
+                saveJsonButton = elements.saveJsonButton;
+                quizAreaElement = elements.quizAreaElement;
+                quizProgressElement = elements.quizProgressElement;
+                groupIntroElement = elements.groupIntroElement;
+                metaTooltipContentElement = elements.metaTooltipContentElement;
+                questionTextElement = elements.questionTextElement;
+                choicesFormElement = elements.choicesFormElement;
+                attemptNotesElement = elements.attemptNotesElement;
+                submitAnswerButton = elements.submitAnswerButton;
+                feedbackAreaElement = elements.feedbackAreaElement;
+                nextQuestionButton = elements.nextQuestionButton;
+                previousQuestionButton = elements.previousQuestionButton;
+                pastAttemptsContainer = elements.pastAttemptsContainer;
+                endOfQuizMessageElement = elements.endOfQuizMessageElement;
+                loadSampleButton = elements.loadSampleButton;
+                settingHideAnswerCheckbox = elements.settingHideAnswerCheckbox;
+                showAnswerButton = elements.showAnswerButton;
+                reviewSessionButton = elements.reviewSessionButton;
+                finalReviewArea = elements.finalReviewArea;
+                finalReviewContent = elements.finalReviewContent;
+                restartQuizButton = elements.restartQuizButton;
+                backToSettingsButton = elements.backToSettingsButton;
+                reviewModal = elements.reviewModal;
+                reviewModalContent = elements.reviewModalContent;
+                closeReviewModalButton = elements.closeReviewModalButton;
+                toggleAnnotationButton = elements.toggleAnnotationButton;
+                annotationArea = elements.annotationArea;
+                annotationCanvas = elements.annotationCanvas;
+                annotationControls = elements.annotationControls;
+                penButton = elements.penButton;
+                highlighterButton = elements.highlighterButton;
+                eraserButton = elements.eraserButton;
+                clearAnnotationButton = elements.clearAnnotationButton;
+                sidebarElement = elements.sidebarElement;
+                sidebarToggleButton = elements.sidebarToggleButton;
+                closeSidebarButton = elements.closeSidebarButton;
+                applyFiltersButton = elements.applyFiltersButton;
+                filterCategoriesList = elements.filterCategoriesList;
+                filterProvidersList = elements.filterProvidersList;
+                filterScrambleCheckbox = elements.filterScrambleCheckbox;
+                clearCategoriesButton = elements.clearCategoriesButton;
+                clearProvidersButton = elements.clearProvidersButton;
+                performanceModal = elements.performanceModal;
+                closePerformanceModalButton = elements.closePerformanceModalButton;
+                performanceStatsContent = elements.performanceStatsContent;
+                
+                // Handle special cases
+                questionMetaContainer = querySelector('.question-meta-container');
+                pastAttemptsAccordionToggle = pastAttemptsContainer?.querySelector('.accordion-toggle');
+                pastAttemptsAccordionContent = pastAttemptsContainer?.querySelector('.accordion-content');
+                annotationCtx = annotationCanvas?.getContext('2d', { alpha: true });
+            }
+
+            // --- State Vars ---
+            let quizData = { questions: [], groups: [], fileName: null }; // Holds the in-memory quiz data, populated from Dexie
+            let performanceButton = null;
+            let masterQuestionList = [];
+            let currentQuestionIndex = -1;
+            let currentQuestionObject = null;
+            let questionStartTime = null;
+            let lastDisplayedGroupId = null;
+            let hideAnswerMode = false;
+            let sessionAttempts = new Map();
+
+            // Annotation State
+            let isAnnotationActive = false;
+            let isDrawing = false;
+            let currentTool = 'pen';
+            let lastX = 0;
+            let lastY = 0;
+            let penColor = '#0000FF';
+            let penWidth = 2;
+            let highlighterColor = 'rgba(60, 255, 131, 0.03)';
+            let highlighterWidth = 15;
+            let eraserWidth = 25;
+
+            // Timer State
+            let sessionTimerEnabled = false;
+            let questionTimerEnabled = false;
+            let stopwatchEnabled = true;
+            let sessionTimeLimit = 60 * 60;
+            let questionTimeLimit = 90;
+            let questionLimit = 50;
+            let sessionTimeRemaining = 0;
+            let questionTimeRemaining = 0;
+            let stopwatchTime = 0;
+            let sessionTimerInterval = null;
+            let questionTimerInterval = null;
+            let stopwatchInterval = null;
 
             // Function to setup event listeners after elements are initialized
             function setupEventListeners() {
                 // --- Event Listeners ---
-                domManager.get('loadJsonButton')?.addEventListener('click', handleLoadJson);
-                domManager.get('saveJsonButton')?.addEventListener('click', handleSaveJson);
+                loadJsonButton?.addEventListener('click', handleLoadJson);
+                saveJsonButton?.addEventListener('click', handleSaveJson);
 
                 // Event listeners for saving settings automatically
-                document.querySelectorAll('input[name="filter-attempts"]').forEach(radio => radio.addEventListener('change', saveCurrentSettingsToDB));
-                document.querySelectorAll('input[name="filter-notes"]').forEach(radio => radio.addEventListener('change', saveCurrentSettingsToDB));
-                domManager.get('filterScramble')?.addEventListener('change', saveCurrentSettingsToDB);
-                domManager.get('sessionTimeLimit')?.addEventListener('change', saveCurrentSettingsToDB);
-                domManager.get('questionLimit')?.addEventListener('change', saveCurrentSettingsToDB);
-                domManager.get('enableSessionTimer')?.addEventListener('change', saveCurrentSettingsToDB);
-                domManager.get('enableQuestionTimer')?.addEventListener('change', saveCurrentSettingsToDB);
-                domManager.get('enableStopwatch')?.addEventListener('change', saveCurrentSettingsToDB);
-                domManager.get('questionTimeLimit')?.addEventListener('change', saveCurrentSettingsToDB);
-                domManager.get('settingHideAnswer')?.addEventListener('change', saveCurrentSettingsToDB);
+                querySelectorAll('input[name="filter-attempts"]').forEach(radio => radio.addEventListener('change', saveCurrentSettingsToDB));
+                querySelectorAll('input[name="filter-notes"]').forEach(radio => radio.addEventListener('change', saveCurrentSettingsToDB));
+                getElement('filter-scramble')?.addEventListener('change', saveCurrentSettingsToDB);
+                getElement('session-time-limit')?.addEventListener('change', saveCurrentSettingsToDB);
+                getElement('question-limit')?.addEventListener('change', saveCurrentSettingsToDB);
+                getElement('enable-session-timer')?.addEventListener('change', saveCurrentSettingsToDB);
+                getElement('enable-question-timer')?.addEventListener('change', saveCurrentSettingsToDB);
+                getElement('enable-stopwatch')?.addEventListener('change', saveCurrentSettingsToDB);
+                getElement('question-time-limit')?.addEventListener('change', saveCurrentSettingsToDB);
+                getElement('setting-hide-answer')?.addEventListener('change', saveCurrentSettingsToDB);
 
                 // Event delegation for dynamic checkboxes
-                domManager.get('filterCategoriesList')?.addEventListener('change', (event) => {
+                filterCategoriesList?.addEventListener('change', (event) => {
                     if (event.target.type === 'checkbox') {
                         saveCurrentSettingsToDB();
                     }
                 });
-                domManager.get('filterProvidersList')?.addEventListener('change', (event) => {
+                filterProvidersList?.addEventListener('change', (event) => {
                     if (event.target.type === 'checkbox') {
                         saveCurrentSettingsToDB();
                     }
                 });
-                domManager.get('submitAnswerButton')?.addEventListener('click', handleSubmitAnswer);
-                domManager.get('nextQuestionButton')?.addEventListener('click', handleNextQuestion);
-                domManager.get('sidebarToggleButton')?.addEventListener('click', toggleSidebar);
-                domManager.get('closeSidebarButton')?.addEventListener('click', closeSidebar);
-                domManager.get('applyFiltersButton')?.addEventListener('click', applyFiltersAndStartQuiz);
-                domManager.get('clearCategoriesButton')?.addEventListener('click', () => clearCheckboxes(domManager.get('filterCategoriesList')));
-                domManager.get('clearProvidersButton')?.addEventListener('click', () => clearCheckboxes(domManager.get('filterProvidersList')));
-                domManager.get('loadSampleButton')?.addEventListener('click', handleLoadSampleData);
-                domManager.get('showAnswerButton')?.addEventListener('click', showCurrentAnswer);
-                domManager.get('reviewSessionButton')?.addEventListener('click', showReviewModal);
-                domManager.get('restartQuizButton')?.addEventListener('click', handleRestartQuiz);
-                domManager.get('backToSettingsButton')?.addEventListener('click', handleBackToSettings);
-                domManager.get('closeReviewModalButton')?.addEventListener('click', closeReviewModal);
-                domManager.get('reviewModal')?.addEventListener('click', (event) => { if (event.target === domManager.get('reviewModal')) closeReviewModal(); });
+                submitAnswerButton?.addEventListener('click', handleSubmitAnswer);
+                nextQuestionButton?.addEventListener('click', handleNextQuestion);
+                sidebarToggleButton?.addEventListener('click', toggleSidebar);
+                closeSidebarButton?.addEventListener('click', closeSidebar);
+                applyFiltersButton?.addEventListener('click', applyFiltersAndStartQuiz);
+                clearCategoriesButton?.addEventListener('click', () => clearCheckboxes(filterCategoriesList));
+                clearProvidersButton?.addEventListener('click', () => clearCheckboxes(filterProvidersList));
+                loadSampleButton?.addEventListener('click', handleLoadSampleData);
+                showAnswerButton?.addEventListener('click', showCurrentAnswer);
+                reviewSessionButton?.addEventListener('click', showReviewModal);
+                restartQuizButton?.addEventListener('click', handleRestartQuiz);
+                backToSettingsButton?.addEventListener('click', handleBackToSettings);
+                closeReviewModalButton?.addEventListener('click', closeReviewModal);
+                reviewModal?.addEventListener('click', (event) => { if (event.target === reviewModal) closeReviewModal(); });
 
                 // Accordion for Past Attempts
-                const pastAttemptsAccordionToggle = domManager.get('pastAttemptsAccordionToggle');
-                const pastAttemptsAccordionContent = domManager.get('pastAttemptsAccordionContent');
                 if (pastAttemptsAccordionToggle && pastAttemptsAccordionContent) {
                     pastAttemptsAccordionToggle.addEventListener('click', () => {
                         const isExpanded = pastAttemptsAccordionToggle.getAttribute('aria-expanded') === 'true';
@@ -201,19 +337,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
-                document.getElementById('clear-attempts-filter')?.addEventListener('click', () => {
-                    document.querySelector('input[name="filter-attempts"][value="all"]').checked = true;
+                getElement('clear-attempts-filter')?.addEventListener('click', () => {
+                    querySelector('input[name="filter-attempts"][value="all"]').checked = true;
                 });
-                document.getElementById('clear-notes-filter')?.addEventListener('click', () => {
-                    document.querySelector('input[name="filter-notes"][value="all"]').checked = true;
+                getElement('clear-notes-filter')?.addEventListener('click', () => {
+                    querySelector('input[name="filter-notes"][value="all"]').checked = true;
                 });
 
-                const referenceButtonForPerformance = domManager.get('applyFiltersButton');
-                const performanceButton = document.createElement('button');
+                const referenceButtonForPerformance = applyFiltersButton;
+                performanceButton = document.createElement('button');
                 performanceButton.id = 'show-performance-button';
                 performanceButton.textContent = 'Performance Dashboard';
                 performanceButton.disabled = true;
-                appState.set('ui.performanceButton', performanceButton);
                 referenceButtonForPerformance?.parentNode?.insertBefore(performanceButton, referenceButtonForPerformance.nextSibling);
                 performanceButton.style.marginTop = "1rem";
                 if (applyFiltersButton) applyFiltersButton.style.marginBottom = "0";
@@ -221,12 +356,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 closePerformanceModalButton?.addEventListener('click', closePerformanceModal);
                 performanceModal?.addEventListener('click', (event) => { if (event.target === performanceModal) closePerformanceModal(); });
 
-                document.getElementById('enable-session-timer')?.addEventListener('change', (e) => { sessionTimerEnabled = e.target.checked; updateTimerVisibility(); });
-                document.getElementById('enable-question-timer')?.addEventListener('change', (e) => { questionTimerEnabled = e.target.checked; updateTimerVisibility(); });
-                document.getElementById('enable-stopwatch')?.addEventListener('change', (e) => { stopwatchEnabled = e.target.checked; updateTimerVisibility(); });
-                document.getElementById('session-time-limit')?.addEventListener('change', (e) => { sessionTimeLimit = Math.max(1, parseInt(e.target.value, 10) || 60) * 60; });
-                document.getElementById('question-time-limit')?.addEventListener('change', (e) => { questionTimeLimit = Math.max(10, parseInt(e.target.value, 10) || 90); });
-                document.getElementById('question-limit')?.addEventListener('change', (e) => { questionLimit = Math.max(1, parseInt(e.target.value, 10) || 50); });
+                getElement('enable-session-timer')?.addEventListener('change', (e) => { sessionTimerEnabled = e.target.checked; updateTimerVisibility(); });
+                getElement('enable-question-timer')?.addEventListener('change', (e) => { questionTimerEnabled = e.target.checked; updateTimerVisibility(); });
+                getElement('enable-stopwatch')?.addEventListener('change', (e) => { stopwatchEnabled = e.target.checked; updateTimerVisibility(); });
+                getElement('session-time-limit')?.addEventListener('change', (e) => { sessionTimeLimit = Math.max(1, parseInt(e.target.value, 10) || 60) * 60; });
+                getElement('question-time-limit')?.addEventListener('change', (e) => { questionTimeLimit = Math.max(10, parseInt(e.target.value, 10) || 90); });
+                getElement('question-limit')?.addEventListener('change', (e) => { questionLimit = Math.max(1, parseInt(e.target.value, 10) || 50); });
 
                 toggleAnnotationButton?.addEventListener('click', toggleAnnotationMode);
                 annotationCanvas?.addEventListener('mousedown', startDrawing);
@@ -2041,170 +2176,132 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
 
-
-        // Main application initialization
-        document.addEventListener('DOMContentLoaded', async () => {
-            await initializeApp();
-        });
-
-        async function initializeApp() {
-            try {
-                console.log('Starting application initialization...');
-                
-                // Load HTML fragments first
-                await loadHtmlFragments();
-                console.log('HTML fragments loaded');
-                
-                // Wait a bit for DOM to settle
-                await new Promise(resolve => setTimeout(resolve, 50));
-                
-                // Initialize DOM manager
-                domManager.initialize();
-                console.log('DOM manager initialized');
-                
-                // Initialize event manager after DOM elements are loaded
-                eventManager.initialize();
-                console.log('Event manager initialized');
-                
-                // Verify sidebar elements are available
-                const sidebar = document.getElementById('settings-sidebar');
-                const toggleButton = document.getElementById('sidebar-toggle-button');
-                const closeButton = document.getElementById('close-sidebar-button');
-                console.log('Sidebar verification:', { sidebar: !!sidebar, toggleButton: !!toggleButton, closeButton: !!closeButton });
-                
-                // Add manual event listeners as backup
-                if (toggleButton) {
-                    toggleButton.addEventListener('click', toggleSidebar);
-                    console.log('Manual toggle button listener added');
-                }
-                if (closeButton) {
-                    closeButton.addEventListener('click', closeSidebar);
-                    console.log('Manual close button listener added');
-                }
-                
-                // Register service worker
+            // --- Initial Page Load Sequence ---
+            async function initializeApp() {
+                await loadHtmlFragments(); // Load HTML snippets first
+                initializeElementReferences(); // Initialize element references after fragments are loaded
+                setupEventListeners(); // Setup event listeners after elements are initialized
                 registerServiceWorker();
+                const loadedFromDB = await loadQuizDataFromDB();
                 
-                // Load user settings and quiz data AFTER DOM is ready
-                await loadUserSettingsFromDB();
-                const quizData = await loadQuizDataFromDB();
+                // Update global quizData first
+                if (loadedFromDB && loadedFromDB.questions && loadedFromDB.questions.length > 0) {
+                    quizData = loadedFromDB;
+                }
                 
-                // Handle session restoration AFTER DOM is ready
-                if (quizData && quizData.questions && quizData.questions.length > 0) {
-                    await handleSessionRestoration(quizData);
+                populateFilterOptions(); // Populate dynamic filter options after quizData is set
+                await loadUserSettingsFromDB(); // Then load and apply saved settings
+
+                let sessionRestored = false;
+
+                if (loadedFromDB) {
+                    // Attempt to load and restore an active session
+                    // Note: Session restoration might override some of the general user settings loaded above,
+                    // especially for filters, which is the intended behavior.
+                    const savedMasterList = await loadAppState('activeMasterQuestionList');
+                    const savedIndex = await loadAppState('activeCurrentQuestionIndex');
+                    const savedFilters = await loadAppState('activeFilters');
+                    const savedHideAnswerMode = await loadAppState('activeHideAnswerMode');
+                    const savedQuestionLimit = await loadAppState('activeQuestionLimit');
+                    const savedSessionTimeRemaining = await loadAppState('activeSessionTimeRemaining');
+                    const savedStopwatchTime = await loadAppState('activeStopwatchTime');
+                    const savedSerializableSessionAttempts = await loadAppState('activeSessionAttempts');
+
+                    // Load timer settings from previous session
+                    const savedSessionTimerEnabled = await loadAppState('activeSessionTimerEnabled');
+                    const savedQuestionTimerEnabled = await loadAppState('activeQuestionTimerEnabled');
+                    const savedStopwatchEnabled = await loadAppState('activeStopwatchEnabled');
+                    const savedSessionTimeLimit = await loadAppState('activeSessionTimeLimit');
+                    const savedQuestionTimeLimit = await loadAppState('activeQuestionTimeLimit');
+
+                    if (savedSerializableSessionAttempts && Array.isArray(savedSerializableSessionAttempts)) {
+                        sessionAttempts = new Map(savedSerializableSessionAttempts);
+                        console.log("initializeApp: sessionAttempts restored from saved state.", sessionAttempts);
+                    } else {
+                        sessionAttempts = new Map(); // Ensure it's a fresh Map if nothing was restored
+                        console.log("initializeApp: No saved sessionAttempts found or format error, initialized as new Map.");
+                    }
+
+                    if (savedMasterList && savedMasterList.length > 0 && savedIndex !== null && savedIndex >= 0 && savedIndex < savedMasterList.length) {
+                        console.log("Found active session state. Attempting to restore.");
+                        masterQuestionList = savedMasterList;
+                        currentQuestionIndex = savedIndex - 1; // displayNextQuestionInternal will increment it
+                        hideAnswerMode = savedHideAnswerMode !== null ? savedHideAnswerMode : settingHideAnswerCheckbox.checked;
+                        questionLimit = savedQuestionLimit !== null ? savedQuestionLimit : parseInt(document.getElementById('question-limit').value, 10) || 50;
+
+                        // Restore all timer settings
+                        document.getElementById('question-limit').value = questionLimit;
+                        document.getElementById('enable-session-timer').checked = savedSessionTimerEnabled || false;
+                        document.getElementById('enable-question-timer').checked = savedQuestionTimerEnabled || false;
+                        document.getElementById('enable-stopwatch').checked = savedStopwatchEnabled || false;
+                        document.getElementById('session-time-limit').value = savedSessionTimeLimit ? Math.floor(savedSessionTimeLimit / 60) : 60;
+                        document.getElementById('question-time-limit').value = savedQuestionTimeLimit || 90;
+
+                        // Restore filter UI before initializing timers
+                        if (savedFilters) {
+                            restoreFilterUI(savedFilters);
+                        }
+
+                        initializeTimerSettings(); // This will set up timer limits based on restored UI values
+
+                        // Now, apply the saved remaining times
+                        sessionTimeRemaining = savedSessionTimeRemaining !== null ? savedSessionTimeRemaining : sessionTimeLimit;
+                        stopwatchTime = savedStopwatchTime !== null ? savedStopwatchTime : 0;
+                        updateSessionTimerDisplay(); // Update display with restored time
+                        updateStopwatchDisplay();   // Update display with restored time
+
+                        quizAreaElement.style.display = 'block';
+                        endOfQuizMessageElement.style.display = 'none';
+                        finalReviewArea.style.display = 'none';
+                        toggleAnnotationButton.style.display = 'inline-block';
+
+                        populateFilterOptions(); // Ensure filter options are populated based on full quizData
+                        if (savedFilters) restoreFilterUI(savedFilters); // Re-apply to ensure dynamic content is handled
+
+                        await displayNextQuestionInternal(); // This will load currentQuestionObject, render, etc.
+                                                           // and also increments currentQuestionIndex to the correct value.
+
+                        startSessionTimer();
+                        startStopwatch();
+                        // quizProgressElement is updated in displayNextQuestionInternal
+
+                        alert("Your previous quiz session has been restored.");
+                        sessionRestored = true;
+                        closeSidebar();
+                    } else {
+                        console.log("No active session found or session data invalid. Initializing normally.");
+                        resetQuizState(true); // Resets UI, keeps quizData loaded from DB
+                        console.log("Data loaded from DB. User settings (if any) applied. No active session restored, or session data was invalid.");
+                    }
                 } else {
                     resetQuizState(false); // Full reset, quizData will be empty
+                    // populateFilterOptions(); // Already called above
                     if (performanceButton) performanceButton.disabled = true;
                     console.log("No data in DB. UI reset. User settings (if any) applied.");
                 }
-                
-                console.log('Application initialized successfully');
-            } catch (error) {
-                console.error('Error during application initialization:', error);
-            }
-        }
 
-        async function handleSessionRestoration(quizData) {
-            // Set the global quizData
-            window.quizData = quizData; // Make sure this is available globally
-            
-            // Load saved session state
-            const savedMasterList = await loadAppState('activeMasterQuestionList');
-            const savedIndex = await loadAppState('activeCurrentQuestionIndex');
-            const savedFilters = await loadAppState('activeFilters');
-            const savedHideAnswerMode = await loadAppState('activeHideAnswerMode');
-            const savedQuestionLimit = await loadAppState('activeQuestionLimit');
-            const savedSessionTimeRemaining = await loadAppState('activeSessionTimeRemaining');
-            const savedStopwatchTime = await loadAppState('activeStopwatchTime');
-            const savedSerializableSessionAttempts = await loadAppState('activeSessionAttempts');
-
-            // Load timer settings from previous session
-            const savedSessionTimerEnabled = await loadAppState('activeSessionTimerEnabled');
-            const savedQuestionTimerEnabled = await loadAppState('activeQuestionTimerEnabled');
-            const savedStopwatchEnabled = await loadAppState('activeStopwatchEnabled');
-            const savedSessionTimeLimit = await loadAppState('activeSessionTimeLimit');
-            const savedQuestionTimeLimit = await loadAppState('activeQuestionTimeLimit');
-
-            if (savedSerializableSessionAttempts && Array.isArray(savedSerializableSessionAttempts)) {
-                sessionAttempts = new Map(savedSerializableSessionAttempts);
-                console.log("handleSessionRestoration: sessionAttempts restored from saved state.", sessionAttempts);
-            } else {
-                sessionAttempts = new Map(); // Ensure it's a fresh Map if nothing was restored
-                console.log("handleSessionRestoration: No saved sessionAttempts found or format error, initialized as new Map.");
-            }
-
-            let sessionRestored = false;
-            
-            if (savedMasterList && savedMasterList.length > 0 && savedIndex !== null && savedIndex >= 0 && savedIndex < savedMasterList.length) {
-                console.log("Found active session state. Attempting to restore.");
-                masterQuestionList = savedMasterList;
-                currentQuestionIndex = savedIndex - 1; // displayNextQuestionInternal will increment it
-                hideAnswerMode = savedHideAnswerMode !== null ? savedHideAnswerMode : settingHideAnswerCheckbox.checked;
-                questionLimit = savedQuestionLimit !== null ? savedQuestionLimit : parseInt(document.getElementById('question-limit').value, 10) || 50;
-
-                // Restore all timer settings
-                document.getElementById('question-limit').value = questionLimit;
-                document.getElementById('enable-session-timer').checked = savedSessionTimerEnabled || false;
-                document.getElementById('enable-question-timer').checked = savedQuestionTimerEnabled || false;
-                document.getElementById('enable-stopwatch').checked = savedStopwatchEnabled || false;
-                document.getElementById('session-time-limit').value = savedSessionTimeLimit ? Math.floor(savedSessionTimeLimit / 60) : 60;
-                document.getElementById('question-time-limit').value = savedQuestionTimeLimit || 90;
-
-                // Restore filter UI before initializing timers
-                if (savedFilters) {
-                    restoreFilterUI(savedFilters);
+                if (!sessionRestored) { // If no session was restored, do default timer/UI setup
+                    initializeTimerSettings();
+                    setTool('pen');
+            closeSidebar(); // ui.js
+                    updateTimerVisibility();
                 }
-
-                initializeTimerSettings(); // This will set up timer limits based on restored UI values
-
-                // Now, apply the saved remaining times
-                sessionTimeRemaining = savedSessionTimeRemaining !== null ? savedSessionTimeRemaining : sessionTimeLimit;
-                stopwatchTime = savedStopwatchTime !== null ? savedStopwatchTime : 0;
-                updateSessionTimerDisplay(); // Update display with restored time
-                updateStopwatchDisplay();   // Update display with restored time
-
-                quizAreaElement.style.display = 'block';
-                endOfQuizMessageElement.style.display = 'none';
-                finalReviewArea.style.display = 'none';
-                toggleAnnotationButton.style.display = 'inline-block';
-
-                populateFilterOptions(); // Ensure filter options are populated based on full quizData
-                if (savedFilters) restoreFilterUI(savedFilters); // Re-apply to ensure dynamic content is handled
-
-                await displayNextQuestionInternal(); // This will load currentQuestionObject, render, etc.
-                                                   // and also increments currentQuestionIndex to the correct value.
-
-                startSessionTimer();
-                startStopwatch();
-                // quizProgressElement is updated in displayNextQuestionInternal
-
-                alert("Your previous quiz session has been restored.");
-                sessionRestored = true;
-                closeSidebar(); // Now this will work because DOM is ready
-            } else {
-                console.log("No active session found or session data invalid. Initializing normally.");
-                resetQuizState(true); // Resets UI, keeps quizData loaded from DB
-                console.log("Data loaded from DB. User settings (if any) applied. No active session restored, or session data was invalid.");
             }
 
-            if (!sessionRestored) { // If no session was restored, do default timer/UI setup
-                initializeTimerSettings();
-                setTool('pen');
-                closeSidebar(); // Now this will work because DOM is ready
-                updateTimerVisibility();
+            function registerServiceWorker() {
+                if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js') // Corrected path
+                            .then(registration => {
+                                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                            })
+                            .catch(error => {
+                                console.log('ServiceWorker registration failed: ', error);
+                            });
+                    });
+                }
             }
-        }
 
-        function registerServiceWorker() {
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('service-worker.js')
-                        .then(registration => {
-                            console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                        })
-                        .catch(error => {
-                            console.log('ServiceWorker registration failed: ', error);
-                        });
-                });
-            }
-        }
+            // Start the application initialization
+            initializeApp();
+        });
