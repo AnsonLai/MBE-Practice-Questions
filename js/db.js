@@ -1,4 +1,6 @@
 // js/db.js - DexieDB setup and interaction functions
+import { getElement, querySelector, querySelectorAll, initializeElements } from './dom.js';
+
 export const db = new Dexie('MBEPracticeQuizDB');
 db.version(1).stores({
     questions: 'question_id, category, source.provider, source.year, group_id', // question_id is PK. Others indexed.
@@ -6,21 +8,38 @@ db.version(1).stores({
     appState: 'key'      // 'key' is PK. For storing 'lastLoadedFileName', etc.
 });
 
+// Initialize form elements used in this module
+const formElements = {
+    filterScramble: 'filter-scramble',
+    sessionTimeLimit: 'session-time-limit',
+    questionLimit: 'question-limit',
+    enableSessionTimer: 'enable-session-timer',
+    enableQuestionTimer: 'enable-question-timer',
+    enableStopwatch: 'enable-stopwatch',
+    questionTimeLimit: 'question-time-limit',
+    hideAnswer: 'setting-hide-answer',
+    categoriesList: 'filter-categories-list',
+    providersList: 'filter-providers-list'
+};
+
 export async function saveCurrentSettingsToDB() {
     try {
+        // Get form elements
+        const elements = initializeElements(formElements);
+        
         const userSettings = {
-            attempts: document.querySelector('input[name="filter-attempts"]:checked')?.value,
-            notes: document.querySelector('input[name="filter-notes"]:checked')?.value,
-            scramble: document.getElementById('filter-scramble')?.checked,
-            sessionTimeLimit: document.getElementById('session-time-limit')?.value,
-            questionLimit: document.getElementById('question-limit')?.value,
-            enableSessionTimer: document.getElementById('enable-session-timer')?.checked,
-            enableQuestionTimer: document.getElementById('enable-question-timer')?.checked,
-            enableStopwatch: document.getElementById('enable-stopwatch')?.checked,
-            questionTimeLimit: document.getElementById('question-time-limit')?.value,
-            hideAnswer: document.getElementById('setting-hide-answer')?.checked,
-            categories: Array.from(document.getElementById('filter-categories-list').querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value),
-            providers: Array.from(document.getElementById('filter-providers-list').querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value),
+            attempts: querySelector('input[name="filter-attempts"]:checked')?.value,
+            notes: querySelector('input[name="filter-notes"]:checked')?.value,
+            scramble: elements.filterScramble?.checked,
+            sessionTimeLimit: elements.sessionTimeLimit?.value,
+            questionLimit: elements.questionLimit?.value,
+            enableSessionTimer: elements.enableSessionTimer?.checked,
+            enableQuestionTimer: elements.enableQuestionTimer?.checked,
+            enableStopwatch: elements.enableStopwatch?.checked,
+            questionTimeLimit: elements.questionTimeLimit?.value,
+            hideAnswer: elements.hideAnswer?.checked,
+            categories: Array.from(elements.categoriesList.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value),
+            providers: Array.from(elements.providersList.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value),
         };
         await db.appState.put({ key: 'userQuizSettings', value: userSettings });
         console.log('User quiz settings saved to DexieDB.');
@@ -36,35 +55,46 @@ export async function loadUserSettingsFromDB() {
             const settings = savedSettings.value;
             console.log('Loading user quiz settings from DexieDB:', settings);
 
+            // Get all form elements at once
+            const elements = initializeElements(formElements);
+
             // Radio buttons
-            const attemptsRadio = document.querySelector(`input[name="filter-attempts"][value="${settings.attempts}"]`);
+            const attemptsRadio = querySelector(`input[name="filter-attempts"][value="${settings.attempts}"]`);
             if (attemptsRadio) attemptsRadio.checked = true;
-            const notesRadio = document.querySelector(`input[name="filter-notes"][value="${settings.notes}"]`);
+            const notesRadio = querySelector(`input[name="filter-notes"][value="${settings.notes}"]`);
             if (notesRadio) notesRadio.checked = true;
 
             // Checkboxes
-            if (document.getElementById('filter-scramble') && typeof settings.scramble !== 'undefined') document.getElementById('filter-scramble').checked = settings.scramble;
-            if (document.getElementById('enable-session-timer') && typeof settings.enableSessionTimer !== 'undefined') document.getElementById('enable-session-timer').checked = settings.enableSessionTimer;
-            if (document.getElementById('enable-question-timer') && typeof settings.enableQuestionTimer !== 'undefined') document.getElementById('enable-question-timer').checked = settings.enableQuestionTimer;
-            if (document.getElementById('enable-stopwatch') && typeof settings.enableStopwatch !== 'undefined') document.getElementById('enable-stopwatch').checked = settings.enableStopwatch;
-            if (document.getElementById('setting-hide-answer') && typeof settings.hideAnswer !== 'undefined') document.getElementById('setting-hide-answer').checked = settings.hideAnswer;
+            if (elements.filterScramble && typeof settings.scramble !== 'undefined') 
+                elements.filterScramble.checked = settings.scramble;
+            if (elements.enableSessionTimer && typeof settings.enableSessionTimer !== 'undefined') 
+                elements.enableSessionTimer.checked = settings.enableSessionTimer;
+            if (elements.enableQuestionTimer && typeof settings.enableQuestionTimer !== 'undefined') 
+                elements.enableQuestionTimer.checked = settings.enableQuestionTimer;
+            if (elements.enableStopwatch && typeof settings.enableStopwatch !== 'undefined') 
+                elements.enableStopwatch.checked = settings.enableStopwatch;
+            if (elements.hideAnswer && typeof settings.hideAnswer !== 'undefined') 
+                elements.hideAnswer.checked = settings.hideAnswer;
 
             // Number inputs
-            if (document.getElementById('session-time-limit') && typeof settings.sessionTimeLimit !== 'undefined') document.getElementById('session-time-limit').value = settings.sessionTimeLimit;
-            if (document.getElementById('question-limit') && typeof settings.questionLimit !== 'undefined') document.getElementById('question-limit').value = settings.questionLimit;
-            if (document.getElementById('question-time-limit') && typeof settings.questionTimeLimit !== 'undefined') document.getElementById('question-time-limit').value = settings.questionTimeLimit;
+            if (elements.sessionTimeLimit && typeof settings.sessionTimeLimit !== 'undefined') 
+                elements.sessionTimeLimit.value = settings.sessionTimeLimit;
+            if (elements.questionLimit && typeof settings.questionLimit !== 'undefined') 
+                elements.questionLimit.value = settings.questionLimit;
+            if (elements.questionTimeLimit && typeof settings.questionTimeLimit !== 'undefined') 
+                elements.questionTimeLimit.value = settings.questionTimeLimit;
 
             // Dynamic checkboxes (categories and providers)
             // These rely on populateCheckboxList having been called first.
             if (settings.categories && Array.isArray(settings.categories)) {
-                document.getElementById('filter-categories-list').querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                elements.categoriesList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
                     if (settings.categories.includes(cb.value)) {
                         cb.checked = true;
                     }
                 });
             }
             if (settings.providers && Array.isArray(settings.providers)) {
-                document.getElementById('filter-providers-list').querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                elements.providersList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
                     if (settings.providers.includes(cb.value)) {
                         cb.checked = true;
                     }

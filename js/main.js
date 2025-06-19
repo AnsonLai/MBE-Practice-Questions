@@ -124,15 +124,21 @@ document.addEventListener('DOMContentLoaded', () => {
             let filterScrambleCheckbox, clearCategoriesButton, clearProvidersButton;
             let performanceModal, closePerformanceModalButton, performanceStatsContent;
 
-            // Function to initialize element references after HTML fragments are loaded
-            function initializeElementReferences() {
-                // Use the initializeElements function to get all elements at once
-                const elements = initializeElements({
+            // Element group definitions for reuse throughout the app
+            const elementGroups = {
+                // Main UI elements
+                main: {
                     jsonFileElement: 'jsonFile',
                     loadJsonButton: 'loadJsonButton',
                     saveJsonButton: 'saveJsonButton',
+                    loadSampleButton: 'loadSampleButton',
                     quizAreaElement: 'quiz-area',
                     quizProgressElement: 'quiz-progress',
+                    endOfQuizMessageElement: 'end-of-quiz-message'
+                },
+                
+                // Question display elements
+                question: {
                     groupIntroElement: 'current-group-intro',
                     metaTooltipContentElement: 'meta-tooltip-content',
                     questionTextElement: 'question-text',
@@ -142,12 +148,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     feedbackAreaElement: 'feedback-area',
                     nextQuestionButton: 'next-question-button',
                     previousQuestionButton: 'previous-question-button',
-                    pastAttemptsContainer: 'past-attempts',
-                    endOfQuizMessageElement: 'end-of-quiz-message',
-                    loadSampleButton: 'loadSampleButton',
+                    pastAttemptsContainer: 'past-attempts'
+                },
+                
+                // Settings and controls
+                settings: {
                     settingHideAnswerCheckbox: 'setting-hide-answer',
                     showAnswerButton: 'show-answer-button',
                     reviewSessionButton: 'review-session-button',
+                    sidebarElement: 'settings-sidebar',
+                    sidebarToggleButton: 'sidebar-toggle-button',
+                    closeSidebarButton: 'close-sidebar-button',
+                    applyFiltersButton: 'apply-filters-button',
+                    filterCategoriesList: 'filter-categories-list',
+                    filterProvidersList: 'filter-providers-list',
+                    filterScrambleCheckbox: 'filter-scramble',
+                    clearCategoriesButton: 'clear-categories-filter',
+                    clearProvidersButton: 'clear-providers-filter'
+                },
+                
+                // Timer elements
+                timer: {
+                    questionLimit: 'question-limit',
+                    enableSessionTimer: 'enable-session-timer',
+                    enableQuestionTimer: 'enable-question-timer',
+                    enableStopwatch: 'enable-stopwatch',
+                    sessionTimeLimit: 'session-time-limit',
+                    questionTimeLimit: 'question-time-limit',
+                    sessionTimerDisplay: 'session-timer-display',
+                    questionTimerDisplay: 'question-timer-display',
+                    stopwatchDisplay: 'stopwatch-display'
+                },
+                
+                // Review and annotation elements
+                review: {
                     finalReviewArea: 'final-review-area',
                     finalReviewContent: 'final-review-content',
                     restartQuizButton: 'restart-quiz-button',
@@ -162,20 +196,48 @@ document.addEventListener('DOMContentLoaded', () => {
                     penButton: 'penButton',
                     highlighterButton: 'highlighterButton',
                     eraserButton: 'eraserButton',
-                    clearAnnotationButton: 'clearAnnotationButton',
-                    sidebarElement: 'settings-sidebar',
-                    sidebarToggleButton: 'sidebar-toggle-button',
-                    closeSidebarButton: 'close-sidebar-button',
-                    applyFiltersButton: 'apply-filters-button',
-                    filterCategoriesList: 'filter-categories-list',
-                    filterProvidersList: 'filter-providers-list',
-                    filterScrambleCheckbox: 'filter-scramble',
-                    clearCategoriesButton: 'clear-categories-filter',
-                    clearProvidersButton: 'clear-providers-filter',
+                    clearAnnotationButton: 'clearAnnotationButton'
+                },
+                
+                // Performance stats elements
+                performance: {
                     performanceModal: 'performance-modal',
                     closePerformanceModalButton: 'close-performance-modal',
-                    performanceStatsContent: 'performance-stats-content'
-                });
+                    performanceStatsContent: 'performance-stats-content',
+                    performanceButton: 'performance-button'
+                }
+            };
+            
+            // Cache for initialized element groups
+            const initializedElementGroups = {};
+            
+            // Function to get an element group, initializing it if needed
+            function getElementGroup(groupName) {
+                if (!initializedElementGroups[groupName]) {
+                    initializedElementGroups[groupName] = initializeElements(elementGroups[groupName]);
+                }
+                return initializedElementGroups[groupName];
+            }
+            
+            // Function to initialize element references after HTML fragments are loaded
+            function initializeElementReferences() {
+                // Initialize all element groups
+                const mainElements = getElementGroup('main');
+                const questionElements = getElementGroup('question');
+                const settingsElements = getElementGroup('settings');
+                const timerElements = getElementGroup('timer');
+                const reviewElements = getElementGroup('review');
+                const performanceElements = getElementGroup('performance');
+                
+                // Combine all element groups
+                const elements = {
+                    ...mainElements,
+                    ...questionElements,
+                    ...settingsElements,
+                    ...timerElements,
+                    ...reviewElements,
+                    ...performanceElements
+                };
                 
                 // Assign all elements to their respective variables
                 jsonFileElement = elements.jsonFileElement;
@@ -2322,15 +2384,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         masterQuestionList = savedMasterList;
                         currentQuestionIndex = savedIndex - 1; // displayNextQuestionInternal will increment it
                         hideAnswerMode = savedHideAnswerMode !== null ? savedHideAnswerMode : settingHideAnswerCheckbox.checked;
-                        questionLimit = savedQuestionLimit !== null ? savedQuestionLimit : parseInt(document.getElementById('question-limit').value, 10) || 50;
+                        
+                        // Get timer elements using our cached element group
+                        const timerElements = getElementGroup('timer');
+                        
+                        questionLimit = savedQuestionLimit !== null ? savedQuestionLimit : parseInt(timerElements.questionLimit.value, 10) || 50;
 
-                        // Restore all timer settings
-                        document.getElementById('question-limit').value = questionLimit;
-                        document.getElementById('enable-session-timer').checked = savedSessionTimerEnabled || false;
-                        document.getElementById('enable-question-timer').checked = savedQuestionTimerEnabled || false;
-                        document.getElementById('enable-stopwatch').checked = savedStopwatchEnabled || false;
-                        document.getElementById('session-time-limit').value = savedSessionTimeLimit ? Math.floor(savedSessionTimeLimit / 60) : 60;
-                        document.getElementById('question-time-limit').value = savedQuestionTimeLimit || 90;
+                        // Restore all timer settings using cached elements
+                        timerElements.questionLimit.value = questionLimit;
+                        timerElements.enableSessionTimer.checked = savedSessionTimerEnabled || false;
+                        timerElements.enableQuestionTimer.checked = savedQuestionTimerEnabled || false;
+                        timerElements.enableStopwatch.checked = savedStopwatchEnabled || false;
+                        timerElements.sessionTimeLimit.value = savedSessionTimeLimit ? Math.floor(savedSessionTimeLimit / 60) : 60;
+                        timerElements.questionTimeLimit.value = savedQuestionTimeLimit || 90;
 
                         // Restore filter UI before initializing timers
                         if (savedFilters) {
@@ -2362,7 +2428,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         alert("Your previous quiz session has been restored.");
                         sessionRestored = true;
-                        closeSidebar();
+                        // Only close sidebar if HTML fragments are fully loaded
+                        try {
+                            closeSidebar();
+                        } catch (error) {
+                            console.warn("Could not close sidebar, HTML fragments may not be fully loaded yet:", error);
+                        }
                     } else {
                         console.log("No active session found or session data invalid. Initializing normally.");
                         resetQuizState(true); // Resets UI, keeps quizData loaded from DB
@@ -2378,7 +2449,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!sessionRestored) { // If no session was restored, do default timer/UI setup
                     initializeTimerSettings();
                     setTool('pen');
-            closeSidebar(); // ui.js
+                    // Only close sidebar if HTML fragments are fully loaded
+                    try {
+                        closeSidebar(); // ui.js
+                    } catch (error) {
+                        console.warn("Could not close sidebar, HTML fragments may not be fully loaded yet:", error);
+                    }
                     updateTimerVisibility();
                 }
             }

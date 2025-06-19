@@ -1,5 +1,5 @@
 // js/ui.js - DOM manipulation and UI update functions
-import { getElement, querySelector, querySelectorAll } from './dom.js';
+import { getElement, querySelector, querySelectorAll, initializeElements, initializeElementsBySelector } from './dom.js';
 
 export function escapeHtml(unsafe) {
     if (typeof unsafe !== 'string') {
@@ -23,10 +23,32 @@ export function formatTime(totalSeconds) {
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
+// Sidebar elements definition
+const sidebarElements = {
+    sidebar: 'settings-sidebar',
+    toggleButton: 'sidebar-toggle-button'
+};
+
+// Lazy initialization for sidebar elements
+let sidebarElementsCache = null;
+
+// Function to get sidebar elements, initializing them if needed
+function getSidebarElements() {
+    if (!sidebarElementsCache) {
+        sidebarElementsCache = initializeElements(sidebarElements);
+    }
+    return sidebarElementsCache;
+}
+
 export function toggleSidebar() {
-    const sidebarElement = getElement('settings-sidebar');
-    const sidebarToggleButton = getElement('sidebar-toggle-button');
-    const isOpen = sidebarElement.classList.contains('open');
+    const sidebar = getSidebarElements();
+    // Check if elements exist before accessing them
+    if (!sidebar.sidebar || !sidebar.toggleButton) {
+        console.warn("Sidebar elements not found. Make sure HTML fragments are loaded.");
+        return;
+    }
+    
+    const isOpen = sidebar.sidebar.classList.contains('open');
     if (isOpen) {
         closeSidebar();
     } else {
@@ -35,21 +57,31 @@ export function toggleSidebar() {
 }
 
 export function openSidebar() {
-    const sidebarElement = getElement('settings-sidebar');
-    const sidebarToggleButton = getElement('sidebar-toggle-button');
-    sidebarElement.classList.add('open');
+    const sidebar = getSidebarElements();
+    // Check if elements exist before accessing them
+    if (!sidebar.sidebar || !sidebar.toggleButton) {
+        console.warn("Sidebar elements not found. Make sure HTML fragments are loaded.");
+        return;
+    }
+    
+    sidebar.sidebar.classList.add('open');
     document.body.classList.add('sidebar-open');
-    sidebarToggleButton.setAttribute('aria-expanded', 'true');
-    sidebarToggleButton.innerHTML = '×';
+    sidebar.toggleButton.setAttribute('aria-expanded', 'true');
+    sidebar.toggleButton.innerHTML = '×';
 }
 
 export function closeSidebar() {
-    const sidebarElement = getElement('settings-sidebar');
-    const sidebarToggleButton = getElement('sidebar-toggle-button');
-    sidebarElement.classList.remove('open');
+    const sidebar = getSidebarElements();
+    // Check if elements exist before accessing them
+    if (!sidebar.sidebar || !sidebar.toggleButton) {
+        console.warn("Sidebar elements not found. Make sure HTML fragments are loaded.");
+        return;
+    }
+    
+    sidebar.sidebar.classList.remove('open');
     document.body.classList.remove('sidebar-open');
-    sidebarToggleButton.setAttribute('aria-expanded', 'false');
-    sidebarToggleButton.innerHTML = '☰';
+    sidebar.toggleButton.setAttribute('aria-expanded', 'false');
+    sidebar.toggleButton.innerHTML = '☰';
 }
 
 export function populateCheckboxList(container, items) {
@@ -79,18 +111,27 @@ export function clearCheckboxes(container) {
     });
 }
 
+// HTML fragment containers
+const fragmentContainers = {
+    sidebarContainer: 'sidebar-container',
+    modalsContainer: 'modals-container',
+    quizAreaContainer: 'quiz-area-container'
+};
+
 // Function to load HTML fragments
 export async function loadHtmlFragments() {
-    const loadFragment = async (fragmentPath, placeholderId) => {
+    // Initialize all fragment containers at once
+    const containers = initializeElements(fragmentContainers);
+    
+    const loadFragment = async (fragmentPath, container) => {
         try {
             const response = await fetch(fragmentPath);
             if (!response.ok) throw new Error(`Failed to load ${fragmentPath}: ${response.status} ${response.statusText}`);
             const html = await response.text();
-            const placeholder = getElement(placeholderId);
-            if (placeholder) {
-                placeholder.innerHTML = html;
+            if (container) {
+                container.innerHTML = html;
             } else {
-                console.warn(`Placeholder ${placeholderId} not found for ${fragmentPath}.`);
+                console.warn(`Container not found for ${fragmentPath}.`);
             }
         } catch (error) {
             console.error(`Error loading HTML fragment ${fragmentPath}: ${error}`);
@@ -98,10 +139,37 @@ export async function loadHtmlFragments() {
     };
 
     // Load HTML fragments into their respective containers
-    // Match the container IDs from index.html
-    await loadFragment('html/sidebar.html', 'sidebar-container');
-    await loadFragment('html/modals.html', 'modals-container');
-    await loadFragment('html/quiz_area.html', 'quiz-area-container');
+    await loadFragment('html/sidebar.html', containers.sidebarContainer);
+    await loadFragment('html/modals.html', containers.modalsContainer);
+    await loadFragment('html/quiz_area.html', containers.quizAreaContainer);
+    
+    // Reset sidebar elements cache since we've just loaded new HTML
+    sidebarElementsCache = null;
+    
+    // Set up sidebar toggle button event listener
+    setupSidebarEventListeners();
+    
+    // Log that fragments have been loaded
+    console.log("HTML fragments loaded successfully");
+}
+
+// Function to set up sidebar event listeners
+function setupSidebarEventListeners() {
+    try {
+        const sidebar = getSidebarElements();
+        
+        if (sidebar.toggleButton) {
+            console.log("Setting up sidebar toggle button event listener");
+            sidebar.toggleButton.addEventListener('click', toggleSidebar);
+        }
+        
+        if (sidebar.sidebar && sidebar.sidebar.querySelector('#close-sidebar-button')) {
+            console.log("Setting up close sidebar button event listener");
+            sidebar.sidebar.querySelector('#close-sidebar-button').addEventListener('click', closeSidebar);
+        }
+    } catch (error) {
+        console.error("Error setting up sidebar event listeners:", error);
+    }
 }
 
 export function populateCategorySubcategoryFilter(container, categoriesWithSubcategories) {
