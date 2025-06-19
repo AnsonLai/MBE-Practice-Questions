@@ -1,5 +1,5 @@
 import { db, saveCurrentSettingsToDB, loadUserSettingsFromDB, loadQuizDataFromDB, saveQuestionToDB, saveAppState, loadAppState, clearActiveSessionState } from './db.js';
-import { escapeHtml, formatTime, toggleSidebar, openSidebar, closeSidebar, populateCheckboxList, clearCheckboxes, loadHtmlFragments, populateCategorySubcategoryFilter } from './ui.js';
+import { escapeHtml, formatTime, toggleSidebar, openSidebar, closeSidebar, populateCheckboxList, clearCheckboxes, loadHtmlFragments, populateCategorySubcategoryFilter, showNotification } from './ui.js';
 import { getElement, querySelector, querySelectorAll, initializeElements, createElement } from './dom.js';
 import { filterQuestions, prepareQuizQuestions } from './filterQuestions.js';
 
@@ -335,8 +335,22 @@ document.addEventListener('DOMContentLoaded', () => {
             // Function to setup event listeners after elements are initialized
             function setupEventListeners() {
                 // --- Event Listeners ---
-                loadJsonButton?.addEventListener('click', handleLoadJson);
+                loadJsonButton?.addEventListener('click', () => handleLoadJson());
                 saveJsonButton?.addEventListener('click', handleSaveJson);
+                loadSampleButton?.addEventListener('click', handleLoadSampleData);
+                
+                // Sidebar data controls
+                const sidebarJsonFile = getElement('sidebar-jsonFile');
+                const sidebarLoadJsonButton = getElement('sidebar-loadJsonButton');
+                const sidebarLoadSampleButton = getElement('sidebar-loadSampleButton');
+                
+                if (sidebarLoadJsonButton && sidebarJsonFile) {
+                    sidebarLoadJsonButton.addEventListener('click', () => handleLoadJson(sidebarJsonFile));
+                }
+                
+                if (sidebarLoadSampleButton) {
+                    sidebarLoadSampleButton.addEventListener('click', handleLoadSampleData);
+                }
 
                 // Event listeners for saving settings automatically
                 querySelectorAll('input[name="filter-attempts"]').forEach(radio => radio.addEventListener('change', saveCurrentSettingsToDB));
@@ -877,10 +891,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            async function handleLoadJson() {
-                const file = jsonFileElement.files[0];
+            async function handleLoadJson(fileInputElement = null) {
+                const fileInput = fileInputElement || jsonFileElement;
+                const file = fileInput.files[0];
                 if (!file) {
-                    alert('Please select a JSON file first.');
+                    showNotification('Please select a JSON file first.', 'warning');
                     return;
                 }
                 const reader = new FileReader();
@@ -888,18 +903,35 @@ document.addEventListener('DOMContentLoaded', () => {
                     try {
                         const loadedData = JSON.parse(e.target.result);
                         await processLoadedData(loadedData, file.name);
+                        
+                        // Move file controls to sidebar after data is loaded
+                        moveFileControlsToSidebar();
                     } catch (error) {
-                        alert(`Error parsing JSON: ${error.message}`);
+                        showNotification(`Error parsing JSON: ${error.message}`, 'error');
                         console.error("Error parsing JSON from file:", error);
-                        jsonFileElement.value = '';
+                        fileInput.value = '';
                     }
                 };
                 reader.onerror = () => {
-                    alert('Error reading file.');
+                    showNotification('Error reading file.', 'error');
                     console.error("Error reading file:", reader.error);
-                    jsonFileElement.value = '';
+                    fileInput.value = '';
                 };
                 reader.readAsText(file);
+            }
+            
+            // Function to move file controls to sidebar after data is loaded
+            function moveFileControlsToSidebar() {
+                const initialFileControls = getElement('initial-file-controls');
+                const sidebarDataControls = getElement('sidebar-data-controls');
+                
+                if (initialFileControls && sidebarDataControls) {
+                    // Hide the initial file controls
+                    initialFileControls.style.display = 'none';
+                    
+                    // Show the sidebar data controls
+                    sidebarDataControls.style.display = 'block';
+                }
             }
 
             async function processLoadedData(loadedData, sourceDescription) {
@@ -2426,7 +2458,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         startStopwatch();
                         // quizProgressElement is updated in displayNextQuestionInternal
 
-                        alert("Your previous quiz session has been restored.");
+                        showNotification("Your previous quiz session has been restored.", "info");
                         sessionRestored = true;
                         // Only close sidebar if HTML fragments are fully loaded
                         try {

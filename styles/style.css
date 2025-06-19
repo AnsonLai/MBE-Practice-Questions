@@ -1374,33 +1374,62 @@
 
 /* Styles for new category/subcategory filter in sidebar */
 .category-filter-item {
-    margin-bottom: 8px; /* Space between main category groups */
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.category-filter-item:last-child {
+    border-bottom: none;
 }
 
 .main-category-line {
     display: flex;
     align-items: center;
-    padding: 4px 0;
+    padding: 0.25rem 0;
 }
 
-.main-category-line label { /* Label for main category checkbox */
-    display: flex; /* Align checkbox and text */
+.main-category-line label {
+    flex-grow: 1;
+    margin-bottom: 0;
+}
+
+.subcategory-toggle {
+    display: inline-flex;
     align-items: center;
-    flex-grow: 1; /* Allow label to take available space */
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    line-height: 1;
+    transition: all 0.2s ease;
 }
 
+.subcategory-list {
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+}
+
+.subcategory-list li {
+    margin-bottom: 0.25rem;
+}
+
+.subcategory-list label {
+    display: flex;
+    align-items: center;
+}
+
+.subcategory-list input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+/* Additional styling for main category line */
 .main-category-line input[type="checkbox"] {
     margin-right: 6px;
 }
 
+/* Additional styling for subcategory toggle - these will be overridden by inline styles */
 .subcategory-toggle {
-    cursor: pointer;
-    padding: 2px 6px;
-    border: 1px solid #ccc;
-    background-color: #f0f0f0;
-    border-radius: 4px;
-    font-size: 0.9em;
-    margin-left: auto; /* Push toggle to the right */
     user-select: none; /* Prevent text selection on click */
 }
 
@@ -1434,6 +1463,48 @@
 /* but a class-based approach would be: */
 /* .subcategory-list.hidden { display: none; } */
 
+
+/* Sidebar button styles */
+.sidebar-button {
+    display: inline-block;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar-button:hover {
+    background-color: var(--primary-hover-color);
+}
+
+/* Notification animations */
+@keyframes slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slide-out {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
 
 /* Styles for subcategory performance display in modal */
 .subcategory-performance-toggle {

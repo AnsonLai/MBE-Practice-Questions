@@ -78,6 +78,23 @@
     </div>
 
 
+    <!-- Data Controls Section (initially hidden) -->
+    <div id="sidebar-data-controls" class="sidebar-section" style="display: none;">
+        <h3>Data Management</h3>
+        <div class="control-group">
+            <label for="saveJsonButton">Export / Backup Data:</label>
+            <button id="saveJsonButton" class="sidebar-button">Export Backup</button>
+        </div>
+        <div class="control-group">
+            <label for="jsonFile">Load New Data:</label>
+            <input type="file" id="sidebar-jsonFile" accept=".json" style="width: 100%; margin-bottom: 0.5rem;">
+            <div style="display: flex; gap: 0.5rem;">
+                <button id="sidebar-loadJsonButton" class="sidebar-button">Load File</button>
+                <button id="sidebar-loadSampleButton" class="sidebar-button">Use Sample</button>
+            </div>
+        </div>
+    </div>
+
     <button id="apply-filters-button" disabled>Apply Filters & Start Quiz</button>
     <button id="close-sidebar-button">Close Settings</button>
 

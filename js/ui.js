@@ -14,6 +14,90 @@ export function escapeHtml(unsafe) {
             .replace(/'/g, "'");
 }
 
+/**
+ * Show an in-app notification instead of using browser alerts
+ * @param {string} message - The message to display
+ * @param {string} type - The type of notification (info, success, warning, error)
+ * @param {number} duration - How long to show the notification in ms (default 3000ms)
+ */
+export function showNotification(message, type = 'info', duration = 3000) {
+    // Create notification container if it doesn't exist
+    let notificationContainer = document.getElementById('notification-container');
+    if (!notificationContainer) {
+        notificationContainer = document.createElement('div');
+        notificationContainer.id = 'notification-container';
+        notificationContainer.style.position = 'fixed';
+        notificationContainer.style.top = '20px';
+        notificationContainer.style.right = '20px';
+        notificationContainer.style.zIndex = '9999';
+        document.body.appendChild(notificationContainer);
+    }
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-message">${escapeHtml(message)}</span>
+            <button class="notification-close">&times;</button>
+        </div>
+    `;
+    
+    // Style the notification
+    notification.style.backgroundColor = type === 'error' ? 'var(--danger-bg-color)' : 
+                                        type === 'success' ? 'var(--success-bg-color)' : 
+                                        type === 'warning' ? '#fff3cd' : 
+                                        'var(--light-gray)';
+    notification.style.border = `1px solid ${type === 'error' ? 'var(--danger-border-color)' : 
+                                            type === 'success' ? 'var(--success-border-color)' : 
+                                            type === 'warning' ? '#ffeeba' : 
+                                            'var(--border-color)'}`;
+    notification.style.borderRadius = 'var(--border-radius)';
+    notification.style.boxShadow = 'var(--box-shadow)';
+    notification.style.marginBottom = '10px';
+    notification.style.padding = '10px 15px';
+    notification.style.width = '300px';
+    notification.style.maxWidth = '100%';
+    notification.style.animation = 'slide-in 0.3s ease-out forwards';
+    
+    // Add the notification to the container
+    notificationContainer.appendChild(notification);
+    
+    // Add close button functionality
+    const closeButton = notification.querySelector('.notification-close');
+    closeButton.style.background = 'none';
+    closeButton.style.border = 'none';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.float = 'right';
+    closeButton.style.fontSize = '1.25rem';
+    closeButton.style.fontWeight = 'bold';
+    closeButton.style.lineHeight = '1';
+    closeButton.style.padding = '0 5px';
+    
+    closeButton.addEventListener('click', () => {
+        notification.style.animation = 'slide-out 0.3s ease-in forwards';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    });
+    
+    // Auto-remove after duration
+    if (duration > 0) {
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.style.animation = 'slide-out 0.3s ease-in forwards';
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 300);
+            }
+        }, duration);
+    }
+    
+    return notification;
+}
+
 export function formatTime(totalSeconds) {
     if (isNaN(totalSeconds) || totalSeconds < 0) {
         return "00:00";
@@ -210,9 +294,14 @@ export function populateCategorySubcategoryFilter(container, categoriesWithSubca
 
         const toggleButton = document.createElement('span');
         toggleButton.className = 'subcategory-toggle';
-        toggleButton.textContent = '[+]';
+        toggleButton.textContent = '+';
         toggleButton.style.cursor = 'pointer';
         toggleButton.style.marginLeft = '5px';
+        toggleButton.style.fontSize = '0.8rem';
+        toggleButton.style.padding = '0 4px';
+        toggleButton.style.borderRadius = '3px';
+        toggleButton.style.backgroundColor = 'var(--light-gray)';
+        toggleButton.style.color = 'var(--primary-color)';
         toggleButton.setAttribute('aria-label', `Toggle subcategories for ${escapeHtml(category)}`);
 
         mainCategoryLine.appendChild(categoryCheckbox);
@@ -267,8 +356,9 @@ export function populateCategorySubcategoryFilter(container, categoriesWithSubca
             e.preventDefault(); // Prevent any default action if wrapped in something clickable
             const isHidden = subcategoryList.style.display === 'none';
             subcategoryList.style.display = isHidden ? 'block' : 'none';
-            toggleButton.textContent = isHidden ? '[-]' : '[+]';
+            toggleButton.textContent = isHidden ? '-' : '+';
             toggleButton.setAttribute('aria-expanded', String(isHidden));
+            toggleButton.style.backgroundColor = isHidden ? 'var(--medium-gray)' : 'var(--light-gray)';
         });
 
         // Optional: Clicking main category label also toggles subcategories

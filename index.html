@@ -9,7 +9,7 @@
     <meta name="author" content="Anson Lai">
     <meta name="theme-color" content="#007bff">
     <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <link rel="stylesheet" href="styles/style.css">
@@ -47,8 +47,8 @@
                 style="margin-top: 1rem; background-color: var(--secondary-color);">Back to Settings</button>
         </div>
 
-        <!-- Modified File Controls Section -->
-        <div class="file-controls">
+        <!-- Initial File Controls Section - will be moved to sidebar after data is loaded -->
+        <div id="initial-file-controls" class="file-controls">
             <p class="auto-save-info">💾 Your progress is automatically saved to the local browser database. You can
                 load a backup from another device.</p>
             <div class="control-group">
