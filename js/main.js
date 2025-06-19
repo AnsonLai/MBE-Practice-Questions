@@ -1,6 +1,7 @@
 import { db, saveCurrentSettingsToDB, loadUserSettingsFromDB, loadQuizDataFromDB, saveQuestionToDB, saveAppState, loadAppState, clearActiveSessionState } from './db.js';
 import { escapeHtml, formatTime, toggleSidebar, openSidebar, closeSidebar, populateCheckboxList, clearCheckboxes, loadHtmlFragments, populateCategorySubcategoryFilter } from './ui.js';
 import { getElement, querySelector, querySelectorAll, initializeElements, createElement } from './dom.js';
+import { filterQuestions, prepareQuizQuestions } from './filterQuestions.js';
 
 const mbe_categories_with_subcategories = {
     "Civil Procedure": [
@@ -459,6 +460,77 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
+            
+            // Function to apply filters and start the quiz
+            async function applyFiltersAndStartQuiz() {
+                if (!quizData || !quizData.questions || quizData.questions.length === 0) {
+                    alert("No quiz data loaded. Please load a JSON file first.");
+                    return;
+                }
+
+                await saveNotesForCurrentAttempt(); // Save any notes from current question
+
+                // Get filter settings
+                const filters = getFilterSettings();
+                
+                // Use our new filtering module to prepare the quiz questions
+                const result = prepareQuizQuestions(
+                    quizData.questions,
+                    quizData.groups || [],
+                    filters,
+                    questionLimit,
+                    filters.scramble
+                );
+                
+                // Check if we have any questions after filtering
+                if (!result.questions || result.questions.length === 0) {
+                    alert("No questions match your filter criteria. Please adjust your filters and try again.");
+                    return;
+                }
+
+                // Update the master question list with the filtered questions
+                masterQuestionList = result.questions;
+                
+                // Reset session state
+                currentQuestionIndex = -1;
+                sessionAttempts = new Map();
+                stopwatchTime = 0;
+                sessionTimeRemaining = sessionTimeLimit;
+                
+                // Get hide answer mode setting
+                hideAnswerMode = settingHideAnswerCheckbox?.checked || false;
+                
+                // Hide sidebar and show quiz area
+                closeSidebar();
+                sidebarElement.style.display = 'none';
+                quizAreaElement.style.display = 'block';
+                finalReviewArea.style.display = 'none';
+                
+                // Reset and start timers
+                if (sessionTimerEnabled) {
+                    sessionTimeRemaining = sessionTimeLimit;
+                    startSessionTimer();
+                }
+                if (stopwatchEnabled) {
+                    stopwatchTime = 0;
+                    startStopwatch();
+                }
+                
+                // Update quiz progress display
+                updateQuizProgress();
+                
+                // Show the first question
+                handleNextQuestion();
+                
+                // Save the current state
+                await saveAppState('activeFilters', filters);
+                await saveAppState('activeHideAnswerMode', hideAnswerMode);
+                await saveAppState('activeMasterQuestionList', masterQuestionList);
+                await saveAppState('activeCurrentQuestionIndex', currentQuestionIndex);
+                await saveAppState('activeQuestionLimit', questionLimit);
+                await saveAppState('activeSessionTimeRemaining', sessionTimeRemaining);
+                await saveAppState('activeStopwatchTime', stopwatchTime);
+            }
 
             function getFilterSettings() {
                 const attemptsFilter = document.querySelector('input[name="filter-attempts"]:checked')?.value || 'all';
@@ -467,19 +539,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const selectedCategoriesAndSubcategories = {};
                 const mainCategoryCheckboxes = filterCategoriesList.querySelectorAll('input[name="filter-main-category"]');
-
+                
+                // First, collect all selected subcategories, regardless of parent category selection
+                const allSelectedSubcategories = new Map(); // Maps subcategory to parent category
+                
+                // Process each main category
                 mainCategoryCheckboxes.forEach(cb => {
                     const mainCategoryName = cb.value;
+                    const sanitizedMainCategoryName = mainCategoryName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+                    const subCategoryCheckboxes = filterCategoriesList.querySelectorAll(`input[name="filter-subcategory-${sanitizedMainCategoryName}"]:checked`);
+                    
+                    // If main category is checked, add it to the result object
                     if (cb.checked) {
                         const selectedSubcategories = [];
-                        // Ensure sanitization for the selector matches the one used in populateCategorySubcategoryFilter
-                        const sanitizedMainCategoryName = mainCategoryName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-                        const subCategoryCheckboxes = filterCategoriesList.querySelectorAll(`input[name="filter-subcategory-${sanitizedMainCategoryName}"]:checked`);
-
+                        
+                        // Add all selected subcategories for this main category
                         subCategoryCheckboxes.forEach(subCb => {
                             selectedSubcategories.push(subCb.value);
+                            allSelectedSubcategories.set(subCb.value, mainCategoryName);
                         });
+                        
                         selectedCategoriesAndSubcategories[mainCategoryName] = selectedSubcategories;
+                    } 
+                    // If main category is not checked but has selected subcategories, 
+                    // we still need to track those subcategories
+                    else if (subCategoryCheckboxes.length > 0) {
+                        subCategoryCheckboxes.forEach(subCb => {
+                            allSelectedSubcategories.set(subCb.value, mainCategoryName);
+                            
+                            // Add the parent category to the result with just this subcategory
+                            if (!selectedCategoriesAndSubcategories[mainCategoryName]) {
+                                selectedCategoriesAndSubcategories[mainCategoryName] = [];
+                            }
+                            selectedCategoriesAndSubcategories[mainCategoryName].push(subCb.value);
+                        });
                     }
                 });
 
@@ -489,9 +582,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 return {
                     attempts: attemptsFilter,
                     notes: notesFilter,
-                    categories: selectedCategoriesAndSubcategories, // New structure
+                    categories: selectedCategoriesAndSubcategories,
                     providers: selectedProviders,
-                    scramble: scramble
+                    scramble: scramble,
+                    // Include the map of all selected subcategories for easier filtering
+                    allSelectedSubcategories: Object.fromEntries(allSelectedSubcategories)
                 };
             }
 
