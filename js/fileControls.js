@@ -13,14 +13,15 @@ export function updateFileControlsVisibility() {
     import('./db.js').then(({ db }) => {
         db.questions.count().then(count => {
             if (count > 0) {
-                // Quiz data is available, hide initial controls and show sidebar controls
+                // Quiz data is available, hide initial controls
                 if (initialFileControls) initialFileControls.style.display = 'none';
-                if (sidebarDataControls) sidebarDataControls.style.display = 'block';
             } else {
-                // No quiz data available, show initial controls and hide sidebar controls
+                // No quiz data available, show initial controls
                 if (initialFileControls) initialFileControls.style.display = 'block';
-                if (sidebarDataControls) sidebarDataControls.style.display = 'none';
             }
+            
+            // Always show sidebar data controls
+            if (sidebarDataControls) sidebarDataControls.style.display = 'block';
         });
     });
 }

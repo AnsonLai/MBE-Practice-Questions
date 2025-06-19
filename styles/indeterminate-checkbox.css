@@ -1,0 +1,19 @@
+/* CSS for indeterminate checkbox state */
+.main-category-line input[type="checkbox"]:indeterminate {
+    /* Custom styling for indeterminate state */
+    background-color: var(--light-gray);
+    border-color: var(--primary-color);
+    position: relative;
+}
+
+.main-category-line input[type="checkbox"]:indeterminate::after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    top: 20%;
+    left: 20%;
+    background-color: var(--primary-color);
+    border-radius: 2px;
+}

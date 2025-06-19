@@ -626,8 +626,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const sanitizedMainCategoryName = mainCategoryName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
                     const subCategoryCheckboxes = filterCategoriesList.querySelectorAll(`input[name="filter-subcategory-${sanitizedMainCategoryName}"]:checked`);
                     
-                    // If main category is checked, add it to the result object
-                    if (cb.checked) {
+                    // If main category is checked or in indeterminate state, add it to the result object
+                    if (cb.checked || cb.indeterminate) {
                         const selectedSubcategories = [];
                         
                         // Add all selected subcategories for this main category
@@ -639,7 +639,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         selectedCategoriesAndSubcategories[mainCategoryName] = selectedSubcategories;
                     } 
                     // If main category is not checked but has selected subcategories, 
-                    // we still need to track those subcategories
+                    // we still need to track those subcategories (this shouldn't happen with the new UI,
+                    // but keeping for backward compatibility)
                     else if (subCategoryCheckboxes.length > 0) {
                         subCategoryCheckboxes.forEach(subCb => {
                             allSelectedSubcategories.set(subCb.value, mainCategoryName);

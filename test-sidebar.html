@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidebar Test</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <style>
+        body {
+            padding: 20px;
+        }
+        .test-content {
+            margin-top: 50px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <button id="sidebar-toggle-button" aria-label="Toggle Settings Sidebar" aria-expanded="false">☰</button>
+    
+    <div id="settings-sidebar" class="sidebar">
+        <h2>Test Sidebar</h2>
+        <div class="sidebar-section">
+            <h3>Test Section</h3>
+            <p>This is a test sidebar to check if the toggle functionality works.</p>
+        </div>
+        <button id="close-sidebar-button">Close Settings</button>
+    </div>
+
+    <div class="test-content">
+        <h1>Test Page</h1>
+        <p>Click the ☰ button to toggle the sidebar.</p>
+    </div>
+
+    <script>
+        document.getElementById('sidebar-toggle-button').addEventListener('click', function() {
+            const sidebar = document.getElementById('settings-sidebar');
+            const isOpen = sidebar.classList.contains('open');
+            
+            if (isOpen) {
+                sidebar.classList.remove('open');
+                document.body.classList.remove('sidebar-open');
+                this.setAttribute('aria-expanded', 'false');
+                this.innerHTML = '☰';
+            } else {
+                sidebar.classList.add('open');
+                document.body.classList.add('sidebar-open');
+                this.setAttribute('aria-expanded', 'true');
+                this.innerHTML = '×';
+            }
+        });
+
+        document.getElementById('close-sidebar-button').addEventListener('click', function() {
+            const sidebar = document.getElementById('settings-sidebar');
+            const toggleButton = document.getElementById('sidebar-toggle-button');
+            
+            sidebar.classList.remove('open');
+            document.body.classList.remove('sidebar-open');
+            toggleButton.setAttribute('aria-expanded', 'false');
+            toggleButton.innerHTML = '☰';
+        });
+    </script>
+</body>
+</html>

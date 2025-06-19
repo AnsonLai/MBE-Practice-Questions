@@ -285,12 +285,10 @@ export function populateCategorySubcategoryFilter(container, categoriesWithSubca
 
         const categoryLabel = document.createElement('label');
         categoryLabel.htmlFor = categoryCheckbox.id;
-        // categoryLabel.textContent = ` ${escapeHtml(category)}`; // Text next to checkbox
 
         const categoryLabelText = document.createElement('span');
         categoryLabelText.textContent = ` ${escapeHtml(category)}`;
         categoryLabel.appendChild(categoryLabelText);
-
 
         const toggleButton = document.createElement('span');
         toggleButton.className = 'subcategory-toggle';
@@ -315,6 +313,8 @@ export function populateCategorySubcategoryFilter(container, categoriesWithSubca
         subcategoryList.style.marginLeft = '20px'; // Indent subcategories
         subcategoryList.setAttribute('aria-labelledby', categoryCheckbox.id);
 
+        // Store all subcategory checkboxes for this category
+        const subCheckboxes = [];
 
         if (subcategories && subcategories.length > 0) {
             subcategories.forEach(subcategory => {
@@ -322,23 +322,22 @@ export function populateCategorySubcategoryFilter(container, categoriesWithSubca
                 const subCheckbox = document.createElement('input');
                 subCheckbox.type = 'checkbox';
                 subCheckbox.value = subcategory;
-                 // Sanitize subcategory and category names for name attribute
+                // Sanitize subcategory and category names for name attribute
                 const sanitizedSubcategoryName = subcategory.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
                 subCheckbox.name = `filter-subcategory-${sanitizedCategoryId}`; // Unique name per parent
                 subCheckbox.dataset.parentCategory = category;
                 subCheckbox.id = `sub-cat-${sanitizedCategoryId}-${sanitizedSubcategoryName}`;
 
+                // Add to subcategory checkboxes array
+                subCheckboxes.push(subCheckbox);
 
                 const subLabel = document.createElement('label');
                 subLabel.htmlFor = subCheckbox.id;
-                // subLabel.appendChild(subCheckbox); // Checkbox inside label for better click handling
-                // subLabel.appendChild(document.createTextNode(` ${escapeHtml(subcategory)}`));
 
                 // Append checkbox first, then text node for spacing
                 subLabel.appendChild(subCheckbox);
                 subLabel.appendChild(document.createTextNode(' ')); // Add space
                 subLabel.appendChild(document.createTextNode(escapeHtml(subcategory)));
-
 
                 subItem.appendChild(subLabel);
                 subcategoryList.appendChild(subItem);
@@ -352,6 +351,42 @@ export function populateCategorySubcategoryFilter(container, categoriesWithSubca
         categoryWrapper.appendChild(subcategoryList);
         container.appendChild(categoryWrapper);
 
+        // Function to update parent checkbox state based on subcategory selections
+        function updateParentCheckboxState() {
+            const checkedSubCheckboxes = subCheckboxes.filter(cb => cb.checked);
+            
+            if (checkedSubCheckboxes.length === 0) {
+                // No subcategories checked, parent should be unchecked
+                categoryCheckbox.checked = false;
+                categoryCheckbox.indeterminate = false;
+            } else if (checkedSubCheckboxes.length === subCheckboxes.length) {
+                // All subcategories checked, parent should be checked
+                categoryCheckbox.checked = true;
+                categoryCheckbox.indeterminate = false;
+            } else {
+                // Some subcategories checked, parent should be in indeterminate state
+                categoryCheckbox.indeterminate = true;
+                categoryCheckbox.checked = false;
+            }
+        }
+
+        // Add event listener to parent checkbox to check/uncheck all subcategories
+        categoryCheckbox.addEventListener('change', () => {
+            const isChecked = categoryCheckbox.checked;
+            subCheckboxes.forEach(cb => {
+                cb.checked = isChecked;
+            });
+            // Clear indeterminate state when explicitly checked/unchecked
+            categoryCheckbox.indeterminate = false;
+        });
+
+        // Add event listeners to subcategory checkboxes
+        subCheckboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                updateParentCheckboxState();
+            });
+        });
+
         toggleButton.addEventListener('click', (e) => {
             e.preventDefault(); // Prevent any default action if wrapped in something clickable
             const isHidden = subcategoryList.style.display === 'none';
@@ -360,14 +395,5 @@ export function populateCategorySubcategoryFilter(container, categoriesWithSubca
             toggleButton.setAttribute('aria-expanded', String(isHidden));
             toggleButton.style.backgroundColor = isHidden ? 'var(--medium-gray)' : 'var(--light-gray)';
         });
-
-        // Optional: Clicking main category label also toggles subcategories
-        // categoryLabelText.addEventListener('click', (e) => {
-        //     // Avoid interfering with checkbox click
-        //     if (e.target !== categoryCheckbox) {
-        //        e.preventDefault();
-        //        toggleButton.click(); // Simulate click on the toggle button
-        //     }
-        // });
     });
 }
