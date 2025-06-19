@@ -86,13 +86,16 @@
             <button id="saveJsonButton" class="sidebar-button">Export Backup</button>
         </div>
         <div class="control-group">
-            <label for="jsonFile">Load New Data:</label>
+            <label for="sidebar-jsonFile">Load New Data:</label>
             <input type="file" id="sidebar-jsonFile" accept=".json" style="width: 100%; margin-bottom: 0.5rem;">
             <div style="display: flex; gap: 0.5rem;">
                 <button id="sidebar-loadJsonButton" class="sidebar-button">Load File</button>
                 <button id="sidebar-loadSampleButton" class="sidebar-button">Use Sample</button>
             </div>
         </div>
+        <p class="small" style="margin-top: 0.5rem; color: var(--dark-gray);">
+            ℹ️ Loading new data will replace your current questions but preserve your attempt history.
+        </p>
     </div>
 
     <button id="apply-filters-button" disabled>Apply Filters & Start Quiz</button>

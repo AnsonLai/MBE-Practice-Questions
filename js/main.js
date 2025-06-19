@@ -2,6 +2,7 @@ import { db, saveCurrentSettingsToDB, loadUserSettingsFromDB, loadQuizDataFromDB
 import { escapeHtml, formatTime, toggleSidebar, openSidebar, closeSidebar, populateCheckboxList, clearCheckboxes, loadHtmlFragments, populateCategorySubcategoryFilter, showNotification } from './ui.js';
 import { getElement, querySelector, querySelectorAll, initializeElements, createElement } from './dom.js';
 import { filterQuestions, prepareQuizQuestions } from './filterQuestions.js';
+import { initializeFileControls, updateFileControlsVisibility } from './fileControls.js';
 
 const mbe_categories_with_subcategories = {
     "Civil Procedure": [
@@ -2470,12 +2471,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         console.log("No active session found or session data invalid. Initializing normally.");
                         resetQuizState(true); // Resets UI, keeps quizData loaded from DB
                         console.log("Data loaded from DB. User settings (if any) applied. No active session restored, or session data was invalid.");
+                        
+                        // Update file controls visibility when data is available
+                        updateFileControlsVisibility();
                     }
                 } else {
                     resetQuizState(false); // Full reset, quizData will be empty
                     // populateFilterOptions(); // Already called above
                     if (performanceButton) performanceButton.disabled = true;
                     console.log("No data in DB. UI reset. User settings (if any) applied.");
+                    
+                    // Update file controls visibility when no data is available
+                    updateFileControlsVisibility();
                 }
 
                 if (!sessionRestored) { // If no session was restored, do default timer/UI setup
@@ -2505,6 +2512,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Start the application initialization
-            initializeApp();
+            // Initialize file controls
+            async function setupApp() {
+                try {
+                    // First load HTML fragments
+                    await loadHtmlFragments();
+                    
+                    // Initialize file controls
+                    initializeFileControls();
+                    
+                    // Update file controls visibility based on data availability
+                    updateFileControlsVisibility();
+                    
+                    // Start the application initialization
+                    initializeApp();
+                } catch (error) {
+                    console.error('Error setting up app:', error);
+                }
+            }
+            
+            // Start the application setup
+            setupApp();
         });
